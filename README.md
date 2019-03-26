@@ -23,16 +23,35 @@ https://wikipedia.readthedocs.io/en/latest/code.html
 
 ### Findings/notes
 
-**Stats on Dutch articles:**
+#### Stats on Dutch articles
 
-* we get 171 incidents that fit all constraints (have a Dutch label, information on time, and location) -> step 1 & 2
-* 149 out of 171 incidents have a description in Dutch in Wikipedia (that we can obtain automatically) -> step 3
-* 115 out of 171 incidents have reference texts -> step 4
-* The average amount of reference texts, when found, is 10.52
+* we get 147 incidents that fit all constraints (have a Dutch label, information on time, and location) -> step 1 & 2 & 3
+* 133 out of 147 incidents have a description in Dutch in Wikipedia (that we can obtain automatically) -> step 4
+* 101 out of 147 incidents have reference texts -> step 5
+* The average amount of reference texts, when found, is 13.11
 * Distribution of countries:
 
 ```
-Countries distribution: Counter({'Netherlands': 71, 'Belgium': 22, 'Austria': 10, 'Italy': 9, 'France': 8, 'Mexico': 6, 'Chile': 6, 'United States of America': 5, 'Latvia': 3, 'Spain': 3, 'Croatia': 3, 'Sweden': 3, 'Greece': 2, 'Romania': 2, 'Israel': 2, 'Bulgaria': 2, 'Slovenia': 1, 'Ireland': 1, 'Czech Republic': 1, 'Malta': 1, 'Slovakia': 1, 'Cyprus': 1, 'Portugal': 1, 'Lithuania': 1, 'Hungary': 1, 'Estonia': 1, 'Peru': 1, 'Kingdom of the Netherlands': 1, 'Aruba': 1, 'Venezuela': 1})
+Countries distribution: Counter({'Netherlands': 64, 'Belgium': 26, 'Austria': 9, 'France': 8, 'Italy': 8, 'Mexico': 6, 'Chile': 6, 'United States of America': 5, 'Romania': 2, 'Israel': 2, 'Croatia': 2, 'Sweden': 2, 'Kingdom of the Netherlands': 2, 'Spain': 1, 'Peru': 1, 'Aruba': 1, 'Venezuela': 1, 'Philippines': 1})
 ```
 
 **Regarding the page references:** We get useful references. The number of references is approximately the same as the ones in the current wikipedia online, and the order is different.
+
+#### Stats on Dutch and Italian reports of incidents
+
+* In total, 286 incidents have time, location, and a label in Dutch and/or Italian -> step 1 & 2
+* For these incidents, we have 298 labels in total for Dutch and Italian from Wikidata -> step 3
+* For 268 out of 298 labels we can obtain the Wikipedia page -> step 4
+* 212 of these have reference texts -> step 5
+* The average amount of reference texts, when found, is 17.83
+* Distribution of countries:
+
+```
+{'Italy': 121, 'Netherlands': 64, 'Belgium': 26, 'Cuba': 10, 'Austria': 9, 'France': 9, 'Mexico': 7, 'United States of America': 7, 'Chile': 6, 'Spain': 2, 'Croatia': 2, 'Romania': 2, 'Israel': 2, 'Kingdom of the Netherlands': 2, 'Sweden': 2, 'United Kingdom': 1, 'Russia': 1, 'Kenya': 1, 'Peru': 1, 'Iran': 1, 'German Democratic Republic': 1, 'Aruba': 1, 'Burkina Faso': 1, 'Argentina': 1, 'Turkey': 1, 'Venezuela': 1, 'Paraguay': 1, 'California': 1, 'Costa Rica': 1, 'Philippines': 1}
+```
+
+* Number of languages per incident (max 2 for this experiment):
+
+```
+{1: 274, 2: 12}
+```

@@ -1,20 +1,20 @@
 import wikipedia
-import requests
 from pprint import pprint
 import pickle
 
 import classes
+import utils
 
-wikipedia.set_lang("nl")
-wdt_sparql_url = 'https://query.wikidata.org/sparql'
 
 incident_type='election'
-output_file='bin/%s.bin' % incident_type
+#languages=['nl', 'it']
+languages=['nl']
 
-def obtain_wiki_text_and_references(title):
+def obtain_wiki_text_and_references(title, lang):
     """
-    Given a (Dutch) Wikipedia title, obtain its content and list of references.
+    Given a Wikipedia title in some language, obtain its content and list of references.
     """
+    wikipedia.set_lang(lang)
     try:
         wp=wikipedia.page(title)
     except:
@@ -29,65 +29,51 @@ def obtain_wiki_text_and_references(title):
         content=''
     return content, refs
 
-def construct_and_run_query(type_label, limit):
-    """
-    Construct a wikidata query to obtain all events of a specific type with their structured data, then run this query.
-    """
-
-    query = """
-    SELECT ?incident ?label ?country ?countryLabel ?time WHERE {
-      SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
-      ?type_id rdfs:label "%s"@en.
-      ?incident wdt:P31 ?type_id;
-                rdfs:label ?label;
-                wdt:P17 ?country;
-                wdt:P585 ?time.
-      filter(lang(?label) = 'nl')
-    } limit %d
-    """ % (type_label, limit)
-
-    r = requests.get(wdt_sparql_url, params = {'format': 'json', 'query': query})
-    response = r.json()
-    print(response)
-    results=response['results']['bindings']
-    
-    return results
-
-def retrieve_incidents_per_type(type_label, limit=5000):
+def retrieve_incidents_per_type(type_label, limit=10):
     """
     Given an event type identifier, retrieve incidents that belong to this type.
     """
 
     incidents=[]
 
-    query_results=construct_and_run_query(type_label, limit)
-
-    for entry in query_results:
-        wdt_id=entry['incident']['value']
-        name=entry['label']['value']
-        country_id=entry['country']['value']
-        country_name=entry['countryLabel']['value']
-        time=entry['time']['value']
+    results_by_id=utils.construct_and_run_query(type_label, languages, limit)    
+    print(len(results_by_id.keys()))
+    for wdt_id, inc_data in results_by_id.items():
+        country_id=inc_data['country']
+        country_name=inc_data['countryLabel']
+        time=inc_data['time']
+        ref_texts=[]
+        for language, name in inc_data['references'].items():
+            print(language, name, wdt_id)
+            ref_text=classes.ReferenceText(
+                        name=name,
+                        language=language
+                    )
+            ref_texts.append(ref_text)
+            
         incident=classes.Incident(
                 incident_type=type_label,
                 wdt_id=wdt_id,
-                name=name,
                 country_id=country_id,
                 country_name=country_name,
-                time=time
-                )
+                time=time,
+                reference_texts=ref_texts
+            )
         incidents.append(incident)
     return incidents
 
 if __name__ == '__main__':
-    incidents=retrieve_incidents_per_type(incident_type)
+    incidents=retrieve_incidents_per_type(incident_type, 50000)
     print(len(incidents))
     for incident in incidents:
-        content, references=obtain_wiki_text_and_references(incident.name)
-        incident.wiki_content=content
-        incident.sources=references
-        incident.language='nl'
-#        pprint(vars(incident))
+        for ref_text in incident.reference_texts:
+            
+            content, references=obtain_wiki_text_and_references(ref_text.name, ref_text.language)
+            ref_text.wiki_content=content
+            ref_text.sources=references
+    #        pprint(vars(incident))
 
+    output_file=utils.make_output_filename(incident_type, languages)
+    
     with open(output_file, 'wb') as of:
         pickle.dump(incidents, of)
