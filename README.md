@@ -65,9 +65,11 @@ These statistics are produced automatically in the script `analyze.py`, by using
 
 ![Alt text](img/analysis.png?raw=true "Analysis")
 
-### Serialization
+### Serialization to RDF
 
 The .bin files are serialized to RDF Turtle files by using the script `serialize.py`. This script reads a .bin file that contains an incident collection, and converts it to a .ttl file in the same folder. 
+
+### Modeling
 
 The modeling in the .ttl file is based on the SEM model. Here is an excerpt of the resulting graph:
 
