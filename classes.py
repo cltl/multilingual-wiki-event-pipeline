@@ -1,4 +1,8 @@
 from collections import Counter
+from rdflib.namespace import Namespace
+from rdflib.namespace import RDF, RDFS
+from rdflib import Graph
+from rdflib import URIRef, BNode, Literal
 
 class IncidentCollection:
     
@@ -40,6 +44,56 @@ class IncidentCollection:
         numlang_dist=Counter(num_languages)
         
         return num_incidents, num_with_wikipedia, num_with_sources, avg_sources, countries_dist, numlang_dist
+    
+    def serialize(self, filename=None):
+        """
+        Serialize a collection of incidents to a .ttl file.
+        """
+        
+        g = Graph()
+        
+        # Namespaces definition
+        SEM=Namespace('http://semanticweb.cs.vu.nl/2009/11/sem/')
+        WDT_ONT=Namespace('http://www.wikidata.org/wiki/')
+        g.bind('sem', SEM)
+        g.bind('wdt', WDT_ONT)
+
+        # Some core URIs/Literals
+        election=URIRef('https://www.wikidata.org/wiki/Q40231')
+        election_label=Literal('election')
+        country_label=Literal('country')
+        
+        for incident in self.incidents:
+            event_id = URIRef(incident.wdt_id)
+
+            # event labels in all languages
+            for ref_text in incident.reference_texts:
+                name_in_lang=Literal(ref_text.name, lang=ref_text.language)
+                g.add(( event_id, RDFS.label, name_in_lang))
+
+            # event type information
+            g.add( (event_id, RDF.type, SEM.Event) )
+            g.add(( event_id, SEM.eventType, election))
+
+            # time information
+            timestamp=Literal(incident.time)
+            g.add((event_id, SEM.hasTimeStamp, timestamp))
+
+            # place information
+            country=URIRef(incident.country_id)
+            country_name=Literal(incident.country_name)
+            g.add((event_id, SEM.hasPlace, country))
+            g.add((country, RDFS.label, country_name))
+            g.add((country, RDF.type, WDT_ONT.Q6256))
+
+        g.add((election, RDFS.label, election_label))
+        g.add((election, RDFS.label, country_label))
+
+        # Done. Store the resulting .ttl file now...
+        if filename: # if a filename was supplied, store it there
+            g.serialize(format='turtle', destination=filename)
+        else: # else print to the console
+            print(g.serialize(format='turtle'))
 
 class Incident:
 

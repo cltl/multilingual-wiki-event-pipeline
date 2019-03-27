@@ -1,0 +1,946 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> .
+@prefix wdt: <http://www.wikidata.org/wiki/> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://www.wikidata.org/entity/Q1139992> a sem:Event ;
+    rdfs:label "Verkiezingen voor het Franse Directoraat 1795"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q142> ;
+    sem:hasTimeStamp "1795-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q12054585> a sem:Event ;
+    rdfs:label "Stanley Chang"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q30> ;
+    sem:hasTimeStamp "2014-11-04T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q1251785> a sem:Event ;
+    rdfs:label "Kroatische Eerste Kamerverkiezingen 1997"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q224> ;
+    sem:hasTimeStamp "1997-04-13T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q1251803> a sem:Event ;
+    rdfs:label "Kroatische Eerste Kamerverkiezingen 1993"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q224> ;
+    sem:hasTimeStamp "1993-02-07T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q127905> a sem:Event ;
+    rdfs:label "Belgische regionale verkiezingen 2004"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2004-06-13T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q127908> a sem:Event ;
+    rdfs:label "Belgische regionale verkiezingen 1999"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1999-06-13T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q13543999> a sem:Event ;
+    rdfs:label "Belgische regionale verkiezingen 2014"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2014-05-25T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q13574596> a sem:Event ;
+    rdfs:label "Duitstalige Gemeenschapsraadverkiezingen 1999"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1999-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q13575449> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 2003"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2003-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q14509387> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Flevoland"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q16295330> a sem:Event ;
+    rdfs:label "Duitstalige Gemeenschapsraadverkiezingen 1986"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1986-10-26T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q16319681> a sem:Event ;
+    rdfs:label "Landdagverkiezingen in Vorarlberg 2014"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q40> ;
+    sem:hasTimeStamp "2014-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q16466994> a sem:Event ;
+    rdfs:label "verkiezingen in België 2014"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2014-05-25T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q17844541> a sem:Event ;
+    rdfs:label "Arubaanse Statenverkiezingen 1989"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q21203> ;
+    sem:hasTimeStamp "1989-01-06T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q1804106> a sem:Event ;
+    rdfs:label "Landdagverkiezingen in Karinthië 2013"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q40> ;
+    sem:hasTimeStamp "2013-03-03T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q1804131> a sem:Event ;
+    rdfs:label "Landdagverkiezingen in Neder-Oostenrijk 2013"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q40> ;
+    sem:hasTimeStamp "2013-03-03T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q18088939> a sem:Event ;
+    rdfs:label "Waalse verkiezingen 2004"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2004-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q1812897> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 1891"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1891-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q18285661> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1991"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1991-05-27T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q18285666> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1995"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1995-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q18285677> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1999"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1999-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q18286528> a sem:Event ;
+    rdfs:label "Provinciale Statenverkiezingen 2015"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2015-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q18816481> a sem:Event ;
+    rdfs:label "Landdagverkiezingen in Stiermarken 2015"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q40> ;
+    sem:hasTimeStamp "2015-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q18816484> a sem:Event ;
+    rdfs:label "Landdagverkiezingen in Opper-Oostenrijk 2015"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q40> ;
+    sem:hasTimeStamp "2015-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q1902521> a sem:Event ;
+    rdfs:label "Brusselse gewestverkiezingen 2009"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2009-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q1914765> a sem:Event ;
+    rdfs:label "Voorverkiezingen van West Virginia 2008"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q30> ;
+    sem:hasTimeStamp "2008-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q1919769> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Friesland"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19288805> a sem:Event ;
+    rdfs:label "Landdag- en gemeenteraadsverkiezingen in Wenen 2015"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q40> ;
+    sem:hasTimeStamp "2015-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19517954> a sem:Event ;
+    rdfs:label "Landdagverkiezingen in Burgenland 2015"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q40> ;
+    sem:hasTimeStamp "2015-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19833185> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1983"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1983-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19833186> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1986"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1986-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19833187> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1987"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1987-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19833190> a sem:Event ;
+    rdfs:label "Provinciale Statenverkiezingen 1987"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1987-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19833191> a sem:Event ;
+    rdfs:label "Provinciale Statenverkiezingen 1991"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1991-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19833192> a sem:Event ;
+    rdfs:label "Provinciale Statenverkiezingen 1999"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1999-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19833193> a sem:Event ;
+    rdfs:label "Provinciale Statenverkiezingen 2003"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2003-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19838074> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1977"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1977-07-06T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19838075> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1980"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1980-07-04T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19838076> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1981"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1981-06-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19844716> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1974"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1974-07-03T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19844718> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1971"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1971-04-29T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19905074> a sem:Event ;
+    rdfs:label "Waalse verkiezingen 2009"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2009-06-07T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q1990939> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Groningen"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19969032> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1969"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1969-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19972212> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1956 (oktober)"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1956-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19972213> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1963"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1963-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19972214> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1966"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1966-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19973786> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1951"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1951-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19973787> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1952"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1952-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q19973788> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1955"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1955-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q20011643> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1956 (juni)"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1956-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2018244> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 1894"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1894-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2054481> a sem:Event ;
+    rdfs:label "Duitstalige Gemeenschapsraadverkiezingen 2004"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2004-06-13T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q20680149> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1948"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1948-07-08T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q20696703> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1946"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1946-07-12T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q20986371> a sem:Event ;
+    rdfs:label "Melodifestivalen 2016: 3e voorronde"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q34> ;
+    sem:hasTimeStamp "2016-02-20T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q20986381> a sem:Event ;
+    rdfs:label "Melodifestivalen 2016: 4e voorronde"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q34> ;
+    sem:hasTimeStamp "2016-02-27T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2113158> a sem:Event ;
+    rdfs:label "Proposition 19"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q30> ;
+    sem:hasTimeStamp "2010-11-02T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2146138> a sem:Event ;
+    rdfs:label "Mexicaanse gouverneursverkiezingen 2006"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q96> ;
+    sem:hasTimeStamp "2006-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2178208> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Zuid-Holland"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2238730> a sem:Event ;
+    rdfs:label "Roemeense parlementsverkiezingen 1948"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q218> ;
+    sem:hasTimeStamp "1948-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2259724> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Noord-Brabant"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2292369> a sem:Event ;
+    rdfs:label "Voorverkiezingen in Missouri 2008"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q30> ;
+    sem:hasTimeStamp "2008-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2292439> a sem:Event ;
+    rdfs:label "Belgische gemeenteraadsverkiezingen 2006/Voeren"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2006-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2328827> a sem:Event ;
+    rdfs:label "Roemeense parlementsverkiezingen 1946"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q218> ;
+    sem:hasTimeStamp "1946-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2331139> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Noord-Holland"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q23468312> a sem:Event ;
+    rdfs:label "Maduro wint regionale verkiezingen in Venezuela"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q717> ;
+    sem:hasTimeStamp "2017-10-15T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2348841> a sem:Event ;
+    rdfs:label "Mexicaanse gouverneursverkiezingen 2005"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q96> ;
+    sem:hasTimeStamp "2005-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2375251> a sem:Event ;
+    rdfs:label "Mexicaanse algemene verkiezingen 2009"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q96> ;
+    sem:hasTimeStamp "2009-07-05T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2455236> a sem:Event ;
+    rdfs:label "Voorverkiezingen van Idaho 2008"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q30> ;
+    sem:hasTimeStamp "2008-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2464149> a sem:Event ;
+    rdfs:label "Verkiezingen in België 2004"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2004-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2482360> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Zeeland"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q25054487> a sem:Event ;
+    rdfs:label "Belgische federale verkiezingen 2019"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2019-05-26T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2539325> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 1960"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1960-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2660765> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 2007"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2007-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2688978> a sem:Event ;
+    rdfs:label "Mexicaanse verkiezingen van het Federaal District 2006"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q96> ;
+    sem:hasTimeStamp "2006-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2689039> a sem:Event ;
+    rdfs:label "Israëlische directe premiersverkiezingen 1996"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q801> ;
+    sem:hasTimeStamp "1996-05-29T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2733907> a sem:Event ;
+    rdfs:label "Israëlische directe premiersverkiezingen 2001"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q801> ;
+    sem:hasTimeStamp "2001-02-06T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2749033> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Gelderland"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2754693> a sem:Event ;
+    rdfs:label "Landdagverkiezingen in Salzburg 2013"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q40> ;
+    sem:hasTimeStamp "2013-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2754696> a sem:Event ;
+    rdfs:label "Landdagverkiezingen in Tirol 2013"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q40> ;
+    sem:hasTimeStamp "2013-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2762675> a sem:Event ;
+    rdfs:label "Belgische regionale verkiezingen 2009"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2009-06-07T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q2804311> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Overijssel"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q28735985> a sem:Event ;
+    rdfs:label "Chileense parlementsverkiezingen 1876"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q298> ;
+    sem:hasTimeStamp "1876-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q28870167> a sem:Event ;
+    rdfs:label "Waalse verkiezingen 1999"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1999-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q28870168> a sem:Event ;
+    rdfs:label "Waalse verkiezingen 1995"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1995-05-21T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q29101733> a sem:Event ;
+    rdfs:label "Provinciale Statenverkiezingen 1985"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1985-09-18T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q29110534> a sem:Event ;
+    rdfs:label "Provinciale Statenverkiezingen 1978"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1978-03-29T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q29209187> a sem:Event ;
+    rdfs:label "Provinciale Statenverkiezingen 1970"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "1970-03-18T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3044535> a sem:Event ;
+    rdfs:label "Verkiezingen in België 1999"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1999-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3261651> a sem:Event ;
+    rdfs:label "Eerste Kamerverkiezingen 2011"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2011-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3323425> a sem:Event ;
+    rdfs:label "Mexicaanse algemene verkiezingen 2003"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q96> ;
+    sem:hasTimeStamp "2003-07-06T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3473924> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Drenthe"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3587387> a sem:Event ;
+    rdfs:label "Duitstalige Gemeenschapsraadverkiezingen 1990"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1990-10-28T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3587388> a sem:Event ;
+    rdfs:label "Brusselse gewestverkiezingen 1989"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1989-06-18T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3587545> a sem:Event ;
+    rdfs:label "Franse Senaatsverkiezingen 1974"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q142> ;
+    sem:hasTimeStamp "1974-09-22T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3587547> a sem:Event ;
+    rdfs:label "Franse Senaatsverkiezingen 1977"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q142> ;
+    sem:hasTimeStamp "1977-09-25T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3587548> a sem:Event ;
+    rdfs:label "Franse Senaatsverkiezingen 1980"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q142> ;
+    sem:hasTimeStamp "1980-09-28T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3587549> a sem:Event ;
+    rdfs:label "Franse Senaatsverkiezingen 1983"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q142> ;
+    sem:hasTimeStamp "1983-09-25T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3587552> a sem:Event ;
+    rdfs:label "Franse Senaatsverkiezingen 1992"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q142> ;
+    sem:hasTimeStamp "1992-09-27T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3587553> a sem:Event ;
+    rdfs:label "Franse Senaatsverkiezingen 1995"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q142> ;
+    sem:hasTimeStamp "1995-09-24T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3587555> a sem:Event ;
+    rdfs:label "Franse Senaatsverkiezingen 2001"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q142> ;
+    sem:hasTimeStamp "2001-09-23T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3722186> a sem:Event ;
+    rdfs:label "Italian municipal elections, 2006"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q38> ;
+    sem:hasTimeStamp "2006-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3722334> a sem:Event ;
+    rdfs:label "Chileense parlementsverkiezingen 1989"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q298> ;
+    sem:hasTimeStamp "1989-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3722644> a sem:Event ;
+    rdfs:label "Sicilian regional election, 2001"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q38> ;
+    sem:hasTimeStamp "2001-06-24T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3722648> a sem:Event ;
+    rdfs:label "Sicilian regional election, 2006"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q38> ;
+    sem:hasTimeStamp "2006-05-26T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3722649> a sem:Event ;
+    rdfs:label "Sicilian regional election, 2008"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q38> ;
+    sem:hasTimeStamp "2008-04-14T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3722650> a sem:Event ;
+    rdfs:label "Sicilian regional election, 2012"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q38> ;
+    sem:hasTimeStamp "2012-10-28T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3722844> a sem:Event ;
+    rdfs:label "Apulian regional election, 2005"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q38> ;
+    sem:hasTimeStamp "2004-04-03T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3722852> a sem:Event ;
+    rdfs:label "Emilia-Romagna regional election, 2010"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q38> ;
+    sem:hasTimeStamp "2010-03-28T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3722860> a sem:Event ;
+    rdfs:label "Apulian regional election, 2010"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q38> ;
+    sem:hasTimeStamp "2010-03-29T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q3998564> a sem:Event ;
+    rdfs:label "Mexicaanse gouverneursverkiezingen 2007"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q96> ;
+    sem:hasTimeStamp "2007-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q40165838> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2015"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2015-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q4046345> a sem:Event ;
+    rdfs:label "Eilandsraadsverkiezingen 2011"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2011-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q41536171> a sem:Event ;
+    rdfs:label "Belgische provincieraadsverkiezingen 1987"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1987-12-13T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q42137117> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2016"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2016-11-23T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q42137154> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2017"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2017-11-22T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q42256820> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2014"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2014-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q44635620> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2011"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2011-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q45046523> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2010"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q45046724> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2008"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2008-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q45048280> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2013"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2013-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q45048910> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2012"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2012-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q4510180> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Utrecht"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q45126280> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2009"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2009-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q46244702> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2004"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2004-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q46248915> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2002"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2002-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q4689006> a sem:Event ;
+    rdfs:label "Tweede Kamerverkiezingen 2010/Uitslagen provincie Limburg"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2010-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q46919600> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2003"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2003-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q46994737> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2000"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2000-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q46994825> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2001"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2001-11-07T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q46999979> a sem:Event ;
+    rdfs:label "Gemeentelijke herindelingsverkiezingen in Nederland 2006"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q55> ;
+    sem:hasTimeStamp "2006-11-22T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q4882534> a sem:Event ;
+    rdfs:label "Belgische wetgevende verkiezingen 1866"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1866-06-12T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q48835428> a sem:Event ;
+    rdfs:label "Belgische deelstaatverkiezingen 2019"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2019-05-26T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q5140112> a sem:Event ;
+    rdfs:label "Brusselse gewestverkiezingen 1999"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1999-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q5150754> a sem:Event ;
+    rdfs:label "Brusselse gewestverkiezingen 1995"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "1995-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q5433920> a sem:Event ;
+    rdfs:label "Brusselse gewestverkiezingen 2004"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2004-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q55629868> a sem:Event ;
+    rdfs:label "Filipijnse verkiezingen 2019"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q928> ;
+    sem:hasTimeStamp "2019-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q56425481> a sem:Event ;
+    rdfs:label "Eilandsraadsverkiezingen 2019"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q29999> ;
+    sem:hasTimeStamp "2019-03-20T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q5783140> a sem:Event ;
+    rdfs:label "Chileense parlementsverkiezingen 1930"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q298> ;
+    sem:hasTimeStamp "1930-03-02T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q5828203> a sem:Event ;
+    rdfs:label "Peruviaanse presidentiële verkiezingen 1915"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q419> ;
+    sem:hasTimeStamp "1915-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q5828512> a sem:Event ;
+    rdfs:label "Chileense parlementsverkiezingen 1924"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q298> ;
+    sem:hasTimeStamp "1924-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q5828516> a sem:Event ;
+    rdfs:label "Chileense parlementsverkiezingen 1932"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q298> ;
+    sem:hasTimeStamp "1932-10-30T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q61745610> a sem:Event ;
+    rdfs:label "Verkiezingen in België 2019"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q31> ;
+    sem:hasTimeStamp "2019-05-26T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q618463> a sem:Event ;
+    rdfs:label "Akkoord over de volksraadpleging in Catalonië"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q29> ;
+    sem:hasTimeStamp "2014-01-01T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q61960429> a sem:Event ;
+    rdfs:label "Kiescollegeverkiezingen 2019"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q29999> ;
+    sem:hasTimeStamp "2019-03-20T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q973652> a sem:Event ;
+    rdfs:label "Chileense parlementsverkiezingen 1993"@nl ;
+    sem:eventType <https://www.wikidata.org/wiki/Q40231> ;
+    sem:hasPlace <http://www.wikidata.org/entity/Q298> ;
+    sem:hasTimeStamp "1993-12-11T00:00:00Z" .
+
+<http://www.wikidata.org/entity/Q21203> a wdt:Q6256 ;
+    rdfs:label "Aruba" .
+
+<http://www.wikidata.org/entity/Q29> a wdt:Q6256 ;
+    rdfs:label "Spain" .
+
+<http://www.wikidata.org/entity/Q419> a wdt:Q6256 ;
+    rdfs:label "Peru" .
+
+<http://www.wikidata.org/entity/Q717> a wdt:Q6256 ;
+    rdfs:label "Venezuela" .
+
+<http://www.wikidata.org/entity/Q928> a wdt:Q6256 ;
+    rdfs:label "Philippines" .
+
+<http://www.wikidata.org/entity/Q218> a wdt:Q6256 ;
+    rdfs:label "Romania" .
+
+<http://www.wikidata.org/entity/Q224> a wdt:Q6256 ;
+    rdfs:label "Croatia" .
+
+<http://www.wikidata.org/entity/Q29999> a wdt:Q6256 ;
+    rdfs:label "Kingdom of the Netherlands" .
+
+<http://www.wikidata.org/entity/Q34> a wdt:Q6256 ;
+    rdfs:label "Sweden" .
+
+<http://www.wikidata.org/entity/Q801> a wdt:Q6256 ;
+    rdfs:label "Israel" .
+
+<http://www.wikidata.org/entity/Q30> a wdt:Q6256 ;
+    rdfs:label "United States of America" .
+
+<http://www.wikidata.org/entity/Q298> a wdt:Q6256 ;
+    rdfs:label "Chile" .
+
+<http://www.wikidata.org/entity/Q96> a wdt:Q6256 ;
+    rdfs:label "Mexico" .
+
+<http://www.wikidata.org/entity/Q142> a wdt:Q6256 ;
+    rdfs:label "France" .
+
+<http://www.wikidata.org/entity/Q38> a wdt:Q6256 ;
+    rdfs:label "Italy" .
+
+<http://www.wikidata.org/entity/Q40> a wdt:Q6256 ;
+    rdfs:label "Austria" .
+
+<http://www.wikidata.org/entity/Q31> a wdt:Q6256 ;
+    rdfs:label "Belgium" .
+
+<http://www.wikidata.org/entity/Q55> a wdt:Q6256 ;
+    rdfs:label "Netherlands" .
+
+<https://www.wikidata.org/wiki/Q40231> rdfs:label "country",
+        "election" .
+
