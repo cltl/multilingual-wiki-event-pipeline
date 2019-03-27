@@ -1,6 +1,6 @@
-# wiki-event-pipeline
+# multilingual-wiki-event-pipeline
 
-This project aims to extract information about incidents of a particular type. This information consists of structured data on the incidents from Wikidata, as well as unstructured description and supporting sources from Wikipedia.
+This project aims to extract information about incidents of a particular type. This information consists of structured data on the incidents from Wikidata, as well as unstructured description and supporting sources from Wikipedia. We obtain information from Wikipedia in multiple languages (currently tested with Dutch and Italian).
 
 ### Steps
 
@@ -14,14 +14,16 @@ This project aims to extract information about incidents of a particular type. T
 
 All extraction code can be found in the file `extract.py`. Steps 1, 2, and 3 are covered by the function `retrieve_incidents_per_type` which queries Wikidata, whereas the steps 4 and 5 are covered by the function `obtain_wiki_text_and_references` which queries Wikipedia.
 
-The final result is stored in a pickle file in the `bin/` folder. 
+The final result is an incident collection for a set of languages and an incident type. This collection is stored in a pickle file in the `bin/` folder. 
+
+The script `analyze.py` produces statistics of such incident collections.
 
 ### Helpful links
 
 * Wikipedia API documentation:
 https://wikipedia.readthedocs.io/en/latest/code.html
 
-### Findings/notes
+### Statistics
 
 #### Stats on Dutch articles
 
@@ -55,3 +57,10 @@ Countries distribution: Counter({'Netherlands': 64, 'Belgium': 26, 'Austria': 9,
 ```
 {1: 274, 2: 12}
 ```
+
+#### Note on the code
+
+
+These statistics are produced automatically in the script `analyze.py`, by using the function `compute_stats()` of the class `IncidentCollection`:
+
+![Alt text](img/analysis.png?raw=true "Analysis")

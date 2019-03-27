@@ -7,8 +7,8 @@ import utils
 
 
 incident_type='election'
-#languages=['nl', 'it']
-languages=['nl']
+languages=['nl', 'it']
+#languages=['nl']
 
 def obtain_wiki_text_and_references(title, lang):
     """
@@ -73,7 +73,11 @@ if __name__ == '__main__':
             ref_text.sources=references
     #        pprint(vars(incident))
 
+    collection=classes.IncidentCollection(incidents=incidents,
+                             incident_type=incident_type,
+                             languages=languages)
+    
     output_file=utils.make_output_filename(incident_type, languages)
     
     with open(output_file, 'wb') as of:
-        pickle.dump(incidents, of)
+        pickle.dump(collection, of)
