@@ -36,6 +36,8 @@ class IncidentCollection:
                 if len(ref_text.sources):
                     num_with_sources+=1
                     sum_sources+=len(ref_text.sources)
+            if len(incident.reference_texts)==3:
+                print(incident.wdt_id)
             num_languages.append(len(incident.reference_texts))
             countries.append(incident.country_name)
         

@@ -3,12 +3,11 @@ from pprint import pprint
 import pickle
 
 import classes
+import config
 import utils
 
-
-incident_type='election'
-languages=['nl', 'it']
-#languages=['nl']
+incident_types=config.incident_types
+languages_list=config.languages_list
 
 def obtain_wiki_text_and_references(title, lang):
     """

@@ -1,5 +1,6 @@
 import pickle
 
+import config
 import utils
 
 def compute_stats_for_all_combinations(combinations):
@@ -37,10 +38,9 @@ def compute_stats_for_all_combinations(combinations):
     
 if __name__ == '__main__':
 
-    incident_types=['election']
-    languages_list=[['nl', 'it'],['nl']]
-    #languages_list=[['nl']]
 
+    incident_types=config.incident_types
+    languages_list=config.languages_list
 
     cartesian_product=[(x, y) for x in incident_types for y in languages_list]
 

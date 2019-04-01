@@ -1,6 +1,6 @@
 # multilingual-wiki-event-pipeline
 
-This project aims to extract information about incidents of a particular type. This information consists of structured data on the incidents from Wikidata, as well as unstructured description and supporting sources from Wikipedia. We obtain information from Wikipedia in multiple languages (currently tested with Dutch and Italian).
+This project aims to extract information about incidents of a particular type. This information consists of structured data on the incidents from Wikidata, as well as unstructured description and supporting sources from Wikipedia. We obtain information from Wikipedia in multiple languages (currently tested with Dutch, Italian, and Japanese).
 
 ### Steps
 
@@ -58,12 +58,33 @@ Countries distribution: Counter({'Netherlands': 64, 'Belgium': 26, 'Austria': 9,
 {1: 274, 2: 12}
 ```
 
-#### Note on the code
+#### Stats on Dutch, Italian, and Japanese reports of incidents
+
+* In total, 518 incidents have time, location, and a label in Dutch and/or Italian and/or Japanese -> step 1 & 2
+* For these incidents, we have 542 labels in total for Dutch, Italian, and Japanese from Wikidata -> step 3
+* For 495 out of 542 labels we can obtain the Wikipedia page -> step 4
+* 427 of these have reference texts -> step 5
+* The average amount of reference texts, when found, is 32.39
+* Distribution of countries:
+
+```
+{'United States of America': 171, 'Italy': 121, 'Netherlands': 64, 'Belgium': 27, 'United Kingdom': 18, 'Kingdom of Great Britain': 17, 'France': 10, 'Cuba': 10, 'Mexico': 9, 'Austria': 9, 'Spain': 7, 'Chile': 6, 'Taiwan': 5, 'Philippines': 4, 'Japan': 3, 'Romania': 2, 'Israel': 2, 'Croatia': 2, 'Czech Republic': 2, 'Pakistan': 2, 'Venezuela': 2, 'Sweden': 2, 'Kingdom of the Netherlands': 2, 'Estonia': 1, 'England': 1, 'Russia': 1, 'Kenya': 1, 'Canada': 1, 'Iraq': 1, 'Burkina Faso': 1, 'Argentina': 1, 'Aruba': 1, 'Iran': 1, 'German Democratic Republic': 1, 'Peru': 1, 'Grenada': 1, 'Paraguay': 1, 'Tonga': 1, 'Turkey': 1, 'Libya': 1, 'Comoros': 1, 'Bolivia': 1, 'California': 1, 'Costa Rica': 1}
+```
+
+* Number of languages per incident (max 3 for this experiment):
+
+```
+{1: 495, 2: 22, 3: 1}
+```
+
+#### Notes on the code
 
 
 These statistics are produced automatically in the script `analyze.py`, by using the function `compute_stats()` of the class `IncidentCollection`:
 
 ![Alt text](img/analysis.png?raw=true "Analysis")
+
+The settings for the experiment are stored centrally in the file `config.py`.
 
 ### Serialization to RDF
 

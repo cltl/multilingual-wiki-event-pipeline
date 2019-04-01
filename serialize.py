@@ -1,11 +1,12 @@
 import pickle
 
 import utils        
+import config
 
 if __name__ == '__main__':
 
-    incident_types=['election']
-    languages_list=[['nl', 'it'],['nl']]
+    incident_types=config.incident_types
+    languages_list=config.languages_list
 
     cartesian_product=[(x, y) for x in incident_types for y in languages_list]
     
