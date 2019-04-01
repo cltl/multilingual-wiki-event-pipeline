@@ -18,6 +18,11 @@ The final result is an incident collection for a set of languages and an inciden
 
 The script `analyze.py` produces statistics of such incident collections.
 
+The .bin files are serialized to RDF Turtle files by using the script `serialize.py`. This script reads a .bin file that contains an incident collection, and converts it to a .ttl file in the same folder. 
+
+The settings for the experiment are stored centrally in the file `config.py`.
+
+
 ### Helpful links
 
 * Wikipedia API documentation:
@@ -77,18 +82,12 @@ Countries distribution: Counter({'Netherlands': 64, 'Belgium': 26, 'Austria': 9,
 {1: 495, 2: 22, 3: 1}
 ```
 
-#### Notes on the code
+#### Note on the code
 
 
 These statistics are produced automatically in the script `analyze.py`, by using the function `compute_stats()` of the class `IncidentCollection`:
 
 ![Alt text](img/analysis.png?raw=true "Analysis")
-
-The settings for the experiment are stored centrally in the file `config.py`.
-
-### Serialization to RDF
-
-The .bin files are serialized to RDF Turtle files by using the script `serialize.py`. This script reads a .bin file that contains an incident collection, and converts it to a .ttl file in the same folder. 
 
 ### Modeling
 
