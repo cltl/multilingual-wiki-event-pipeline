@@ -20,13 +20,7 @@ The script `analyze.py` produces statistics of such incident collections.
 
 The .bin files are serialized to RDF Turtle files by using the script `serialize.py`. This script reads a .bin file that contains an incident collection, and converts it to a .ttl file in the same folder. 
 
-The settings for the experiment are stored centrally in the file `config.py`.
-
-
-### Helpful links
-
-* Wikipedia API documentation:
-https://wikipedia.readthedocs.io/en/latest/code.html
+The settings for the experiment are stored centrally in the file `config.py`. In theory, adding a new language and/or event type requires simply a change in the config.
 
 ### Statistics
 
@@ -94,3 +88,9 @@ These statistics are produced automatically in the script `analyze.py`, by using
 The modeling in the .ttl file is based on the SEM model. Here is an excerpt of the resulting graph:
 
 ![Alt text](img/model.png?raw=true "Model")
+
+
+### Helpful links
+
+* Wikipedia API documentation:
+https://wikipedia.readthedocs.io/en/latest/code.html
