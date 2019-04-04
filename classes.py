@@ -79,7 +79,7 @@ class IncidentCollection:
 
                 # denotation of the event
                 wikipedia_article=URIRef(ref_text.wiki_uri)
-                g.add(( event_id, GRASPdenotedIn, wikipedia_article ))
+                g.add(( event_id, GRASP.denotedIn, wikipedia_article ))
 
             # event type information
             g.add( (event_id, RDF.type, SEM.Event) )
@@ -113,14 +113,12 @@ class Incident:
                 country_id,
                 country_name,
                 time,
-                english_name,
                 reference_texts=[]):
         self.incident_type=incident_type
         self.wdt_id=wdt_id
         self.country_id=country_id
         self.country_name=country_name
         self.time=time
-        self.english_name=english_name
         self.reference_texts=reference_texts
         
         
