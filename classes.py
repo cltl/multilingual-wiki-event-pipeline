@@ -40,8 +40,10 @@ class IncidentCollection:
                 print(incident.wdt_id)
             num_languages.append(len(incident.reference_texts))
             countries.append(incident.country_name)
-        
-        avg_sources=sum_sources/num_with_sources
+        if num_with_sources: 
+            avg_sources=sum_sources/num_with_sources
+        else:
+            avg_sources=0
         countries_dist=Counter(countries)
         numlang_dist=Counter(num_languages)
         
@@ -57,8 +59,10 @@ class IncidentCollection:
         # Namespaces definition
         SEM=Namespace('http://semanticweb.cs.vu.nl/2009/11/sem/')
         WDT_ONT=Namespace('http://www.wikidata.org/wiki/')
+        GRASP=Namespace('http://groundedannotationframework.org/grasp#')
         g.bind('sem', SEM)
         g.bind('wdt', WDT_ONT)
+        g.bind('grasp', GRASP)
 
         # Some core URIs/Literals
         election=URIRef('https://www.wikidata.org/wiki/Q40231')
@@ -72,6 +76,10 @@ class IncidentCollection:
             for ref_text in incident.reference_texts:
                 name_in_lang=Literal(ref_text.name, lang=ref_text.language)
                 g.add(( event_id, RDFS.label, name_in_lang))
+
+                # denotation of the event
+                wikipedia_article=URIRef(ref_text.wiki_uri)
+                g.add(( event_id, GRASPdenotedIn, wikipedia_article ))
 
             # event type information
             g.add( (event_id, RDF.type, SEM.Event) )
@@ -105,23 +113,27 @@ class Incident:
                 country_id,
                 country_name,
                 time,
+                english_name,
                 reference_texts=[]):
         self.incident_type=incident_type
         self.wdt_id=wdt_id
         self.country_id=country_id
         self.country_name=country_name
         self.time=time
+        self.english_name=english_name
         self.reference_texts=reference_texts
         
         
 class ReferenceText:
     
     def __init__(self,
+                wiki_uri='',
                 name='',
                 wiki_content='',
                 language='',
                 sources=''):
         self.name=name
+        self.wiki_uri=wiki_uri
         self.wiki_content=wiki_content
         self.language=language
         self.sources=sources
