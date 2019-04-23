@@ -9,9 +9,7 @@ import config
 import utils
 
 incident_types=config.incident_types
-incident_type=incident_types[0]
 languages_list=config.languages_list
-languages=languages_list[0]
 
 def get_additional_reference_texts(ref_texts, found_names, found_languages):
     """
@@ -108,32 +106,36 @@ def retrieve_incidents_per_type(type_label, limit=10):
     return incidents
 
 if __name__ == '__main__':
-    incidents=retrieve_incidents_per_type(incident_type, 50000)
-    print(len(incidents))
-    new_incidents=[]
-    for incident in tqdm(incidents):
-        new_reference_texts=[]
-        found_names=[]
-        found_languages=[]
-        for ref_text in incident.reference_texts:
-            content, references, uri=obtain_wiki_text_and_references(ref_text.name, ref_text.language)
-            if content:
-                ref_text.wiki_content=content
-                ref_text.sources=references
-                ref_text.wiki_uri=uri
-                new_reference_texts.append(ref_text)
-                found_languages.append(ref_text.language)
-                found_names.append(ref_text.name)
-        if len(new_reference_texts):
-            new_reference_texts=get_additional_reference_texts(new_reference_texts, found_names, found_languages)
-            incident.reference_texts=new_reference_texts
-            new_incidents.append(incident)
 
-    collection=classes.IncidentCollection(incidents=new_incidents,
-                             incident_type=incident_type,
-                             languages=languages)
-    
-    output_file=utils.make_output_filename(incident_type, languages)
-    
-    with open(output_file, 'wb') as of:
-        pickle.dump(collection, of)
+    for incident_type in incident_types:
+        for languages in languages_list:
+
+            incidents=retrieve_incidents_per_type(incident_type, 50000)
+            print(len(incidents))
+            new_incidents=[]
+            for incident in tqdm(incidents):
+                new_reference_texts=[]
+                found_names=[]
+                found_languages=[]
+                for ref_text in incident.reference_texts:
+                    content, references, uri=obtain_wiki_text_and_references(ref_text.name, ref_text.language)
+                    if content:
+                        ref_text.wiki_content=content
+                        ref_text.sources=references
+                        ref_text.wiki_uri=uri
+                        new_reference_texts.append(ref_text)
+                        found_languages.append(ref_text.language)
+                        found_names.append(ref_text.name)
+                if len(new_reference_texts):
+                    new_reference_texts=get_additional_reference_texts(new_reference_texts, found_names, found_languages)
+                    incident.reference_texts=new_reference_texts
+                    new_incidents.append(incident)
+
+            collection=classes.IncidentCollection(incidents=new_incidents,
+                                     incident_type=incident_type,
+                                     languages=languages)
+            
+            output_file=utils.make_output_filename(incident_type, languages)
+            
+            with open(output_file, 'wb') as of:
+                pickle.dump(collection, of)

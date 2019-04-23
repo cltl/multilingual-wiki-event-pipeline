@@ -24,7 +24,7 @@ def construct_and_run_query(type_label, languages, limit):
     SELECT ?incident ?label ?country ?countryLabel ?time (lang(?label) as ?lang) WHERE {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
       ?type_id rdfs:label "%s"@en.
-      ?incident wdt:P31 ?type_id;
+      ?incident wdt:P31/wdt:P279* ?type_id;
                 rdfs:label ?label;
                 wdt:P17 ?country;
                 wdt:P585 ?time.
