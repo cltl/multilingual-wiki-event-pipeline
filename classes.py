@@ -60,9 +60,13 @@ class IncidentCollection:
         SEM=Namespace('http://semanticweb.cs.vu.nl/2009/11/sem/')
         WDT_ONT=Namespace('http://www.wikidata.org/wiki/')
         GRASP=Namespace('http://groundedannotationframework.org/grasp#')
+        DCT=Namespace('http://purl.org/dc/elements/1.1/')
+        FN=Namespace('http://premon.fbk.eu/resource/fn17-')
         g.bind('sem', SEM)
         g.bind('wdt', WDT_ONT)
         g.bind('grasp', GRASP)
+        g.bind('dct', DCT)
+        g.bind('fn17', FN)
 
         # Some core URIs/Literals
         election=URIRef('https://www.wikidata.org/wiki/Q40231')
@@ -80,10 +84,19 @@ class IncidentCollection:
                 # denotation of the event
                 wikipedia_article=URIRef(ref_text.wiki_uri)
                 g.add(( event_id, GRASP.denotedIn, wikipedia_article ))
+                g.add(( wikipedia_article, DCT.description, Literal(ref_text.wiki_content) ))
+                g.add(( wikipedia_article, DCT.title, Literal(ref_text.name) ))
+                g.add(( wikipedia_article, DCT.language, Literal(ref_text.language) ))
+                g.add(( wikipedia_article, DCT.type, URIRef('http://purl.org/dc/dcmitype/Text') ))
+                for source in ref_text.sources:
+                    g.add(( wikipedia_article, DCT.source, URIRef(source) ))        
 
             # event type information
             g.add( (event_id, RDF.type, SEM.Event) )
             g.add(( event_id, SEM.eventType, election))
+
+            # Linking to FN1.7 @ Premon
+            g.add(( event_id, RDF.type, FN.change_of_leadership ))
 
             # time information
             timestamp=Literal(incident.time)

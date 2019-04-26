@@ -13,24 +13,22 @@ def make_output_filename(incident_type, languages):
 def prepare_list_for_sparql(x):
     return '("' +  '", "'.join(x) + '")'
 
-def construct_and_run_query(type_label, languages, limit):
+def construct_and_run_query(type_label, limit):
     """
     Construct a wikidata query to obtain all events of a specific type with their structured data, then run this query.
     """
 
-    langs=prepare_list_for_sparql(languages)
+    #langs=prepare_list_for_sparql(languages)
     
     query = """
-    SELECT ?incident ?label ?country ?countryLabel ?time (lang(?label) as ?lang) WHERE {
+    SELECT ?incident ?incidentLabel ?country ?countryLabel ?time (lang(?label) as ?lang) WHERE {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
       ?type_id rdfs:label "%s"@en.
-      ?incident wdt:P31/wdt:P279* ?type_id;
-                rdfs:label ?label;
+      ?incident wdt:P31*/wdt:P279* ?type_id;
                 wdt:P17 ?country;
                 wdt:P585 ?time.
-      filter(lang(?label) IN %s)
     } limit %d
-    """ % (type_label, langs, limit)
+    """ % (type_label, limit)
 
     r = requests.get(wdt_sparql_url, 
                      params = {'format': 'json', 'query': query})
@@ -57,7 +55,7 @@ def index_results_by_id(raw_results):
         
         if 'references' not in current_result:
             current_result['references']=defaultdict(str)
-        name=entry['label']['value']
-        language=entry['lang']['value']
-        current_result['references'][language]=name
+        name=entry['incidentLabel']['value']
+#        language=entry['lang']['value']
+#        current_result['references'][language]=name
     return indexed_results
