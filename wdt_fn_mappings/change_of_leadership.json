@@ -1,0 +1,15 @@
+{
+    "fn17-change_of_leadership@new_leader" : [
+        ["P991"]
+    ],
+    "fn17-change_of_leadership@old_leader" : [
+        ["P155", "P991"]
+    ],
+    "fn17-change_of_leadership@role" : [
+        ["P541"]
+    ],
+    "fn17-change_of_leadership@place" : [
+        ["P17"]
+    ]
+
+}

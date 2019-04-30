@@ -134,7 +134,6 @@ class Incident:
         self.time=time
         self.reference_texts=reference_texts
         
-        
 class ReferenceText:
     
     def __init__(self,
@@ -142,10 +141,11 @@ class ReferenceText:
                 name='',
                 wiki_content='',
                 language='',
-                sources=''):
+                sources='',
+                found_by=''):
         self.name=name
         self.wiki_uri=wiki_uri
         self.wiki_content=wiki_content
         self.language=language
         self.sources=sources
-
+        self.found_by=found_by

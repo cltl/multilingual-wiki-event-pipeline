@@ -6,6 +6,7 @@ from tqdm import tqdm
 import json
 import urllib.request
 import urllib.parse
+import sys
 
 import classes
 import config
@@ -75,22 +76,43 @@ def obtain_wiki_text_and_references(title, lang):
         wiki_url=''
     return content, refs, wiki_url
 
-
-
 def obtain_wiki_page_titles(wdt_ids, languages):
 
     ids_filter='|'.join(wdt_ids)
     languages_filter='|'.join(list(map(lambda x: x + 'wiki', languages)))
-    url='https://www.wikidata.org/w/api.php?action=wbgetentities&format=xml&props=sitelinks&ids=%s&sitefilter=%s&format=json' % (ids_filter, languages_filter)
+    url='https://www.wikidata.org/w/api.php?action=wbgetentities&props=sitelinks&ids=%s&sitefilter=%s&format=json' % (ids_filter, languages_filter)
     f = urllib.request.urlopen(url)
     j=json.loads(f.read().decode('utf-8'))
-    results={}
+    results_batch={}
     if 'entities' in j.keys():
         for id, id_data in j['entities'].items():
+            results_one={}
             sitelinks=id_data['sitelinks']
             for sitelink, data in sitelinks.items():
-                results[data['site'][:2]]=data['title']
-    return results
+                results_one[data['site'][:2]]=data['title']
+            if len(results_one.keys()):
+                results_batch[id]=results_one
+    print(len(results_batch))
+    return results_batch
+
+def add_wikipedia_pages_from_api(incidents, wdt_ids, raw_results):
+
+    id_batches=utils.split_in_batches(wdt_ids, 50)
+
+    for index, batch in enumerate(id_batches):
+        print('Querying batch number %d' % index)
+        wiki_pages=obtain_wiki_page_titles(batch, languages)
+        for incident in incidents:
+            if incident.wdt_id in wiki_pages.keys():
+                incident_wikipedia=wiki_pages[incident.wdt_id]
+                for language, name in incident_wikipedia.items():
+                    ref_text=classes.ReferenceText(
+                                name=name,
+                                language=language,
+                                found_by='API'
+                            )
+                    incident.reference_texts.append(ref_text)
+    return incidents
 
 def retrieve_incidents_per_type(type_label, limit=10):
     """
@@ -98,23 +120,29 @@ def retrieve_incidents_per_type(type_label, limit=10):
     """
 
     incidents=[]
-
-    results_by_id=utils.construct_and_run_query(type_label, limit)    
+    print("Retrieving and storing wikidata information...")
+    results_by_id=utils.construct_and_run_query(type_label, languages, limit)  
+    print("Wikidata querying and storing finished. Number of incidents:")
     print(len(results_by_id.keys()))
-    for wdt_id, inc_data in results_by_id.items():
+    wdt_ids=[]
+    for full_wdt_id, inc_data in results_by_id.items():
         country_id=inc_data['country']
         country_name=inc_data['countryLabel']
         time=inc_data['time']
-        wiki_pages=obtain_wiki_page_titles([wdt_id], languages)
+            
+        wdt_id=full_wdt_id.split('/')[-1]
+        wdt_ids.append(wdt_id)
+
         ref_texts=[]
-        for language, name in wiki_pages.items():
+        for language, name in inc_data['references'].items():
             print(language, name, wdt_id)
             ref_text=classes.ReferenceText(
                         name=name,
-                        language=language
+                        language=language,
+                        found_by='SPARQL'
                     )
             ref_texts.append(ref_text)
-            
+
         incident=classes.Incident(
                 incident_type=type_label,
                 wdt_id=wdt_id,
@@ -124,15 +152,18 @@ def retrieve_incidents_per_type(type_label, limit=10):
                 reference_texts=ref_texts
             )
         incidents.append(incident)
+    print('Now looking into wikipedia...')
+    incidents=add_wikipedia_pages_from_api(incidents, wdt_ids, results_by_id)
+    print('Wikipedia querying done')
     return incidents
 
 if __name__ == '__main__':
 
     for incident_type in incident_types:
         for languages in languages_list:
-
-            incidents=retrieve_incidents_per_type(incident_type, 50000)
+            incidents=retrieve_incidents_per_type(incident_type, 700)
             print(len(incidents))
+            sys.exit()
             new_incidents=[]
             for incident in tqdm(incidents):
                 new_reference_texts=[]
