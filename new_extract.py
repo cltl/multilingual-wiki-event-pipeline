@@ -106,16 +106,18 @@ def add_wikipedia_pages_from_api(incidents, wdt_ids, raw_results):
             if incident.wdt_id in wiki_pages.keys():
                 incident_wikipedia=wiki_pages[incident.wdt_id]
                 for language, name in incident_wikipedia.items():
+                    found=False
                     for rt in incident.reference_texts:
                         if rt.name==name and rt.language==language:
                             rt.found_by.append('API')
-                        else:
-                            ref_text=classes.ReferenceText(
-                                        name=name,
-                                        language=language,
-                                        found_by=['API']
-                                    )
-                            incident.reference_texts.append(ref_text)
+                            found=True
+                    if not found:
+                        ref_text=classes.ReferenceText(
+                                    name=name,
+                                    language=language,
+                                    found_by=['API']
+                                )
+                        incident.reference_texts.append(ref_text)
     return incidents
 
 def retrieve_incidents_per_type(type_label, limit=10):
@@ -123,9 +125,12 @@ def retrieve_incidents_per_type(type_label, limit=10):
     Given an event type identifier, retrieve incidents that belong to this type.
     """
 
+    with open('wdt_fn_mappings/change_of_leadership.json', 'rb') as f:
+        wdt_fn_mappings_COL=json.load(f)
+
     incidents=[]
     print("Retrieving and storing wikidata information...")
-    results_by_id=utils.construct_and_run_query(type_label, languages, limit)  
+    results_by_id=utils.construct_and_run_query(type_label, languages, wdt_fn_mappings_COL, limit)  
     print("Wikidata querying and storing finished. Number of incidents:")
     print(len(results_by_id.keys()))
     wdt_ids=[]

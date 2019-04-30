@@ -1,15 +1,14 @@
 {
     "fn17-change_of_leadership@new_leader" : [
-        ["P991"]
+        "wdt:P991"
     ],
     "fn17-change_of_leadership@old_leader" : [
-        ["P155", "P991"]
+        "wdt:P155/wdt:P991"
     ],
     "fn17-change_of_leadership@role" : [
-        ["P541"]
+        "wdt:P541"
     ],
     "fn17-change_of_leadership@place" : [
-        ["P17"]
+        "wdt:P17"
     ]
-
 }

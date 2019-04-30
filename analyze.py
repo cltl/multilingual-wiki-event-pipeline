@@ -18,10 +18,15 @@ def compute_stats_for_all_combinations(combinations):
 
         num_incidents, \
         num_with_wikipedia, \
+        wiki_from_both_methods, \
+        wiki_from_api, \
+        wiki_from_sparql, \
         num_with_sources, \
         avg_sources, \
         countries_dist, \
         numlang_dist = collection.compute_stats()
+
+        
 
         print()
         print('*'*50)
@@ -29,6 +34,9 @@ def compute_stats_for_all_combinations(combinations):
         print('*'*50)
         print('Num incidents:', num_incidents)
         print('With wiki content:', num_with_wikipedia)
+        print('Wiki from both sources:', wiki_from_both_methods)
+        print('Wiki from API only:', wiki_from_api)
+        print('Wiki from SPARQL:', wiki_from_sparql)
         print('With sources:', num_with_sources)
         print('Avg sources:', avg_sources)
         print('Countries distribution:\n', countries_dist)
@@ -37,7 +45,6 @@ def compute_stats_for_all_combinations(combinations):
     return
     
 if __name__ == '__main__':
-
 
     incident_types=config.incident_types
     languages_list=config.languages_list

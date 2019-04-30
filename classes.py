@@ -1,3 +1,4 @@
+import json
 from collections import Counter
 from rdflib.namespace import Namespace
 from rdflib.namespace import RDF, RDFS
@@ -22,6 +23,10 @@ class IncidentCollection:
         """
         
         num_with_wikipedia=0
+        wiki_from_both_methods=0
+        wiki_from_api_only=0
+        wiki_from_sparql_only=0
+
         num_with_sources=0
         sum_sources=0
         
@@ -36,6 +41,12 @@ class IncidentCollection:
                 if len(ref_text.sources):
                     num_with_sources+=1
                     sum_sources+=len(ref_text.sources)
+                if len(ref_text.found_by)==2:
+                    wiki_from_both_methods+=1
+                elif 'API' in ref_text.found_by:
+                    wiki_from_api_only+=1
+                else:
+                    wiki_from_sparql_only+=1
             if len(incident.reference_texts)==3:
                 print(incident.wdt_id)
             num_languages.append(len(incident.reference_texts))
@@ -47,13 +58,16 @@ class IncidentCollection:
         countries_dist=Counter(countries)
         numlang_dist=Counter(num_languages)
         
-        return num_incidents, num_with_wikipedia, num_with_sources, avg_sources, countries_dist, numlang_dist
+        return num_incidents, num_with_wikipedia, wiki_from_both_methods, wiki_from_api_only, wiki_from_sparql_only, num_with_sources, avg_sources, countries_dist, numlang_dist
     
     def serialize(self, filename=None):
         """
         Serialize a collection of incidents to a .ttl file.
         """
-        
+    
+        with open('wdt_fn_mappings/change_of_leadership.json', 'r') as r:
+            wdt_fn_mappings_COL=json.loads(r)     
+
         g = Graph()
         
         # Namespaces definition
@@ -62,11 +76,13 @@ class IncidentCollection:
         GRASP=Namespace('http://groundedannotationframework.org/grasp#')
         DCT=Namespace('http://purl.org/dc/elements/1.1/')
         FN=Namespace('http://premon.fbk.eu/resource/fn17-')
+        PREMON=Namespace('https://premon.fbk.eu/resource/')
         g.bind('sem', SEM)
         g.bind('wdt', WDT_ONT)
         g.bind('grasp', GRASP)
         g.bind('dct', DCT)
         g.bind('fn17', FN)
+        g.bind('pm', PREMON)
 
         # Some core URIs/Literals
         election=URIRef('https://www.wikidata.org/wiki/Q40231')
@@ -98,6 +114,13 @@ class IncidentCollection:
             # Linking to FN1.7 @ Premon
             g.add(( event_id, RDF.type, FN.change_of_leadership ))
 
+            # Map all roles to FN roles
+            for fn_role, wdt_prop_paths in wdt_fn_mappings_COL.items():
+                for a_path in wdt_prop_paths:
+                    if a_path in incident.other_info.keys():
+                        an_obj=URIRef(incident.other_info[a_path])
+                        g.add(( event_id, PREMON[fn_role], an_obj))
+
             # time information
             timestamp=Literal(incident.time)
             g.add((event_id, SEM.hasTimeStamp, timestamp))
@@ -126,14 +149,16 @@ class Incident:
                 country_id,
                 country_name,
                 time,
-                reference_texts=[]):
+                reference_texts=[],
+                actors={}):
         self.incident_type=incident_type
         self.wdt_id=wdt_id
         self.country_id=country_id
         self.country_name=country_name
         self.time=time
         self.reference_texts=reference_texts
-        
+        self.actors=actors
+
 class ReferenceText:
     
     def __init__(self,

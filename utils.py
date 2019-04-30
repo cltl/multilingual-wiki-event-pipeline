@@ -20,7 +20,7 @@ def split_in_batches(a_list, batch_size=500):
 def prepare_list_for_sparql(x):
     return '("' +  '", "'.join(x) + '")'
 
-def construct_and_run_query(type_label, languages, limit):
+def construct_and_run_query(type_label, languages, more_props, limit):
     """
     Construct a wikidata query to obtain all events of a specific type with their structured data, then run this query.
     """
@@ -38,16 +38,29 @@ def construct_and_run_query(type_label, languages, limit):
         clause=f"""OPTIONAL {{ \n\t?incident rdfs:label {var}.\n\tFILTER ( LANGMATCHES ( LANG ( {var} ), \"{l}\" )) }}\n\t"""
         optional_clauses_str+=clause
 
+    opt_vars=[]
+    optional_more_info=""
+    for fn_role, wdt_prop_paths in more_props.items():
+        var='?' + fn_role.split('@')[-1]
+        for a_path in wdt_prop_paths:
+            clause=f"""OPTIONAL {{ \n\t?incident {a_path} {var} }}\n\t"""
+            optional_more_info+=clause
+        opt_vars.append(var)
+
     query = """
-    SELECT DISTINCT ?incident ?incidentLabel ?country ?countryLabel ?time %s WHERE {
+    SELECT DISTINCT ?incident ?incidentLabel ?country ?countryLabel ?time %s %s WHERE {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
       ?type_id rdfs:label "%s"@en.
       ?incident wdt:P31*/wdt:P279* ?type_id;
                 wdt:P17 ?country;
                 wdt:P585 ?time.
       %s
+      %s
     } limit %d
-    """ % (return_langs, type_label, optional_clauses_str, limit)
+    """ % (return_langs, ' '.join(opt_vars), type_label, optional_clauses_str, optional_more_info, limit)
+
+    print(query)
+    sys.exit()
 
     r = requests.get(wdt_sparql_url, 
                      params = {'format': 'json', 'query': query})
