@@ -106,12 +106,16 @@ def add_wikipedia_pages_from_api(incidents, wdt_ids, raw_results):
             if incident.wdt_id in wiki_pages.keys():
                 incident_wikipedia=wiki_pages[incident.wdt_id]
                 for language, name in incident_wikipedia.items():
-                    ref_text=classes.ReferenceText(
-                                name=name,
-                                language=language,
-                                found_by='API'
-                            )
-                    incident.reference_texts.append(ref_text)
+                    for rt in incident.reference_texts:
+                        if rt.name==name and rt.language==language:
+                            rt.found_by.append('API')
+                        else:
+                            ref_text=classes.ReferenceText(
+                                        name=name,
+                                        language=language,
+                                        found_by=['API']
+                                    )
+                            incident.reference_texts.append(ref_text)
     return incidents
 
 def retrieve_incidents_per_type(type_label, limit=10):
@@ -139,7 +143,7 @@ def retrieve_incidents_per_type(type_label, limit=10):
             ref_text=classes.ReferenceText(
                         name=name,
                         language=language,
-                        found_by='SPARQL'
+                        found_by=['SPARQL']
                     )
             ref_texts.append(ref_text)
 
@@ -161,9 +165,8 @@ if __name__ == '__main__':
 
     for incident_type in incident_types:
         for languages in languages_list:
-            incidents=retrieve_incidents_per_type(incident_type, 700)
+            incidents=retrieve_incidents_per_type(incident_type, 3000)
             print(len(incidents))
-            sys.exit()
             new_incidents=[]
             for incident in tqdm(incidents):
                 new_reference_texts=[]
