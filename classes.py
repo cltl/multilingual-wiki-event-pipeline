@@ -3,7 +3,7 @@ from collections import Counter
 from rdflib.namespace import Namespace
 from rdflib.namespace import RDF, RDFS
 from rdflib import Graph
-from rdflib import URIRef, BNode, Literal
+from rdflib import URIRef, BNode, Literal, XSD
 
 class IncidentCollection:
     
@@ -50,7 +50,9 @@ class IncidentCollection:
             if len(incident.reference_texts)==3:
                 print(incident.wdt_id)
             num_languages.append(len(incident.reference_texts))
-            countries.append(incident.country_name)
+            if 'sem:hasPlace' in incident.extra_info.keys():
+                for country in incident.extra_info['sem:hasPlace']:
+                    countries.append(country)
         if num_with_sources: 
             avg_sources=sum_sources/num_with_sources
         else:
@@ -65,8 +67,8 @@ class IncidentCollection:
         Serialize a collection of incidents to a .ttl file.
         """
     
-        with open('wdt_fn_mappings/change_of_leadership.json', 'r') as r:
-            wdt_fn_mappings_COL=json.loads(r)     
+        with open('wdt_fn_mappings/change_of_leadership.json', 'rb') as r:
+            wdt_fn_mappings_COL=json.load(r)     
 
         g = Graph()
         
@@ -90,7 +92,7 @@ class IncidentCollection:
         country_label=Literal('country')
         
         for incident in self.incidents:
-            event_id = URIRef(incident.wdt_id)
+            event_id = URIRef('http://www.wikidata.org/entity/%s' % incident.wdt_id)
 
             # event labels in all languages
             for ref_text in incident.reference_texts:
@@ -115,25 +117,34 @@ class IncidentCollection:
             g.add(( event_id, RDF.type, FN.change_of_leadership ))
 
             # Map all roles to FN roles
-            for fn_role, wdt_prop_paths in wdt_fn_mappings_COL.items():
-                for a_path in wdt_prop_paths:
-                    if a_path in incident.other_info.keys():
-                        an_obj=URIRef(incident.other_info[a_path])
-                        g.add(( event_id, PREMON[fn_role], an_obj))
+            for predicate, wdt_prop_paths in wdt_fn_mappings_COL.items():
+                if predicate in incident.extra_info.keys():
+                    vals=incident.extra_info[predicate]
+                    prefix, pid=predicate.split(':')
+                    if prefix=='sem':
+                        RES=SEM
+                    else:
+                        RES=PREMON
+                    for v in vals:
+                        if pid not in {'hasTimeStamp', 'time'}:
+                            an_obj=URIRef(v)
+                        else:
+                            an_obj=Literal(v,datatype=XSD.date)
+                        g.add(( event_id, RES[pid], an_obj))
 
             # time information
-            timestamp=Literal(incident.time)
-            g.add((event_id, SEM.hasTimeStamp, timestamp))
+            #timestamp=Literal(incident.time)
+            #g.add((event_id, SEM.hasTimeStamp, timestamp))
 
             # place information
-            country=URIRef(incident.country_id)
-            country_name=Literal(incident.country_name)
-            g.add((event_id, SEM.hasPlace, country))
-            g.add((country, RDFS.label, country_name))
-            g.add((country, RDF.type, WDT_ONT.Q6256))
+            #country=URIRef(incident.country_id)
+            #country_name=Literal(incident.country_name)
+            #g.add((event_id, SEM.hasPlace, country))
+            #g.add((country, RDFS.label, country_name))
+            #g.add((country, RDF.type, WDT_ONT.Q6256))
 
         g.add((election, RDFS.label, election_label))
-        g.add((election, RDFS.label, country_label))
+        #g.add((country, RDFS.label, country_label))
 
         # Done. Store the resulting .ttl file now...
         if filename: # if a filename was supplied, store it there
@@ -146,18 +157,12 @@ class Incident:
     def __init__(self, 
                 incident_type,
                 wdt_id,
-                country_id,
-                country_name,
-                time,
                 reference_texts=[],
-                actors={}):
+                extra_info={}):
         self.incident_type=incident_type
         self.wdt_id=wdt_id
-        self.country_id=country_id
-        self.country_name=country_name
-        self.time=time
         self.reference_texts=reference_texts
-        self.actors=actors
+        self.extra_info=extra_info
 
 class ReferenceText:
     

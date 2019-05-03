@@ -135,9 +135,7 @@ def retrieve_incidents_per_type(type_label, limit=10):
     print(len(results_by_id.keys()))
     wdt_ids=[]
     for full_wdt_id, inc_data in results_by_id.items():
-        country_id=inc_data['country']
-        country_name=inc_data['countryLabel']
-        time=inc_data['time']
+        extra_info=inc_data['extra_info']
             
         wdt_id=full_wdt_id.split('/')[-1]
         wdt_ids.append(wdt_id)
@@ -155,9 +153,7 @@ def retrieve_incidents_per_type(type_label, limit=10):
         incident=classes.Incident(
                 incident_type=type_label,
                 wdt_id=wdt_id,
-                country_id=country_id,
-                country_name=country_name,
-                time=time,
+                extra_info=extra_info,
                 reference_texts=ref_texts
             )
         incidents.append(incident)
@@ -170,7 +166,7 @@ if __name__ == '__main__':
 
     for incident_type in incident_types:
         for languages in languages_list:
-            incidents=retrieve_incidents_per_type(incident_type, 3000)
+            incidents=retrieve_incidents_per_type(incident_type, 600000)
             print(len(incidents))
             new_incidents=[]
             for incident in tqdm(incidents):

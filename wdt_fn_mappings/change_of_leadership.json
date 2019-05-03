@@ -1,14 +1,24 @@
 {
-    "fn17-change_of_leadership@new_leader" : [
-        "wdt:P991"
+    "sem:hasPlace": [
+        "wdt:P17"
     ],
-    "fn17-change_of_leadership@old_leader" : [
+    "sem:hasTimeStamp": [
+        "wdt:P585"
+    ],
+    "sem:hasActor": [
+        "wdt:P991",
         "wdt:P155/wdt:P991"
     ],
-    "fn17-change_of_leadership@role" : [
+    "pm:fn17-change_of_leadership@new_leader" : [
+        "wdt:P991"
+    ],
+    "pm:fn17-change_of_leadership@old_leader" : [
+        "wdt:P155/wdt:P991"
+    ],
+    "pm:fn17-change_of_leadership@role" : [
         "wdt:P541"
     ],
-    "fn17-change_of_leadership@place" : [
+    "pm:fn17-change_of_leadership@place" : [
         "wdt:P17"
     ]
 }
