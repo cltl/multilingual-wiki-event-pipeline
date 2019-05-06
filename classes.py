@@ -1,5 +1,5 @@
 import json
-from collections import Counter
+from collections import defaultdict, Counter
 from rdflib.namespace import Namespace
 from rdflib.namespace import RDF, RDFS
 from rdflib import Graph
@@ -33,6 +33,9 @@ class IncidentCollection:
         countries=[]
         num_languages=[]
 
+        extra_info_dists=defaultdict(list)
+        count_occurences=defaultdict(int)
+
         num_incidents=len(self.incidents)
         for incident in self.incidents:
             for ref_text in incident.reference_texts:
@@ -53,14 +56,25 @@ class IncidentCollection:
             if 'sem:hasPlace' in incident.extra_info.keys():
                 for country in incident.extra_info['sem:hasPlace']:
                     countries.append(country)
+            for p, v in incident.extra_info.items():
+                if isinstance(v, set):
+                    for value in v:
+                        extra_info_dists[p].append(value)
+                else:
+                    extra_info_dists[p].append(v)
+                count_occurences[p]+=1
         if num_with_sources: 
             avg_sources=sum_sources/num_with_sources
         else:
             avg_sources=0
-        countries_dist=Counter(countries)
+        countries_dist=Counter(countries).most_common(10)
         numlang_dist=Counter(num_languages)
         
-        return num_incidents, num_with_wikipedia, wiki_from_both_methods, wiki_from_api_only, wiki_from_sparql_only, num_with_sources, avg_sources, countries_dist, numlang_dist
+        extra_info_dist_agg={}
+        for k, v in extra_info_dists.items():
+            extra_info_dist_agg[k]=Counter(v).most_common(10)
+
+        return num_incidents, num_with_wikipedia, wiki_from_both_methods, wiki_from_api_only, wiki_from_sparql_only, num_with_sources, avg_sources, countries_dist, numlang_dist, extra_info_dist_agg,count_occurences
     
     def serialize(self, filename=None):
         """
