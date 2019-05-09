@@ -36,6 +36,8 @@ class IncidentCollection:
         extra_info_dists=defaultdict(list)
         count_occurences=defaultdict(int)
 
+        found_bys=[]
+
         num_incidents=len(self.incidents)
         for incident in self.incidents:
             for ref_text in incident.reference_texts:
@@ -44,12 +46,7 @@ class IncidentCollection:
                 if len(ref_text.sources):
                     num_with_sources+=1
                     sum_sources+=len(ref_text.sources)
-                if len(ref_text.found_by)==2:
-                    wiki_from_both_methods+=1
-                elif 'API' in ref_text.found_by:
-                    wiki_from_api_only+=1
-                else:
-                    wiki_from_sparql_only+=1
+                found_bys.append('|'.join(ref_text.found_by))
             if len(incident.reference_texts)==3:
                 print(incident.wdt_id)
             num_languages.append(len(incident.reference_texts))
@@ -74,7 +71,7 @@ class IncidentCollection:
         for k, v in extra_info_dists.items():
             extra_info_dist_agg[k]=Counter(v).most_common(10)
 
-        return num_incidents, num_with_wikipedia, wiki_from_both_methods, wiki_from_api_only, wiki_from_sparql_only, num_with_sources, avg_sources, countries_dist, numlang_dist, extra_info_dist_agg,count_occurences
+        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, avg_sources, countries_dist, numlang_dist, extra_info_dist_agg,count_occurences
     
     def serialize(self, filename=None):
         """
@@ -184,12 +181,20 @@ class ReferenceText:
                 wiki_uri='',
                 name='',
                 wiki_content='',
+                html_content='',
                 language='',
+                creation_date='',
+                authors=[],
                 sources='',
+                langlinks=[],
                 found_by=''):
         self.name=name
         self.wiki_uri=wiki_uri
         self.wiki_content=wiki_content
+        self.html_content=html_content
         self.language=language
+        self.creation_date=creation_date
+        self.authors=authors
         self.sources=sources
+        self.langlinks=langlinks
         self.found_by=found_by
