@@ -1,13 +1,10 @@
-import wikipedia
-import wikipediaapi
 from pprint import pprint
 import pickle
 from tqdm import tqdm
 import json
-import urllib.request
-import urllib.parse
-import sys
+from collections import defaultdict
 
+import native_api_utils
 import classes
 import config
 import utils
@@ -23,77 +20,29 @@ def get_additional_reference_texts(ref_texts, found_names, found_languages):
     if not search_for_languages:
         return ref_texts
 
-    wiki = wikipediaapi.Wikipedia(found_languages[0])
-    page = wiki.page(found_names[0])
-    if not page.exists():
-        if len(found_languages)<2: 
-            return ref_texts
-        wiki = wikipediaapi.Wikipedia(found_languages[1])
-        page = wiki.page(found_names[1])
-        if not page.exists():
-            return ref_texts
-    try:    
-        p_langs = page.langlinks
-    except KeyError:
-        return ref_texts
-    for lang in search_for_languages:
-        if lang in p_langs:
-            p_lang=p_langs[lang]
-            p_lang_uri=p_lang.fullurl
-            p_lang_content=p_lang.text
-            p_lang_title=p_lang.title
-            
-            ref_text = classes.ReferenceText(
-                        name=p_lang_title,
-                        language=lang,
-                        wiki_uri=p_lang_uri,
-                        wiki_content=p_lang_content,
-                        sources=[]
-                    )
-            ref_texts.append(ref_text)
+    to_query=defaultdict(set)
+    for ref_text in ref_texts:
+        langlinks=ref_text.langlinks
+        for useful_lang in search_for_languages&set(langlinks.keys()):
+            to_query[useful_lang].add(langlinks[useful_lang])
+
+    props=['extracts', 'langlinks', 'extlinks']
+    for language, pages in to_query.items():
+        for page in pages:
+            page_info=native_api_utils.obtain_wiki_page_info(page, language, props)
+            if 'extract' in page_info.keys():
+                ref_text = classes.ReferenceText(
+                    wiki_content=page_info['extract'],
+                    name=page,
+                    language=language,
+                    found_by=['langlinks']
+                )
+                if 'extlinks' in page_info.keys():
+                    ref_text.sources=page_info['extlinks']
+                if 'langlinks' in page_info.keys():
+                    ref.text.langlinks=page_info['langlinks']
+                ref_texts.append(ref_text)
     return ref_texts
-
-def obtain_wiki_text_and_references(title, lang):
-    """
-    Given a Wikipedia title in some language, obtain its content and list of references.
-    """
-    wikipedia.set_lang(lang)
-    try:
-        wp=wikipedia.page(title)
-    except:
-        return '', [], ''
-    try:
-        refs=wp.references
-    except:
-        refs=[]
-    try:
-        content=wp.content
-    except:
-        content=''
-    try:
-        wiki_url=wp.url
-    except:
-        wiki_url=''
-    return content, refs, wiki_url
-
-def obtain_wiki_page_titles(wdt_ids, languages):
-
-    ids_filter='|'.join(wdt_ids)
-    languages_filter='|'.join(list(map(lambda x: x + 'wiki', languages)))
-    url='https://www.wikidata.org/w/api.php?action=wbgetentities&props=sitelinks&ids=%s&sitefilter=%s&format=json' % (ids_filter, languages_filter)
-    f = urllib.request.urlopen(url)
-    j=json.loads(f.read().decode('utf-8'))
-    results_batch={}
-    if 'entities' in j.keys():
-        for id, id_data in j['entities'].items():
-            results_one={}
-            sitelinks=id_data['sitelinks']
-            for sitelink, data in sitelinks.items():
-                results_one[data['site'][:2]]=data['title']
-            if len(results_one.keys()):
-                results_batch[id]=results_one
-    print(len(results_batch))
-    return results_batch
 
 def add_wikipedia_pages_from_api(incidents, wdt_ids, raw_results):
 
@@ -101,7 +50,7 @@ def add_wikipedia_pages_from_api(incidents, wdt_ids, raw_results):
 
     for index, batch in enumerate(id_batches):
         print('Querying batch number %d' % index)
-        wiki_pages=obtain_wiki_page_titles(batch, languages)
+        wiki_pages=native_api_utils.obtain_wiki_page_titles(batch, languages)
         for incident in incidents:
             if incident.wdt_id in wiki_pages.keys():
                 incident_wikipedia=wiki_pages[incident.wdt_id]
@@ -166,7 +115,7 @@ if __name__ == '__main__':
 
     for incident_type in incident_types:
         for languages in languages_list:
-            incidents=retrieve_incidents_per_type(incident_type, 600000)
+            incidents=retrieve_incidents_per_type(incident_type, 999999)
             print(len(incidents))
             new_incidents=[]
             for incident in tqdm(incidents):
@@ -174,16 +123,23 @@ if __name__ == '__main__':
                 found_names=[]
                 found_languages=[]
                 for ref_text in incident.reference_texts:
-                    content, references, uri=obtain_wiki_text_and_references(ref_text.name, ref_text.language)
-                    if content:
-                        ref_text.wiki_content=content
-                        ref_text.sources=references
-                        ref_text.wiki_uri=uri
+                    props=['extracts', 'langlinks', 'extlinks']
+                    page_info=native_api_utils.obtain_wiki_page_info(ref_text.name, ref_text.language, props, other_languages=set(languages)-set(ref_text.language))
+                    if 'extract' in page_info.keys():
+                        ref_text.wiki_content=page_info['extract']
+                        if 'extlinks' in page_info.keys():
+                            ref_text.sources=page_info['extlinks']
+                        if 'langlinks' in page_info.keys():
+                            ref_text.langlinks=page_info['langlinks'],
+                        #ref_text.wiki_uri=uri
                         new_reference_texts.append(ref_text)
                         found_languages.append(ref_text.language)
                         found_names.append(ref_text.name)
                 if len(new_reference_texts):
+                    all_ref_texts=defaultdict(list)
                     new_reference_texts=get_additional_reference_texts(new_reference_texts, found_names, found_languages)
+                    #for r in new_reference_texts:
+                    #    all_ref_texts[r.language].append(r.name)
                     incident.reference_texts=new_reference_texts
                     new_incidents.append(incident)
 
