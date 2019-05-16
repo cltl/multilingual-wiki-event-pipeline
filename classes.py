@@ -31,7 +31,8 @@ class IncidentCollection:
         sum_sources=0
         
         countries=[]
-        num_languages=[]
+        num_wikis=[]
+        num_languages=defaultdict(int)
 
         extra_info_dists=defaultdict(list)
         count_occurences=defaultdict(int)
@@ -40,6 +41,7 @@ class IncidentCollection:
 
         num_incidents=len(self.incidents)
         for incident in self.incidents:
+            langs=set()
             for ref_text in incident.reference_texts:
                 if ref_text.wiki_content:
                     num_with_wikipedia+=1
@@ -47,9 +49,14 @@ class IncidentCollection:
                     num_with_sources+=1
                     sum_sources+=len(ref_text.sources)
                 found_bys.append('|'.join(ref_text.found_by))
+
+                langs.add(ref_text.language)
+            sorted_langs=tuple(sorted(list(langs)))
+            num_languages[sorted_langs]+=1
+
             if len(incident.reference_texts)==3:
                 print(incident.wdt_id)
-            num_languages.append(len(incident.reference_texts))
+            num_wikis.append(len(incident.reference_texts))
             if 'sem:hasPlace' in incident.extra_info.keys():
                 for country in incident.extra_info['sem:hasPlace']:
                     countries.append(country)
@@ -65,13 +72,13 @@ class IncidentCollection:
         else:
             avg_sources=0
         countries_dist=Counter(countries).most_common(10)
-        numlang_dist=Counter(num_languages)
+        numwiki_dist=Counter(num_wikis)
         
         extra_info_dist_agg={}
         for k, v in extra_info_dists.items():
             extra_info_dist_agg[k]=Counter(v).most_common(10)
 
-        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, avg_sources, countries_dist, numlang_dist, extra_info_dist_agg,count_occurences
+        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, avg_sources, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences
     
     def serialize(self, filename=None):
         """

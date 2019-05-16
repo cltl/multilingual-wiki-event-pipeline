@@ -23,8 +23,10 @@ def get_additional_reference_texts(ref_texts, found_names, found_languages):
     to_query=defaultdict(set)
     for ref_text in ref_texts:
         langlinks=ref_text.langlinks
-        for useful_lang in search_for_languages&set(langlinks.keys()):
-            to_query[useful_lang].add(langlinks[useful_lang])
+        print(langlinks)
+        for lang, the_link in langlinks:
+            if lang in search_for_languages:
+                to_query[lang].add(the_link)
 
     props=['extracts', 'langlinks', 'extlinks']
     for language, pages in to_query.items():
@@ -33,6 +35,7 @@ def get_additional_reference_texts(ref_texts, found_names, found_languages):
             if 'extract' in page_info.keys():
                 ref_text = classes.ReferenceText(
                     wiki_content=page_info['extract'],
+                    langlinks=page_info['langlinks'],
                     name=page,
                     language=language,
                     found_by=['langlinks']
@@ -130,7 +133,8 @@ if __name__ == '__main__':
                         if 'extlinks' in page_info.keys():
                             ref_text.sources=page_info['extlinks']
                         if 'langlinks' in page_info.keys():
-                            ref_text.langlinks=page_info['langlinks'],
+                            ref_text.langlinks=page_info['langlinks']
+                        print(ref_text.langlinks)
                         #ref_text.wiki_uri=uri
                         new_reference_texts.append(ref_text)
                         found_languages.append(ref_text.language)

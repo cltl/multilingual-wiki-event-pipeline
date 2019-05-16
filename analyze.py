@@ -22,6 +22,7 @@ def compute_stats_for_all_combinations(combinations):
         num_with_sources, \
         avg_sources, \
         countries_dist, \
+        numwiki_dist, \
         numlang_dist, \
         extra_info_dist_agg,\
         count_occurrences = collection.compute_stats()
@@ -39,6 +40,7 @@ def compute_stats_for_all_combinations(combinations):
         print('With sources:', num_with_sources)
         print('Avg sources:', avg_sources)
         print('Countries distribution:\n', countries_dist)
+        print('Number of Wikipages per incident:\n', numwiki_dist)
         print('Number of languages per incident:\n', numlang_dist)
         print('Distribution of properties', extra_info_dist_agg)
         print('Count of occurrences', count_occurrences)
