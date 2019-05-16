@@ -9,7 +9,7 @@ def compute_stats_for_all_combinations(combinations):
     """
     
     for incident_type, languages in combinations:
-
+       
         filename=utils.make_output_filename(incident_type, 
                                             languages)
 
@@ -25,9 +25,8 @@ def compute_stats_for_all_combinations(combinations):
         numwiki_dist, \
         numlang_dist, \
         extra_info_dist_agg,\
-        count_occurrences = collection.compute_stats()
-
-        
+        count_occurrences,\
+        count_values = collection.compute_stats()
 
         print()
         print('*'*50)
@@ -44,6 +43,7 @@ def compute_stats_for_all_combinations(combinations):
         print('Number of languages per incident:\n', numlang_dist)
         print('Distribution of properties', extra_info_dist_agg)
         print('Count of occurrences', count_occurrences)
+        print('Count of values', count_values)
     return
     
 if __name__ == '__main__':

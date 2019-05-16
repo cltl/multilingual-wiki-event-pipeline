@@ -36,6 +36,7 @@ class IncidentCollection:
 
         extra_info_dists=defaultdict(list)
         count_occurences=defaultdict(int)
+        count_values=defaultdict(int)
 
         found_bys=[]
 
@@ -64,8 +65,10 @@ class IncidentCollection:
                 if isinstance(v, set):
                     for value in v:
                         extra_info_dists[p].append(value)
+                    count_values[p]+=len(v)
                 else:
                     extra_info_dists[p].append(v)
+                    count_values[p]+=1
                 count_occurences[p]+=1
         if num_with_sources: 
             avg_sources=sum_sources/num_with_sources
@@ -78,7 +81,7 @@ class IncidentCollection:
         for k, v in extra_info_dists.items():
             extra_info_dist_agg[k]=Counter(v).most_common(10)
 
-        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, avg_sources, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences
+        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, avg_sources, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences, count_values
     
     def serialize(self, filename=None):
         """

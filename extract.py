@@ -48,7 +48,7 @@ def get_additional_reference_texts(ref_texts, found_names, found_languages):
     return ref_texts
 
 def add_wikipedia_pages_from_api(incidents, wdt_ids, raw_results):
-
+    assert(len(wdt_ids)>0)
     id_batches=utils.split_in_batches(wdt_ids, 50)
 
     for index, batch in enumerate(id_batches):
@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
     for incident_type in incident_types:
         for languages in languages_list:
-            incidents=retrieve_incidents_per_type(incident_type, 999999)
+            incidents=retrieve_incidents_per_type(incident_type,3000)
             print(len(incidents))
             new_incidents=[]
             for incident in tqdm(incidents):
@@ -127,14 +127,14 @@ if __name__ == '__main__':
                 found_languages=[]
                 for ref_text in incident.reference_texts:
                     props=['extracts', 'langlinks', 'extlinks']
-                    page_info=native_api_utils.obtain_wiki_page_info(ref_text.name, ref_text.language, props, other_languages=set(languages)-set(ref_text.language))
+                    other_languages=set(languages)-set([ref_text.language])
+                    page_info=native_api_utils.obtain_wiki_page_info(ref_text.name, ref_text.language, props, other_languages=other_languages)
                     if 'extract' in page_info.keys():
                         ref_text.wiki_content=page_info['extract']
                         if 'extlinks' in page_info.keys():
                             ref_text.sources=page_info['extlinks']
                         if 'langlinks' in page_info.keys():
                             ref_text.langlinks=page_info['langlinks']
-                        print(ref_text.langlinks)
                         #ref_text.wiki_uri=uri
                         new_reference_texts.append(ref_text)
                         found_languages.append(ref_text.language)

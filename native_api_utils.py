@@ -50,7 +50,7 @@ def obtain_wiki_page_titles(wdt_ids, languages):
     ids_filter='|'.join(wdt_ids)
     languages_filter='|'.join(list(map(lambda x: x + 'wiki', languages)))
     params={
-            'action': 'wbentities',
+            'action': 'wbgetentities',
             'props': 'sitelinks',
             'ids': ids_filter,
             'sitefilter': languages_filter,
@@ -61,7 +61,6 @@ def obtain_wiki_page_titles(wdt_ids, languages):
     j=r.json()
     # f = urllib.request.urlopen(url)
     # j=json.loads(f.read().decode('utf-8'))
-
     results_batch={}
     if 'entities' in j.keys():
         for id, id_data in j['entities'].items():
