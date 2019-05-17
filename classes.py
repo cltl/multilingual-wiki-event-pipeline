@@ -150,7 +150,12 @@ class IncidentCollection:
                         if pid not in {'hasTimeStamp', 'time'}:
                             an_obj=URIRef(v)
                         else:
-                            an_obj=Literal(v,datatype=XSD.date)
+                            if v.endswith('-01-01T00:00:00Z'):
+                                vyear=v[:4]
+                                print(vyear)
+                                an_obj=Literal(vyear, datatype=XSD.gYear)
+                            else:
+                                an_obj=Literal(v,datatype=XSD.date)
                         g.add(( event_id, RES[pid], an_obj))
 
             # time information

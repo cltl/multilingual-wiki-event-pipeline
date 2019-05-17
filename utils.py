@@ -17,15 +17,10 @@ def split_in_batches(a_list, batch_size=500):
     for i in range(0, len(a_list), batch_size):
         yield a_list[i:i + batch_size]
 
-def prepare_list_for_sparql(x):
-    return '("' +  '", "'.join(x) + '")'
-
 def construct_and_run_query(type_label, languages, more_props, limit):
     """
     Construct a wikidata query to obtain all events of a specific type with their structured data, then run this query.
     """
-
-    #langs=prepare_list_for_sparql(languages)
     
     lang2var={}
     for l in languages:
@@ -99,14 +94,5 @@ def index_results_by_id(raw_results, lang2var, extra_info):
                 var=a_path.replace('wdt:', '').replace('/', '_')       # fn_role.split('@')[-1] 
                 if var in entry.keys() and entry[var]['value']:
                     current_result['extra_info'][predicate].add(entry[var]['value'])
-
-
-#        current_result['country']=entry['country']['value']
-#        current_result['countryLabel']=entry['countryLabel']['value']
-#        current_result['time']=entry['time']['value']
-        
         indexed_results[wdt_id]=current_result
-        
-#        language=entry['lang']['value']
-#        current_result['references'][language]=name
     return indexed_results

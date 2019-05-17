@@ -23,11 +23,9 @@ def get_additional_reference_texts(ref_texts, found_names, found_languages):
     to_query=defaultdict(set)
     for ref_text in ref_texts:
         langlinks=ref_text.langlinks
-        print(langlinks)
         for lang, the_link in langlinks:
             if lang in search_for_languages:
                 to_query[lang].add(the_link)
-
     props=['extracts', 'langlinks', 'extlinks']
     for language, pages in to_query.items():
         for page in pages:
@@ -81,10 +79,8 @@ def retrieve_incidents_per_type(type_label, limit=10):
         wdt_fn_mappings_COL=json.load(f)
 
     incidents=[]
-    print("Retrieving and storing wikidata information...")
+    print("### 1. ### Retrieving and storing wikidata information from SPARQL...")
     results_by_id=utils.construct_and_run_query(type_label, languages, wdt_fn_mappings_COL, limit)  
-    print("Wikidata querying and storing finished. Number of incidents:")
-    print(len(results_by_id.keys()))
     wdt_ids=[]
     for full_wdt_id, inc_data in results_by_id.items():
         extra_info=inc_data['extra_info']
@@ -109,43 +105,48 @@ def retrieve_incidents_per_type(type_label, limit=10):
                 reference_texts=ref_texts
             )
         incidents.append(incident)
-    print('Now looking into wikipedia...')
+    print("Wikidata querying and storing finished. Number of incidents:", len(incidents))
+    print('### 2. ### Enriching the reference texts through the Wikipedia-Wikidata API...')
     incidents=add_wikipedia_pages_from_api(incidents, wdt_ids, results_by_id)
-    print('Wikipedia querying done')
+    print('API querying done. Number of incidents:', len(incidents))
     return incidents
+
+def obtain_reference_texts(incidents):
+    print('### 3. ### Retrieve reference text information from the wikipedia API + obtain extra documents through langlinks')
+    new_incidents=[]
+    for incident in tqdm(incidents):
+        new_reference_texts=[]
+        found_names=[]
+        found_languages=[]
+        for ref_text in incident.reference_texts:
+            props=['extracts', 'langlinks', 'extlinks']
+            other_languages=set(languages)-set([ref_text.language])
+            page_info=native_api_utils.obtain_wiki_page_info(ref_text.name, ref_text.language, props, other_languages=other_languages)
+            if 'extract' in page_info.keys():
+                ref_text.wiki_content=page_info['extract']
+                if 'extlinks' in page_info.keys():
+                    ref_text.sources=page_info['extlinks']
+                if 'langlinks' in page_info.keys():
+                    ref_text.langlinks=page_info['langlinks']
+		#ref_text.wiki_uri=uri
+                new_reference_texts.append(ref_text)
+                found_languages.append(ref_text.language)
+                found_names.append(ref_text.name)
+        if len(new_reference_texts): # if there are reference texts with text, try to get more data by using the langlinks info we have stored.
+            new_reference_texts=get_additional_reference_texts(new_reference_texts, found_names, found_languages)
+            incident.reference_texts=new_reference_texts
+            new_incidents.append(incident)
+    print('Retrieval of reference texts done. Number of incidents:', len(new_incidents))
+    return new_incidents
 
 if __name__ == '__main__':
 
     for incident_type in incident_types:
         for languages in languages_list:
-            incidents=retrieve_incidents_per_type(incident_type,3000)
-            print(len(incidents))
-            new_incidents=[]
-            for incident in tqdm(incidents):
-                new_reference_texts=[]
-                found_names=[]
-                found_languages=[]
-                for ref_text in incident.reference_texts:
-                    props=['extracts', 'langlinks', 'extlinks']
-                    other_languages=set(languages)-set([ref_text.language])
-                    page_info=native_api_utils.obtain_wiki_page_info(ref_text.name, ref_text.language, props, other_languages=other_languages)
-                    if 'extract' in page_info.keys():
-                        ref_text.wiki_content=page_info['extract']
-                        if 'extlinks' in page_info.keys():
-                            ref_text.sources=page_info['extlinks']
-                        if 'langlinks' in page_info.keys():
-                            ref_text.langlinks=page_info['langlinks']
-                        #ref_text.wiki_uri=uri
-                        new_reference_texts.append(ref_text)
-                        found_languages.append(ref_text.language)
-                        found_names.append(ref_text.name)
-                if len(new_reference_texts):
-                    all_ref_texts=defaultdict(list)
-                    new_reference_texts=get_additional_reference_texts(new_reference_texts, found_names, found_languages)
-                    #for r in new_reference_texts:
-                    #    all_ref_texts[r.language].append(r.name)
-                    incident.reference_texts=new_reference_texts
-                    new_incidents.append(incident)
+            # Query SPARQL and the API to get incidents, their properties, and labels.
+            incidents=retrieve_incidents_per_type(incident_type,999999)
+
+            new_incidents=obtain_reference_texts(incidents)
 
             collection=classes.IncidentCollection(incidents=new_incidents,
                                      incident_type=incident_type,

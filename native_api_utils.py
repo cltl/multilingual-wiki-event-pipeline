@@ -1,7 +1,9 @@
 import requests
 
 def obtain_date_of_creation(titles, language):
-
+    """
+    Obtain date of creation for a number of documents.
+    """
     title_filter='|'.join(titles)
     dates={}
     params={
@@ -16,16 +18,17 @@ def obtain_date_of_creation(titles, language):
     url='https://%s.wikipedia.org/w/api.php?' % language
     r=requests.get(url, params=params)
     json_response=r.json()
-    print(titles, json_response)
     for page_id, page_info in json_response['query']['pages'].items():
         dates[page_info['title']]=page_info['revisions'][0]['timestamp']
 
     return dates
 
 def map_user_to_uri(user, lang):
+    """Map Wikipedia contributor/user from a username to a URI."""
     return 'https://%s.wikipedia.org/wiki/User:%s' % (lang, user.replace(' ', '_'))
 
 def obtain_contributors(titles, language):
+    """Obtain contributors for a set of Wikipedia titles."""
     title_filter='|'.join(titles)
     contributors={}
     params={
@@ -39,14 +42,13 @@ def obtain_contributors(titles, language):
     json_response=r.json()
     for page_id, page_info in json_response['query']['pages'].items():
         c=[]
-        print(page_info)
         for contributor in page_info['contributors']:
             c.append(map_user_to_uri(contributor['name'], language))
         contributors[page_info['title']]=c
     return contributors
 
 def obtain_wiki_page_titles(wdt_ids, languages):
-
+    """Obtain Wikipedia page titles from a set of Wikidata IDs."""
     ids_filter='|'.join(wdt_ids)
     languages_filter='|'.join(list(map(lambda x: x + 'wiki', languages)))
     params={
@@ -59,8 +61,6 @@ def obtain_wiki_page_titles(wdt_ids, languages):
     url='https://www.wikidata.org/w/api.php?'
     r=requests.get(url, params=params)
     j=r.json()
-    # f = urllib.request.urlopen(url)
-    # j=json.loads(f.read().decode('utf-8'))
     results_batch={}
     if 'entities' in j.keys():
         for id, id_data in j['entities'].items():
@@ -74,6 +74,7 @@ def obtain_wiki_page_titles(wdt_ids, languages):
     return results_batch
 
 def filter_langlinks(a_list, other_l):
+    """Filter the langlinks based on a list of languages of interest."""
     a_dict={}
     for elem in a_list:
         lang=elem['lang']
@@ -82,6 +83,7 @@ def filter_langlinks(a_list, other_l):
     return a_dict
 
 def adapt_extlinks(a_list):
+    """Simplify the structure of the extlinks dictionary."""
     out_list=[]
     for element in a_list:
         for k,v in element.items():
@@ -90,6 +92,7 @@ def adapt_extlinks(a_list):
     
 
 def obtain_wiki_page_info(title, lang, props, extract_text=True, other_languages=set()):
+    """Obtain information for a Wikipedia page title. The requested pieces of information are defined in the `props` parameter."""
     params={
             'format': 'json',
             'action': 'query',
@@ -100,7 +103,11 @@ def obtain_wiki_page_info(title, lang, props, extract_text=True, other_languages
             'exlimit': 1
             }
     url='https://%s.wikipedia.org/w/api.php?' % lang
-    r=requests.get(url, params=params)
+    try:
+        r=requests.get(url, params=params)
+    except:
+        print('Error with wikipage', url, params)
+        return {}
     j=r.json()
     data={}
     for page_id, page_info in j['query']['pages'].items():
@@ -117,7 +124,3 @@ def obtain_wiki_page_info(title, lang, props, extract_text=True, other_languages
                     data[p]=page_info[p]
     return data
 
-
-#d=obtain_date_of_creation(title, lang)
-#c=obtain_contributors(title, lang)
-#print(c, d)
