@@ -29,7 +29,8 @@ def compute_stats_for_all_combinations(combinations, pilot):
         numlang_dist, \
         extra_info_dist_agg,\
         count_occurrences,\
-        count_values = collection.compute_stats()
+        count_values, \
+        all_info = collection.compute_stats()
 
         print()
         print('*'*50)
@@ -49,6 +50,8 @@ def compute_stats_for_all_combinations(combinations, pilot):
         print('Distribution of properties', extra_info_dist_agg)
         print('Count of occurrences', count_occurrences)
         print('Count of values', count_values)
+
+        print('Incidents with full info', all_info)
     return
     
 if __name__ == '__main__':

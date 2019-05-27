@@ -41,13 +41,21 @@ class IncidentCollection:
 
         found_bys=[]
 
+        all_info=0
+
+        with open('wdt_fn_mappings/change_of_leadership.json', 'rb') as r:
+            wdt_fn_mappings_COL=json.load(r)
+        all_frame_elements=set(wdt_fn_mappings_COL.keys())
+
         num_incidents=len(self.incidents)
         for incident in self.incidents:
             langs=set()
+            print('incident ID: ', incident.wdt_id)
             for ref_text in incident.reference_texts:
                 if ref_text.language=='ja':
                     continue
                 if ref_text.wiki_content:
+                    print(ref_text.name, ', FOUND BY: ', ref_text.found_by)
                     num_with_wikipedia+=1
                 if len(ref_text.sources):
                     num_with_sources+=1
@@ -60,12 +68,13 @@ class IncidentCollection:
             sorted_langs=tuple(sorted(list(langs)))
             num_languages[sorted_langs]+=1
 
-            if len(incident.reference_texts)==3:
-                print(incident.wdt_id)
             num_wikis.append(len(incident.reference_texts))
             if 'sem:hasPlace' in incident.extra_info.keys():
                 for country in incident.extra_info['sem:hasPlace']:
                     countries.append(country)
+            extra_info_keys=set(incident.extra_info.keys())
+            if extra_info_keys==all_frame_elements:
+                all_info+=1
             for p, v in incident.extra_info.items():
                 if isinstance(v, set):
                     for value in v:
@@ -86,7 +95,7 @@ class IncidentCollection:
         for k, v in extra_info_dists.items():
             extra_info_dist_agg[k]=Counter(v).most_common(10)
 
-        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, num_with_links, avg_sources, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences, count_values
+        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, num_with_links, avg_sources, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences, count_values, all_info
     
     def serialize(self, filename=None):
         """
