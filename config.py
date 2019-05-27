@@ -1,3 +1,4 @@
+pilot=True
 incident_types=['election']
 #languages_list=[['nl']]
 languages_list=[['nl', 'it', 'ja', 'en']]

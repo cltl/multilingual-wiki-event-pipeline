@@ -33,6 +33,7 @@ def get_additional_reference_texts(ref_texts, found_names, found_languages):
             if 'extract' in page_info.keys():
                 ref_text = classes.ReferenceText(
                     wiki_content=page_info['extract'],
+                    text_and_links=page_info['wikitext'],
                     langlinks=page_info['langlinks'],
                     name=page,
                     language=language,
@@ -128,6 +129,8 @@ def obtain_reference_texts(incidents):
                     ref_text.sources=page_info['extlinks']
                 if 'langlinks' in page_info.keys():
                     ref_text.langlinks=page_info['langlinks']
+                if 'wikitext' in page_info.keys():
+                    ref_text.text_and_links=page_info['wikitext']
 		#ref_text.wiki_uri=uri
                 new_reference_texts.append(ref_text)
                 found_languages.append(ref_text.language)

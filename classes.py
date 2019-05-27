@@ -29,7 +29,8 @@ class IncidentCollection:
 
         num_with_sources=0
         sum_sources=0
-        
+        num_with_links=0       
+ 
         countries=[]
         num_wikis=[]
         num_languages=defaultdict(int)
@@ -44,11 +45,15 @@ class IncidentCollection:
         for incident in self.incidents:
             langs=set()
             for ref_text in incident.reference_texts:
+                if ref_text.language=='ja':
+                    continue
                 if ref_text.wiki_content:
                     num_with_wikipedia+=1
                 if len(ref_text.sources):
                     num_with_sources+=1
                     sum_sources+=len(ref_text.sources)
+                if len(ref_text.text_and_links):
+                    num_with_links+=1
                 found_bys.append('|'.join(ref_text.found_by))
 
                 langs.add(ref_text.language)
@@ -81,7 +86,7 @@ class IncidentCollection:
         for k, v in extra_info_dists.items():
             extra_info_dist_agg[k]=Counter(v).most_common(10)
 
-        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, avg_sources, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences, count_values
+        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, num_with_links, avg_sources, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences, count_values
     
     def serialize(self, filename=None):
         """
@@ -152,7 +157,6 @@ class IncidentCollection:
                         else:
                             if v.endswith('-01-01T00:00:00Z'):
                                 vyear=v[:4]
-                                print(vyear)
                                 an_obj=Literal(vyear, datatype=XSD.gYear)
                             else:
                                 an_obj=Literal(v,datatype=XSD.date)
@@ -201,6 +205,7 @@ class ReferenceText:
                 creation_date='',
                 authors=[],
                 sources='',
+                text_and_links='',
                 langlinks=[],
                 found_by=''):
         self.name=name
@@ -211,5 +216,6 @@ class ReferenceText:
         self.creation_date=creation_date
         self.authors=authors
         self.sources=sources
+        self.text_and_links=text_and_links
         self.langlinks=langlinks
         self.found_by=found_by

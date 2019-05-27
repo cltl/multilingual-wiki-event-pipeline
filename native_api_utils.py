@@ -90,37 +90,73 @@ def adapt_extlinks(a_list):
             out_list.append(v)
     return out_list
     
-
-def obtain_wiki_page_info(title, lang, props, extract_text=True, other_languages=set()):
-    """Obtain information for a Wikipedia page title. The requested pieces of information are defined in the `props` parameter."""
-    params={
-            'format': 'json',
-            'action': 'query',
-            'prop': '|'.join(props),
-            'explaintext': extract_text,
-            'titles': title,
-            'redirects': True,
-            'exlimit': 1
-            }
-    url='https://%s.wikipedia.org/w/api.php?' % lang
+def obtain_results_from_api(url, params):
     try:
         r=requests.get(url, params=params)
     except:
         print('Error with wikipage', url, params)
         return {}
     j=r.json()
+    if 'batchcomplete' not in j.keys() and 'parse' not in j.keys():
+        print(r.request.url)
+    return j
+
+def obtain_wiki_page_info(title, lang, props, extract_text=True, other_languages=set()):
+    """Obtain information for a Wikipedia page title. The requested pieces of information are defined in the `props` parameter."""
+    params_extracts={
+            'format': 'json',
+            'action': 'query',
+            'prop': 'extracts',
+            'explaintext': extract_text,
+            'titles': title,
+            'redirects': True,
+            'exlimit': 1,
+            }
+    params_extlinks={
+            'format': 'json',
+            'action': 'query',
+            'prop': 'extlinks',
+            'titles': title,
+            'redirects': True,
+            'ellimit': 500
+            }
+    params_langlinks={
+            'format': 'json',
+            'action': 'query',
+            'prop': 'langlinks',
+            'titles': title,
+            'redirects': True,
+            'lllimit': 500
+            }
+    params_wikitext={
+            'format': 'json',
+            'action': 'parse',
+            'prop': 'wikitext',
+            'page': title,
+            'section': 0
+    }
+    url='https://%s.wikipedia.org/w/api.php?' % lang
+
+    j=obtain_results_from_api(url, params_extracts)
     data={}
     for page_id, page_info in j['query']['pages'].items():
         if page_id=='-1': continue
         data['title']=page_info['title']
         data['extract']=page_info['extract']
-        for p in props:
-            if p in page_info.keys():
-                if p=='langlinks':
-                    data[p]=filter_langlinks(page_info[p], other_languages)
-                elif p=='extlinks':
-                    data[p]=adapt_extlinks(page_info[p])
-                else:
-                    data[p]=page_info[p]
+        j_el=obtain_results_from_api(url, params_extlinks)
+        if page_id in j_el['query']['pages']:
+            if 'extlinks' in j_el['query']['pages'][page_id]:
+                els=adapt_extlinks(j_el['query']['pages'][page_id]['extlinks'])
+                data['extlinks']=els
+
+        j_ll=obtain_results_from_api(url, params_langlinks)
+        if page_id in j_ll['query']['pages']:
+            if 'langlinks' in j_ll['query']['pages'][page_id]:
+                lls=filter_langlinks(j_ll['query']['pages'][page_id]['langlinks'], other_languages)
+                data['langlinks']=lls
+    
+        j_wt=obtain_results_from_api(url, params_wikitext)
+        if int(page_id)==int(j_wt['parse']['pageid']):
+            data['wikitext']=j_wt['parse']['wikitext']
     return data
 

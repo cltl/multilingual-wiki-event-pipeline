@@ -3,13 +3,15 @@ import pickle
 import config
 import utils
 
-def compute_stats_for_all_combinations(combinations):
+def compute_stats_for_all_combinations(combinations, pilot):
     """
     Compute statistics for all combinations of incident type and languages.
     """
     
     for incident_type, languages in combinations:
        
+        if pilot:
+            languages.append('pilot')
         filename=utils.make_output_filename(incident_type, 
                                             languages)
 
@@ -20,6 +22,7 @@ def compute_stats_for_all_combinations(combinations):
         num_with_wikipedia, \
         wiki_from_which_method, \
         num_with_sources, \
+        num_with_links, \
         avg_sources, \
         countries_dist, \
         numwiki_dist, \
@@ -36,8 +39,10 @@ def compute_stats_for_all_combinations(combinations):
         print('With wiki content:', num_with_wikipedia)
         print('Found by:', wiki_from_which_method)
         
-        print('With sources:', num_with_sources)
+        print('Wikipages with sources:', num_with_sources)
         print('Avg sources:', avg_sources)
+        print('Wikipages with wikitext (incl. links)', num_with_links)
+
         print('Countries distribution:\n', countries_dist)
         print('Number of Wikipages per incident:\n', numwiki_dist)
         print('Number of languages per incident:\n', numlang_dist)
@@ -50,8 +55,9 @@ if __name__ == '__main__':
 
     incident_types=config.incident_types
     languages_list=config.languages_list
+    pilot=config.pilot
 
     cartesian_product=[(x, y) for x in incident_types for y in languages_list]
 
-    compute_stats_for_all_combinations(cartesian_product)
+    compute_stats_for_all_combinations(cartesian_product, pilot)
 
