@@ -32,6 +32,9 @@ def compute_stats_for_all_combinations(combinations, pilot):
         count_values, \
         all_info = collection.compute_stats()
 
+        example_incident=collection.incidents.pop()
+        print(example_incident.extra_info)
+
         print()
         print('*'*50)
         print('Incident type:', incident_type, '; Languages:', '-'.join(languages))
