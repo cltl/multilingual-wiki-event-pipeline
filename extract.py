@@ -75,8 +75,10 @@ def retrieve_incidents_per_type(type_label, limit=10):
     """
     Given an event type identifier, retrieve incidents that belong to this type.
     """
+    eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
+    jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[type_label]
 
-    with open('wdt_fn_mappings/change_of_leadership.json', 'rb') as f:
+    with open(jsonfilename, 'rb') as f:
         wdt_fn_mappings_COL=json.load(f)
 
     incidents=[]
@@ -117,8 +119,6 @@ def obtain_reference_texts(incidents):
     new_incidents=[]
     for incident in tqdm(incidents):
         new_reference_texts=[]
-        found_names=[]
-        found_languages=[]
         for ref_text in incident.reference_texts:
             props=['extracts', 'langlinks', 'extlinks']
             other_languages=set(languages)-set([ref_text.language])
@@ -133,8 +133,9 @@ def obtain_reference_texts(incidents):
                     ref_text.text_and_links=page_info['wikitext']
 		#ref_text.wiki_uri=uri
                 new_reference_texts.append(ref_text)
-                found_languages.append(ref_text.language)
-                found_names.append(ref_text.name)
+        new_reference_texts=utils.deduplicate_ref_texts(new_reference_texts)
+        found_languages, found_names=utils.get_languages_and_names(new_reference_texts)
+
         if len(new_reference_texts): # if there are reference texts with text, try to get more data by using the langlinks info we have stored.
             new_reference_texts=get_additional_reference_texts(new_reference_texts, found_names, found_languages)
             incident.reference_texts=new_reference_texts

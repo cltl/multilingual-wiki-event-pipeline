@@ -6,24 +6,16 @@ import classes
 import config
 import utils
 
+eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
 
-def deduplicate_ref_texts(ref_texts):
-    new_ref_texts=[]
-    for rt in ref_texts:
-        to_keep=True
-        for other_rt in ref_texts:
-            if rt.language==other_rt.language and rt.name<other_rt.name:
-                if rt.wiki_content==other_rt.wiki_content:
-                    to_keep=False
-                    break
-        if to_keep:
-            new_ref_texts.append(rt)
-    return new_ref_texts
-     
-def remove_incidents_with_missing_FEs(incidents):
+def remove_incidents_with_missing_FEs(incidents, event_type):
     new_incidents=[]
-    with open('wdt_fn_mappings/change_of_leadership.json', 'rb') as r:
-        wdt_fn_mappings_COL=json.load(r)
+
+    jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[event_type]
+
+    with open(jsonfilename, 'rb') as f:
+        wdt_fn_mappings_COL=json.load(f)
+
     all_frame_elements=set(wdt_fn_mappings_COL.keys())
 
     for incident in incidents:
@@ -47,10 +39,10 @@ def check_ref_text(rt, min_chars=100, max_chars=10000):
 def create_pilot_data(data):
     pilot_incidents=set()
 
-    data.incidents=remove_incidents_with_missing_FEs(data.incidents)
+    data.incidents=remove_incidents_with_missing_FEs(data.incidents, data.incident_type)
     for incident in data.incidents:
         langs=set()
-        incident.reference_texts=deduplicate_ref_texts(incident.reference_texts)
+        incident.reference_texts=utils.deduplicate_ref_texts(incident.reference_texts)
         new_ref_texts=[]
         for ref_text in incident.reference_texts:
             ref_text.wiki_content=ref_text.wiki_content.split('==')[0].strip() # first section

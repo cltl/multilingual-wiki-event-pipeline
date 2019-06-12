@@ -34,24 +34,27 @@ def construct_and_run_query(type_label, languages, more_props, limit):
         optional_clauses_str+=clause
 
     opt_vars=[]
+    opt_var_labels=[]
     optional_more_info=""
     for fn_role, wdt_prop_paths in more_props.items():
         for a_path in wdt_prop_paths:
             var='?' + a_path.replace('wdt:', '').replace('/', '_')       # fn_role.split('@')[-1]
             if var not in opt_vars:
+                label_var=f"{var}Label"
                 clause=f"""OPTIONAL {{ \n\t?incident {a_path} {var} }}\n\t"""
                 optional_more_info+=clause
                 opt_vars.append(var)
+                opt_var_labels.append(var + 'Label')
 
     query = """
-    SELECT DISTINCT ?incident ?incidentLabel %s %s WHERE {
+    SELECT DISTINCT ?incident ?incidentLabel %s %s %s WHERE {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
       ?type_id rdfs:label "%s"@en .
       ?incident wdt:P31*/wdt:P279* ?type_id .
       %s
       %s
     } limit %d
-    """ % (return_langs, ' '.join(opt_vars), type_label, optional_clauses_str, optional_more_info, limit)
+    """ % (return_langs, ' '.join(opt_vars), ' '.join(opt_var_labels), type_label, optional_clauses_str, optional_more_info, limit)
 
     print(query)
 
@@ -93,6 +96,30 @@ def index_results_by_id(raw_results, lang2var, extra_info):
             for a_path in wdt_prop_paths:
                 var=a_path.replace('wdt:', '').replace('/', '_')       # fn_role.split('@')[-1] 
                 if var in entry.keys() and entry[var]['value']:
-                    current_result['extra_info'][predicate].add(entry[var]['value'])
+                    complex_value='%s | %s' % (entry[var]['value'], entry[var + 'Label']['value'])
+                    current_result['extra_info'][predicate].add(complex_value)
         indexed_results[wdt_id]=current_result
     return indexed_results
+
+def get_languages_and_names(ref_texts):
+    """Obtain list of languages and names in our reference texts."""
+    found_names=[]
+    found_languages=[]
+    for ref_text in ref_texts:
+        found_languages.append(ref_text.language)
+        found_names.append(ref_text.name)
+    return found_languages, found_names
+
+def deduplicate_ref_texts(ref_texts):
+    """Deduplicate reference texts by removing those that have the same content."""
+    new_ref_texts=[]
+    for rt in ref_texts:
+        to_keep=True
+        for other_rt in ref_texts:
+            if rt.language==other_rt.language and rt.name<other_rt.name:
+                if rt.wiki_content==other_rt.wiki_content:
+                    to_keep=False
+                    break
+        if to_keep:
+            new_ref_texts.append(rt)
+    return new_ref_texts

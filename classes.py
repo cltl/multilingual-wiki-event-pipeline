@@ -5,6 +5,9 @@ from rdflib.namespace import RDF, RDFS
 from rdflib import Graph
 from rdflib import URIRef, BNode, Literal, XSD
 
+
+eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
+
 class IncidentCollection:
     
     def __init__(self,
@@ -43,8 +46,11 @@ class IncidentCollection:
 
         all_info=0
 
-        with open('wdt_fn_mappings/change_of_leadership.json', 'rb') as r:
-            wdt_fn_mappings_COL=json.load(r)
+        jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[self.incident_type]
+
+        with open(jsonfilename, 'rb') as f:
+            wdt_fn_mappings_COL=json.load(f)
+
         all_frame_elements=set(wdt_fn_mappings_COL.keys())
 
         num_incidents=len(self.incidents)
@@ -101,9 +107,11 @@ class IncidentCollection:
         """
         Serialize a collection of incidents to a .ttl file.
         """
-    
-        with open('wdt_fn_mappings/change_of_leadership.json', 'rb') as r:
-            wdt_fn_mappings_COL=json.load(r)     
+
+        jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[self.incident_type]
+
+        with open(jsonfilename, 'rb') as f:
+            wdt_fn_mappings_COL=json.load(f)
 
         g = Graph()
         
