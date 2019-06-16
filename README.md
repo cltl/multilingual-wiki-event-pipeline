@@ -6,10 +6,26 @@ This project aims to extract information about incidents of a particular type. T
 ## Authors
 
 * **Filip Ilievski** (f.ilievski@vu.nl)
+* **Marten Postma** (m.c.postma@vu.nl)
 
 ## License
 
 This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details
+
+#### Python modules (Python 3.7 is used)
+A number of external modules need to be installed, which are listed in **requirements.txt**.
+Depending on how you installed Python, you can probably install the requirements using one of following commands:
+```bash
+pip install -r requirements.txt
+```
+
+#### Resources
+A number of resources need to be downloaded. This can be done calling:
+```bash
+bash install.sh
+```
+
+In addition, please download the spaCy for the languages that will be used. Some [here](https://spacy.io/usage/models) for more information about how to downloade them.
 
 ### Steps
 
