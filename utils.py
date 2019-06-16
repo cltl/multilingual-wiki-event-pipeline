@@ -60,8 +60,10 @@ def construct_and_run_query(type_label, languages, more_props, limit):
 
     r = requests.get(wdt_sparql_url, 
                      params = {'format': 'json', 'query': query})
-    response = json.loads(r.text)
-    
+    res_text=r.text
+    print(res_text)
+    response = json.loads(res_text)
+#    response = r.json()
     results=response['results']['bindings']
 
     results_by_id=index_results_by_id(results, lang2var, more_props)
