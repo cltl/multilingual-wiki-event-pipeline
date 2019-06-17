@@ -8,18 +8,20 @@ Options:
     --input_folder=<input_folder> all files with *bin will be used
     --output_folder=<output_folder> the output folder
     --spacy_models=<spacy_models> models to use, e.g., "EN-en;NL-nl_core_news_sm;IT:it_core_news_sm"
-    --layers=<layers> NAF layers to add, e.g, "raw-text"
+    --layers=<layers> NAF layers to add, e.g, "raw-text-terms"
     --readme_path=<readme_path> path to README
 
 Example:
     python create_pilot_data.py --input_folder="bin" --output_folder="pilot_data" \
-    --spacy_models="en-en;nl-nl_core_news_sm;it-it_core_news_sm" --layers="raw-text" --readme_path="wdt_fn_mappings/PILOT_README.md"
+    --spacy_models="en-en;nl-nl_core_news_sm;it-it_core_news_sm" --layers="raw-text-terms" --readme_path="wdt_fn_mappings/PILOT_README.md"
 """
 from docopt import docopt
 from glob import glob
 import pickle
 import json
 import shutil
+import datetime
+import os
 from path import Path
 import spacy
 import spacy_to_naf
@@ -51,6 +53,11 @@ for model_info in arguments['--spacy_models'].split(';'):
 incident_id2incident_info = {}
 
 for bin_file in glob(f'{input_folder}/*.bin'):
+
+    # use date of file for dct of reference texts
+    file_info = os.stat(bin_file)
+    dct = datetime.datetime.fromtimestamp(file_info.st_ctime)
+
     incident_collection = pickle.load(open(bin_file, 'rb'))
 
     for incident in incident_collection.incidents:
@@ -68,7 +75,10 @@ for bin_file in glob(f'{input_folder}/*.bin'):
             if ref_text_obj.language in models:
                 root = spacy_to_naf.text_to_NAF(text=ref_text_obj.wiki_content,
                                                 nlp=models[ref_text_obj.language],
+                                                dct=dct,
                                                 layers=layers,
+                                                title=ref_text_obj.name,
+                                                uri=ref_text_obj.wiki_uri,
                                                 language=ref_text_obj.language)
 
                 naf_output_path = naf_folder / f'{ref_text_obj.name}.naf'
