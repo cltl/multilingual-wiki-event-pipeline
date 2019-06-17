@@ -23,7 +23,8 @@ def compute_stats_for_all_combinations(combinations, pilot):
         wiki_from_which_method, \
         num_with_sources, \
         num_with_links, \
-        avg_sources, \
+        desc_sources, \
+        cntr_sources, \
         countries_dist, \
         numwiki_dist, \
         numlang_dist, \
@@ -44,7 +45,8 @@ def compute_stats_for_all_combinations(combinations, pilot):
         print('Found by:', wiki_from_which_method)
         
         print('Wikipages with sources:', num_with_sources)
-        print('Avg sources:', avg_sources)
+        print('Desc sources:', desc_sources)
+        print('Distribution:', cntr_sources)
         print('Wikipages with wikitext (incl. links)', num_with_links)
 
         print('Countries distribution:\n', countries_dist)

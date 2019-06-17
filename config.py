@@ -1,4 +1,4 @@
-pilot=False
-#incident_types=['election']
-incident_types=['murder']
-languages_list=[['nl', 'it', 'en']]
+pilot=True #False
+incident_types=['election']
+#incident_types=['murder']
+languages_list=[['nl', 'it', 'ja', 'en']]
