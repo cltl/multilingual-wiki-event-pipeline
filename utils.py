@@ -17,6 +17,29 @@ def split_in_batches(a_list, batch_size=500):
     for i in range(0, len(a_list), batch_size):
         yield a_list[i:i + batch_size]
 
+def obtain_label(wd_id):
+    """
+    Obtain an English label for a property of Wikidata.
+    """
+    query = """
+    SELECT ?label WHERE {
+    wd:%s rdfs:label ?label . 
+    FILTER(LANG(?label) = "" || LANGMATCHES(LANG(?label), "en"))
+    }
+    LIMIT 1
+    """ % wd_id
+    
+    r = requests.get(wdt_sparql_url,
+                     params = {'format': 'json', 'query': query})
+    res_text=r.text
+    response = json.loads(res_text)
+#    response = r.json()
+    results=response['results']['bindings']
+    if not len(results):
+        return ''
+    the_label=results[0]['label']['value']
+    return the_label
+
 def construct_and_run_query(type_label, languages, more_props, limit):
     """
     Construct a wikidata query to obtain all events of a specific type with their structured data, then run this query.

@@ -1,3 +1,4 @@
+import time
 import pickle
 import json
 import re
@@ -52,6 +53,19 @@ def create_pilot_data(data):
         incident.reference_texts=new_ref_texts
         if 'en' in langs and 'it' in langs and 'nl' in langs and len(new_ref_texts)==3:
             pilot_incidents.add(incident)
+        for p, v_set in incident.extra_info.items():
+            new_v_set=set()
+            for v in v_set:
+                if '|' not in v:
+                    print('no label for', v)
+                    q_id=v.split('/')[-1]
+                    label=utils.obtain_label(q_id)
+                    v+=' | ' + label
+                    new_v_set.add(v)
+                    time.sleep(1)
+                else:
+                    new_v_set.add(v)
+            incident.extra_info[p]=new_v_set
     print(len(pilot_incidents))
     return pilot_incidents
 
