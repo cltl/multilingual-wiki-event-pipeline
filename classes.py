@@ -4,7 +4,8 @@ from rdflib.namespace import Namespace
 from rdflib.namespace import RDF, RDFS
 from rdflib import Graph
 from rdflib import URIRef, BNode, Literal, XSD
-
+from scipy import stats
+import numpy as np
 
 eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
 
@@ -31,7 +32,7 @@ class IncidentCollection:
         wiki_from_sparql_only=0
 
         num_with_sources=0
-        sum_sources=0
+        num_sources=[]
         num_with_links=0       
  
         countries=[]
@@ -65,7 +66,7 @@ class IncidentCollection:
                     num_with_wikipedia+=1
                 if len(ref_text.sources):
                     num_with_sources+=1
-                    sum_sources+=len(ref_text.sources)
+                num_sources.append(len(ref_text.sources))
                 if len(ref_text.text_and_links):
                     num_with_links+=1
                 found_bys.append('|'.join(ref_text.found_by))
@@ -91,9 +92,11 @@ class IncidentCollection:
                     count_values[p]+=1
                 count_occurences[p]+=1
         if num_with_sources: 
-            avg_sources=sum_sources/num_with_sources
+            desc_sources=stats.describe(np.array(num_sources))
+            cntr_sources=Counter(num_sources)
         else:
-            avg_sources=0
+            cntr_sources=None
+            desc_sources=None
         countries_dist=Counter(countries).most_common(10)
         numwiki_dist=Counter(num_wikis)
         
@@ -101,7 +104,7 @@ class IncidentCollection:
         for k, v in extra_info_dists.items():
             extra_info_dist_agg[k]=Counter(v).most_common(10)
 
-        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, num_with_links, avg_sources, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences, count_values, all_info
+        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, num_with_links, desc_sources, cntr_sources, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences, count_values, all_info
     
     def serialize(self, filename=None):
         """
