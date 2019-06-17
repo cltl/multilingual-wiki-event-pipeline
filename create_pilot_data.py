@@ -2,17 +2,18 @@
 Create folder with pilot data
 
 Usage:
-  create_pilot_data.py --input_folder=<input_folder> --output_folder=<output_folder> --spacy_models=<spacy_models> --layers=<layers>
+  create_pilot_data.py --input_folder=<input_folder> --output_folder=<output_folder> --spacy_models=<spacy_models> --layers=<layers> --readme_path=<readme_path>
 
 Options:
     --input_folder=<input_folder> all files with *bin will be used
     --output_folder=<output_folder> the output folder
     --spacy_models=<spacy_models> models to use, e.g., "EN-en;NL-nl_core_news_sm;IT:it_core_news_sm"
     --layers=<layers> NAF layers to add, e.g, "raw-text"
+    --readme_path=<readme_path> path to README
 
 Example:
     python create_pilot_data.py --input_folder="bin" --output_folder="pilot_data" \
-    --spacy_models="en-en;nl-nl_core_news_sm;it-it_core_news_sm" --layers="raw-text"
+    --spacy_models="en-en;nl-nl_core_news_sm;it-it_core_news_sm" --layers="raw-text" --readme_path="wdt_fn_mappings/PILOT_README.md"
 """
 from docopt import docopt
 from glob import glob
@@ -86,4 +87,14 @@ for bin_file in glob(f'{input_folder}/*.bin'):
 with open(str(main_json_output_path), 'w') as outfile:
     print(f'saved to {main_json_output_path}')
     print(f'number of incidents: {len(incident_id2incident_info)}')
+    print('spaCy language models used:')
+    for lang, nlp in models.items():
+        print(f'spaCy-{nlp.meta["version"]}_language-{lang}_model-{nlp.meta["name"]}')
     json.dump(incident_id2incident_info, outfile, indent=4, sort_keys=True)
+
+with open(arguments['--readme_path']) as infile:
+    readme_text = infile.read()
+
+readme_path = output_folder / 'README.md'
+with open(str(readme_path), 'w') as outfile:
+    outfile.write(readme_text)
