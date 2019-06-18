@@ -160,3 +160,21 @@ def obtain_wiki_page_info(title, lang, props, extract_text=True, other_languages
             data['wikitext']=j_wt['parse']['wikitext']
     return data
 
+def get_uri_from_title(name, lang):
+
+    URL = "https://%s.wikipedia.org/w/api.php" % lang
+
+    PARAMS = {
+    "action": "query",
+    "format": "json",
+    "titles": name,
+    "prop": "info",
+    "inprop": "url|talkid"
+    }
+
+    j=obtain_results_from_api(URL, PARAMS)
+    for page_id, page_info in j['query']['pages'].items():
+        if page_id=='-1': continue
+        return page_info['canonicalurl']
+    return ''
+

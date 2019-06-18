@@ -61,6 +61,7 @@ class IncidentCollection:
             for ref_text in incident.reference_texts:
                 if ref_text.language=='ja':
                     continue
+                print('URI', ref_text.wiki_uri)
                 if ref_text.wiki_content:
                     print(ref_text.name, ', FOUND BY: ', ref_text.found_by)
                     num_with_wikipedia+=1

@@ -6,6 +6,7 @@ import re
 import classes
 import config
 import utils
+import native_api_utils as api
 
 eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
 
@@ -52,6 +53,10 @@ def create_pilot_data(data):
                 new_ref_texts.append(ref_text)
         incident.reference_texts=new_ref_texts
         if 'en' in langs and 'it' in langs and 'nl' in langs and len(new_ref_texts)==3:
+            for ref_text in incident.reference_texts:
+                if not ref_text.wiki_uri:
+                    ref_text.wiki_uri=api.get_uri_from_title(ref_text.name, ref_text.language)
+                    print(ref_text.name, ref_text.language, 'URI', ref_text.wiki_uri)
             pilot_incidents.add(incident)
             for p, v_set in incident.extra_info.items():
                 new_v_set=set()
