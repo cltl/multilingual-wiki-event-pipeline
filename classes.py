@@ -7,6 +7,8 @@ from rdflib import URIRef, BNode, Literal, XSD
 from scipy import stats
 import numpy as np
 
+import spacy_to_naf
+
 eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
 
 class IncidentCollection:
@@ -240,3 +242,32 @@ class ReferenceText:
         self.text_and_links=text_and_links
         self.langlinks=langlinks
         self.found_by=found_by
+
+    def process_spacy_and_convert_to_naf(self,
+                                         nlp,
+                                         dct, # in a next iteration, we can make this a class attribute
+                                         layers,
+                                         output_path=None):
+        """
+        process with spacy and convert to NAF
+
+        :param nlp: spacy language model
+        :param datetime.datetime dct: document creation time
+        :param set layers: layers to convert to NAF, e.g., {'raw', 'text', 'terms'}
+        :param output_path: if provided, NAF is saved to that file
+
+        :return: the root of the NAF XML object
+        """
+        root = spacy_to_naf.text_to_NAF(text=self.wiki_content,
+                                        nlp=nlp,
+                                        dct=dct,
+                                        layers=layers,
+                                        title=self.name,
+                                        uri=self.wiki_uri,
+                                        language=self.language)
+
+        if output_path is not None:
+            with open(output_path, 'w') as outfile:
+                outfile.write(spacy_to_naf.NAF_to_string(NAF=root))
+
+        return root

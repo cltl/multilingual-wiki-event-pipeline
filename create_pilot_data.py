@@ -2,18 +2,21 @@
 Create folder with pilot data
 
 Usage:
-  create_pilot_data.py --input_folder=<input_folder> --output_folder=<output_folder> --spacy_models=<spacy_models> --layers=<layers> --readme_path=<readme_path>
+  create_pilot_data.py --input_folder=<input_folder> --output_folder=<output_folder> --spacy_models=<spacy_models> --folder_secondary_texts=<folder_secondary_texts> --layers=<layers> --readme_path=<readme_path>
 
 Options:
     --input_folder=<input_folder> all files with *bin will be used
     --output_folder=<output_folder> the output folder
     --spacy_models=<spacy_models> models to use, e.g., "EN-en;NL-nl_core_news_sm;IT:it_core_news_sm"
+    --folder_secondary_texts=<folder_secondary_texts> folder with json with manually selected secondary reference texts (development/secondary_reference_texts.json)
     --layers=<layers> NAF layers to add, e.g, "raw-text-terms"
     --readme_path=<readme_path> path to README
 
 Example:
     python create_pilot_data.py --input_folder="bin" --output_folder="pilot_data" \
-    --spacy_models="en-en;nl-nl_core_news_sm;it-it_core_news_sm" --layers="raw-text-terms" --readme_path="wdt_fn_mappings/PILOT_README.md"
+    --spacy_models="en-en;nl-nl_core_news_sm;it-it_core_news_sm" \
+    --folder_secondary_texts="development" \
+    --layers="raw-text-terms" --readme_path="wdt_fn_mappings/PILOT_README.md"
 """
 from docopt import docopt
 from glob import glob
@@ -24,7 +27,8 @@ import datetime
 import os
 from path import Path
 import spacy
-import spacy_to_naf
+import datetime
+from classes import ReferenceText
 
 # load arguments
 arguments = docopt(__doc__)
@@ -42,6 +46,10 @@ output_folder.mkdir()
 naf_folder = output_folder / 'naf'
 naf_folder.mkdir()
 main_json_output_path = output_folder / 'incidents.json'
+
+secondary_texts_folder = Path(arguments['--folder_secondary_texts'])
+secondary_texts = json.load(open(str(secondary_texts_folder / 'secondary_reference_texts.json')))
+
 
 # load spaCy models
 models = {}
@@ -71,24 +79,47 @@ for bin_file in glob(f'{input_folder}/*.bin'):
                            }
         }
 
+        if incident.wdt_id in secondary_texts:
+            sec_ref_texts_info = secondary_texts[incident.wdt_id]
+            for sec_ref_text_info in sec_ref_texts_info:
+                path = secondary_texts_folder / 'secondary_reference_texts' / f'{sec_ref_text_info["title"]}.txt'
+                assert path.exists(), f'{path} does not exist'
+                with open(str(path)) as infile:
+                    raw = infile.read()
+
+                day, month, year = sec_ref_text_info['dct'].split('-')
+                date = datetime.date(int(year), int(month), int(day))
+
+                ref_text_obj = ReferenceText(wiki_uri=sec_ref_text_info['uri'],
+                                             name=sec_ref_text_info['title'],
+                                             language=sec_ref_text_info['language'],
+                                             wiki_content=raw,
+                                             creation_date=date)
+
+                incident.reference_texts.append(ref_text_obj)
+
+
         for ref_text_obj in incident.reference_texts:
             if ref_text_obj.language in models:
-                root = spacy_to_naf.text_to_NAF(text=ref_text_obj.wiki_content,
-                                                nlp=models[ref_text_obj.language],
-                                                dct=dct,
-                                                layers=layers,
-                                                title=ref_text_obj.name,
-                                                uri=ref_text_obj.wiki_uri,
-                                                language=ref_text_obj.language)
 
+                assert ref_text_obj.wiki_uri
                 naf_output_path = naf_folder / f'{ref_text_obj.name}.naf'
-                with open(str(naf_output_path), 'w') as outfile:
-                    outfile.write(spacy_to_naf.NAF_to_string(NAF=root))
 
+                if ref_text_obj.creation_date:
+                    dct_to_use = ref_text_obj.creation_date # actual publish date
+                else:
+                    dct_to_use = dct # date of crawling is used
+
+                root = ref_text_obj.process_spacy_and_convert_to_naf(models[ref_text_obj.language],
+                                                                     dct_to_use,
+                                                                     layers,
+                                                                     output_path=str(naf_output_path))
                 ref_text_info = {
                     'language' : ref_text_obj.language,
-                    'naf_basename' : f'{ref_text_obj.name}.naf',
+                    'title' : ref_text_obj.name,
+                    'url': ref_text_obj.wiki_uri,
                     'raw' : root.find('raw').text,
+                    'naf_basename' : f'{ref_text_obj.name}.naf',
                 }
 
                 info['reference_texts'][ref_text_obj.language].append(ref_text_info)
