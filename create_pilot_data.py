@@ -60,6 +60,11 @@ for model_info in arguments['--spacy_models'].split(';'):
 # processing
 incident_id2incident_info = {}
 
+event_type2likely_frames = {
+    "election" : ["Change_of_leadership", "Getting", "Appointing"],
+    "murder" : ["Killing", "Offenses", "Weapon", "Use_firearm"]
+}
+
 for bin_file in glob(f'{input_folder}/*.bin'):
 
     # use date of file for dct of reference texts
@@ -76,7 +81,8 @@ for bin_file in glob(f'{input_folder}/*.bin'):
             'event_type' : incident.incident_type,
             'meta_data' : {key: list(value)
                            for key, value in incident.extra_info.items()
-                           }
+                           },
+            "likely_frames" : event_type2likely_frames[incident.incident_type]
         }
 
         if incident.wdt_id in secondary_texts:
