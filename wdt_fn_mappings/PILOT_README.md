@@ -8,7 +8,7 @@ Also, for three incidents (Q1505420, Q28036573, and Q574195), we manually added 
 
 This folder contains two main components:
 * **incidents.json**: contains both structured and unstructured data per incident
-* **naf**: contains one NAF XML file per Wikipedia page
+* **naf**: contains one NAF XML file per (secondary) reference text
 
 ## Incidents.json
 
@@ -56,15 +56,11 @@ In the second type of mapping (found in **likely_frames**), we find the frames t
 Additional explanation:
 * WIKIDATA_EVENT_ID/event_type: we included two event types: elections and murders.
 
-## naf
+## [NAF](http://www.newsreader-project.eu/files/2013/01/techreport.pdf)
 
 We used [spaCy](https://spacy.io/) to perform sentence splitting and tokenization.
 After tokenization, we recreate the raw text, which ensures that we align the raw text with the tokenization. 
 
-We used the following spaCy version 2.0.0 models:
-* **English**: *core_web_sm*
-* **Italian**: *core_news_sm*
-* **Dutch**: *core_news_sm*
 
 ## Contact
 * Marten Postma (m.c.postma@vu.nl)

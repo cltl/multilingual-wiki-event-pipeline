@@ -7,14 +7,14 @@ Usage:
 Options:
     --input_folder=<input_folder> all files with *bin will be used
     --output_folder=<output_folder> the output folder
-    --spacy_models=<spacy_models> models to use, e.g., "EN-en;NL-nl_core_news_sm;IT:it_core_news_sm"
+    --spacy_models=<spacy_models> models to use, e.g., "en-en_core_web_sm;en-nl_core_news_sm;en-it_core_news_sm"
     --folder_secondary_texts=<folder_secondary_texts> folder with json with manually selected secondary reference texts (development/secondary_reference_texts.json)
     --layers=<layers> NAF layers to add, e.g, "raw-text-terms"
     --readme_path=<readme_path> path to README
 
 Example:
     python create_pilot_data.py --input_folder="bin" --output_folder="pilot_data" \
-    --spacy_models="en-en;nl-nl_core_news_sm;it-it_core_news_sm" \
+    --spacy_models="en-en_core_web_sm;nl-nl_core_news_sm;it-it_core_news_sm" \
     --folder_secondary_texts="development" \
     --layers="raw-text-terms" --readme_path="wdt_fn_mappings/PILOT_README.md"
 """

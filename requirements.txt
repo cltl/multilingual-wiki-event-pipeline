@@ -1,4 +1,4 @@
-rdflib
-requests
-spacy
-docopt
+rdflib==4.2.2
+requests==2.21.0
+spacy==2.1.4
+docopt==0.6.2

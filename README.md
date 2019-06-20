@@ -25,8 +25,6 @@ A number of resources need to be downloaded. This can be done calling:
 bash install.sh
 ```
 
-In addition, please download the spaCy for the languages that will be used. Some [here](https://spacy.io/usage/models) for more information about how to downloade them.
-
 ### Steps
 
 1. Get Wikidata incident IDs for an event type, like 'election'
