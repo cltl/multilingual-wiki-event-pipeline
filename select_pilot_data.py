@@ -28,10 +28,10 @@ def remove_incidents_with_missing_FEs(incidents, event_type):
 
 
 def check_ref_text(rt, min_chars=100, max_chars=10000):
-    num_chars=len(rt.wiki_content)
+    num_chars=len(rt.content)
     if num_chars<min_chars or num_chars>max_chars:
         return False
-        #print(rt.wiki_content)
+        #print(rt.content)
     #regex='.*[1-2]([0-9]){3}-[1-2]([0-9]){3}.*$'
     if re.match(r'.*[1-2]([0-9]){3}-[1-2]([0-9]){3}.*$', rt.name):
         print(rt.name)
@@ -47,16 +47,16 @@ def create_pilot_data(data):
         incident.reference_texts=utils.deduplicate_ref_texts(incident.reference_texts)
         new_ref_texts=[]
         for ref_text in incident.reference_texts:
-            ref_text.wiki_content=ref_text.wiki_content.split('==')[0].strip() # first section
+            ref_text.content=ref_text.content.split('==')[0].strip() # first section
             if check_ref_text(ref_text):
                 langs.add(ref_text.language)
                 new_ref_texts.append(ref_text)
         incident.reference_texts=new_ref_texts
         if 'en' in langs and 'it' in langs and 'nl' in langs and len(new_ref_texts)==3:
             for ref_text in incident.reference_texts:
-                if not ref_text.wiki_uri:
-                    ref_text.wiki_uri=api.get_uri_from_title(ref_text.name, ref_text.language)
-                    print(ref_text.name, ref_text.language, 'URI', ref_text.wiki_uri)
+                if not ref_text.uri:
+                    ref_text.uri=api.get_uri_from_title(ref_text.name, ref_text.language)
+                    print(ref_text.name, ref_text.language, 'URI', ref_text.uri)
             pilot_incidents.add(incident)
             for p, v_set in incident.extra_info.items():
                 new_v_set=set()

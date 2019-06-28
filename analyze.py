@@ -21,10 +21,10 @@ def compute_stats_for_all_combinations(combinations, pilot):
         num_incidents, \
         num_with_wikipedia, \
         wiki_from_which_method, \
-        num_with_sources, \
+        num_with_sec_rt, \
         num_with_links, \
-        desc_sources, \
-        cntr_sources, \
+        desc_sec_rt, \
+        cntr_sec_rt, \
         countries_dist, \
         numwiki_dist, \
         numlang_dist, \
@@ -44,9 +44,9 @@ def compute_stats_for_all_combinations(combinations, pilot):
         print('With wiki content:', num_with_wikipedia)
         print('Found by:', wiki_from_which_method)
         
-        print('Wikipages with sources:', num_with_sources)
-        print('Desc sources:', desc_sources)
-        print('Distribution:', cntr_sources)
+        print('Wikipages with secondary reference texts:', num_with_sec_rt)
+        print('Description of secondary reference texts:', desc_sec_rt)
+        print('Distribution of secondary reference texts:', cntr_sec_rt)
         print('Wikipages with wikitext (incl. links)', num_with_links)
 
         print('Countries distribution:\n', countries_dist)

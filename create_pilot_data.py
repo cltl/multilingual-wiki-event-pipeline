@@ -96,10 +96,10 @@ for bin_file in glob(f'{input_folder}/*.bin'):
                 day, month, year = sec_ref_text_info['dct'].split('-')
                 date = datetime.date(int(year), int(month), int(day))
 
-                ref_text_obj = ReferenceText(wiki_uri=sec_ref_text_info['uri'],
+                ref_text_obj = ReferenceText(uri=sec_ref_text_info['uri'],
                                              name=sec_ref_text_info['title'],
                                              language=sec_ref_text_info['language'],
-                                             wiki_content=raw,
+                                             content=raw,
                                              creation_date=date)
 
                 incident.reference_texts.append(ref_text_obj)
@@ -108,7 +108,7 @@ for bin_file in glob(f'{input_folder}/*.bin'):
         for ref_text_obj in incident.reference_texts:
             if ref_text_obj.language in models:
 
-                assert ref_text_obj.wiki_uri
+                assert ref_text_obj.uri
                 naf_output_path = naf_folder / f'{ref_text_obj.name}.naf'
 
                 if ref_text_obj.creation_date:
@@ -123,7 +123,7 @@ for bin_file in glob(f'{input_folder}/*.bin'):
                 ref_text_info = {
                     'language' : ref_text_obj.language,
                     'title' : ref_text_obj.name,
-                    'url': ref_text_obj.wiki_uri,
+                    'url': ref_text_obj.uri,
                     'raw' : root.find('raw').text,
                     'naf_basename' : f'{ref_text_obj.name}.naf',
                 }

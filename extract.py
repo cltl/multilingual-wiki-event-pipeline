@@ -14,7 +14,7 @@ languages_list=config.languages_list
 
 def get_additional_reference_texts(ref_texts, found_names, found_languages):
     """
-    Get more reference texts using the langlinks of the other API.
+    Get more reference texts using the Wiki langlinks of the other API.
     """
     search_for_languages=set(languages)-set(found_languages)
     if not search_for_languages:
@@ -22,8 +22,8 @@ def get_additional_reference_texts(ref_texts, found_names, found_languages):
 
     to_query=defaultdict(set)
     for ref_text in ref_texts:
-        langlinks=ref_text.langlinks
-        for lang, the_link in langlinks:
+        wiki_langlinks=ref_text.wiki_langlinks
+        for lang, the_link in wiki_langlinks:
             if lang in search_for_languages:
                 to_query[lang].add(the_link)
     props=['extracts', 'langlinks', 'extlinks']
@@ -32,17 +32,17 @@ def get_additional_reference_texts(ref_texts, found_names, found_languages):
             page_info=native_api_utils.obtain_wiki_page_info(page, language, props)
             if 'extract' in page_info.keys():
                 ref_text = classes.ReferenceText(
-                    wiki_content=page_info['extract'],
-                    text_and_links=page_info['wikitext'],
-                    langlinks=page_info['langlinks'],
+                    content=page_info['extract'],
+                    wiki_text_and_links=page_info['wikitext'],
+                    wiki_langlinks=page_info['langlinks'],
                     name=page,
                     language=language,
                     found_by=['langlinks']
                 )
                 if 'extlinks' in page_info.keys():
-                    ref_text.sources=page_info['extlinks']
+                    ref_text.secondary_ref_texts=page_info['extlinks']
                 if 'langlinks' in page_info.keys():
-                    ref.text.langlinks=page_info['langlinks']
+                    ref.text.wiki_langlinks=page_info['langlinks']
                 ref_texts.append(ref_text)
     return ref_texts
 
@@ -115,7 +115,7 @@ def retrieve_incidents_per_type(type_label, limit=10):
     return incidents
 
 def obtain_reference_texts(incidents):
-    print('### 3. ### Retrieve reference text information from the wikipedia API + obtain extra documents through langlinks')
+    print('### 3. ### Retrieve reference text information from the wikipedia API + obtain extra documents through Wiki langlinks')
     new_incidents=[]
     for incident in tqdm(incidents):
         new_reference_texts=[]
@@ -124,19 +124,19 @@ def obtain_reference_texts(incidents):
             other_languages=set(languages)-set([ref_text.language])
             page_info=native_api_utils.obtain_wiki_page_info(ref_text.name, ref_text.language, props, other_languages=other_languages)
             if 'extract' in page_info.keys():
-                ref_text.wiki_content=page_info['extract']
+                ref_text.content=page_info['extract']
                 if 'extlinks' in page_info.keys():
-                    ref_text.sources=page_info['extlinks']
+                    ref_text.secondary_ref_texts=page_info['extlinks']
                 if 'langlinks' in page_info.keys():
-                    ref_text.langlinks=page_info['langlinks']
+                    ref_text.wiki_langlinks=page_info['langlinks']
                 if 'wikitext' in page_info.keys():
-                    ref_text.text_and_links=page_info['wikitext']
-		#ref_text.wiki_uri=uri
+                    ref_text.wiki_text_and_links=page_info['wikitext']
+		#ref_text.uri=uri
                 new_reference_texts.append(ref_text)
         new_reference_texts=utils.deduplicate_ref_texts(new_reference_texts)
         found_languages, found_names=utils.get_languages_and_names(new_reference_texts)
 
-        if len(new_reference_texts): # if there are reference texts with text, try to get more data by using the langlinks info we have stored.
+        if len(new_reference_texts): # if there are reference texts with text, try to get more data by using the Wiki langlinks info we have stored.
             new_reference_texts=get_additional_reference_texts(new_reference_texts, found_names, found_languages)
             incident.reference_texts=new_reference_texts
             new_incidents.append(incident)

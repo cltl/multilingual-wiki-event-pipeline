@@ -33,8 +33,8 @@ class IncidentCollection:
         wiki_from_api_only=0
         wiki_from_sparql_only=0
 
-        num_with_sources=0
-        num_sources=[]
+        num_with_sec_rt=0
+        num_sec_rt=[]
         num_with_links=0       
  
         countries=[]
@@ -63,14 +63,14 @@ class IncidentCollection:
             for ref_text in incident.reference_texts:
                 if ref_text.language=='ja':
                     continue
-                print('URI', ref_text.wiki_uri)
-                if ref_text.wiki_content:
+                print('URI', ref_text.uri)
+                if ref_text.content:
                     print(ref_text.name, ', FOUND BY: ', ref_text.found_by)
                     num_with_wikipedia+=1
-                if len(ref_text.sources):
-                    num_with_sources+=1
-                num_sources.append(len(ref_text.sources))
-                if len(ref_text.text_and_links):
+                if len(ref_text.secondary_ref_texts):
+                    num_with_sec_rt+=1
+                num_sec_rt.append(len(ref_text.secondary_ref_texts))
+                if len(ref_text.wiki_text_and_links):
                     num_with_links+=1
                 found_bys.append('|'.join(ref_text.found_by))
 
@@ -94,12 +94,12 @@ class IncidentCollection:
                     extra_info_dists[p].append(v)
                     count_values[p]+=1
                 count_occurences[p]+=1
-        if num_with_sources: 
-            desc_sources=stats.describe(np.array(num_sources))
-            cntr_sources=Counter(num_sources)
+        if num_with_sec_rt: 
+            desc_sec_rt=stats.describe(np.array(num_sec_rt))
+            cntr_sec_rt=Counter(num_sec_rt)
         else:
-            cntr_sources=None
-            desc_sources=None
+            desc_sec_rt=None
+            cntr_sec_rt=None
         countries_dist=Counter(countries).most_common(10)
         numwiki_dist=Counter(num_wikis)
         
@@ -107,7 +107,7 @@ class IncidentCollection:
         for k, v in extra_info_dists.items():
             extra_info_dist_agg[k]=Counter(v).most_common(10)
 
-        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sources, num_with_links, desc_sources, cntr_sources, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences, count_values, all_info
+        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sec_rt, num_with_links, desc_sec_rt, cntr_sec_rt, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences, count_values, all_info
     
     def serialize(self, filename=None):
         """
@@ -149,13 +149,13 @@ class IncidentCollection:
                 g.add(( event_id, RDFS.label, name_in_lang))
 
                 # denotation of the event
-                wikipedia_article=URIRef(ref_text.wiki_uri)
+                wikipedia_article=URIRef(ref_text.uri)
                 g.add(( event_id, GRASP.denotedIn, wikipedia_article ))
-                g.add(( wikipedia_article, DCT.description, Literal(ref_text.wiki_content) ))
+                g.add(( wikipedia_article, DCT.description, Literal(ref_text.content) ))
                 g.add(( wikipedia_article, DCT.title, Literal(ref_text.name) ))
                 g.add(( wikipedia_article, DCT.language, Literal(ref_text.language) ))
                 g.add(( wikipedia_article, DCT.type, URIRef('http://purl.org/dc/dcmitype/Text') ))
-                for source in ref_text.sources:
+                for source in ref_text.secondary_ref_texts:
                     g.add(( wikipedia_article, DCT.source, URIRef(source) ))        
 
             # event type information
@@ -220,27 +220,27 @@ class Incident:
 class ReferenceText:
     
     def __init__(self,
-                wiki_uri='',
+                uri='',
                 name='',
-                wiki_content='',
-                html_content='',
+                content='',
+                raw_content='',
                 language='',
                 creation_date='',
                 authors=[],
-                sources='',
-                text_and_links='',
-                langlinks=[],
+                secondary_ref_texts='',
+                wiki_text_and_links='',
+                wiki_langlinks=[],
                 found_by=''):
         self.name=name
-        self.wiki_uri=wiki_uri
-        self.wiki_content=wiki_content
-        self.html_content=html_content
+        self.uri=uri
+        self.content=content
+        self.raw_content=raw_content
         self.language=language
         self.creation_date=creation_date
         self.authors=authors
-        self.sources=sources
-        self.text_and_links=text_and_links
-        self.langlinks=langlinks
+        self.secondary_ref_texts=secondary_ref_texts
+        self.wiki_text_and_links=wiki_text_and_links
+        self.wiki_langlinks=wiki_langlinks
         self.found_by=found_by
 
     def process_spacy_and_convert_to_naf(self,
@@ -258,12 +258,12 @@ class ReferenceText:
 
         :return: the root of the NAF XML object
         """
-        root = spacy_to_naf.text_to_NAF(text=self.wiki_content,
+        root = spacy_to_naf.text_to_NAF(text=self.content,
                                         nlp=nlp,
                                         dct=dct,
                                         layers=layers,
                                         title=self.name,
-                                        uri=self.wiki_uri,
+                                        uri=self.uri,
                                         language=self.language)
 
         if output_path is not None:

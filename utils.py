@@ -142,7 +142,7 @@ def deduplicate_ref_texts(ref_texts):
         to_keep=True
         for other_rt in ref_texts:
             if rt.language==other_rt.language and rt.name<other_rt.name:
-                if rt.wiki_content==other_rt.wiki_content:
+                if rt.content==other_rt.content:
                     to_keep=False
                     break
         if to_keep:
