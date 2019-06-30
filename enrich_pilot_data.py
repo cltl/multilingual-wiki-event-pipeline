@@ -29,15 +29,20 @@ def find_next_occurrence(sf, min_token_id, t_layer, doc):
             else:
                 fits=True
                 ret_tokens=[]
+                print(sf)
                 for i in range(1, len(sf)):
-                    next_term=doc.findall("//wf[@id='w%d']" % (int_id+i))[0]
-                    if not next_term or next_term.text!=sf[i]:
+                    sf[i]=sf[i].strip()
+                    next_token=doc.findall("//wf[@id='w%d']" % (int_id+i))[0]
+                    token_text=next_token.text
+                    if not token_text or token_text!=sf[i]:
+                        print(next_token.text, sf[i])
                         fits=False
                         break
-                    last_id=next_term.get('id')
+                    last_id=next_token.get('id')
                     last_int_id=int(last_id.replace('w', ''))
                     ret_tokens.append(last_id)
                 if fits:
+                    print('fits')
                     min_token_id=last_int_id
                     return ret_tokens, min_token_id
     return [], min_token_id
@@ -54,17 +59,14 @@ def get_text_and_links(wikitext):
     parsed = wtp.parse(wikitext)
     basic_info=parsed.sections[0]
     saved_links={}
-    print(basic_info.wikilinks)
     for link in basic_info.wikilinks:
         original_span=link.span
         if not original_span or original_span[0]==-1: continue
-        print(original_span)
         start=original_span[0]
         end=original_span[1]
         target=link.target
         text=link.text
         if not text: text=target
-        print(text, target)
         basic_info[original_span[0]:original_span[1]]=text
         move_to_left=end-start-len(text)
         saved_links=shift_all(saved_links, move_to_left)
@@ -94,7 +96,7 @@ def add_entity_element(entities_layer, entity_data, add_comments=False):
 
 pilot_folder='pilot_data'
 input_incidents_file='bin/murder_nl,it,en,pilot.bin'
-#input_incidents_file='bin/election_nl,it,ja,en,pilot.bin'
+input_incidents_file='bin/election_nl,it,ja,en,pilot.bin'
 input_folder='%s/naf' % pilot_folder
 output_folder=Path('%s/naf_with_entities' % pilot_folder)
 
