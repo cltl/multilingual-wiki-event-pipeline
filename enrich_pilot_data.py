@@ -1,3 +1,4 @@
+import sys
 from collections import namedtuple
 import pickle
 import shutil
@@ -19,13 +20,12 @@ def find_next_occurrence(sf, min_token_id, t_layer, doc):
         if w.text==sf[0]:
             current_id=w.get('id')
             int_id=int(current_id.replace('w', ''))
+            ret_tokens=[current_id]
             if len(sf)==1:
-                ret_tokens=[current_id]
                 min_token_id=int_id
                 return ret_tokens, min_token_id
             else:
                 fits=True
-                ret_tokens=[]
                 print(sf)
                 for i in range(1, len(sf)):
                     sf[i]=sf[i].strip()
@@ -136,6 +136,8 @@ for incident in collection.incidents:
             min_token_id=1
             next_id=1
             for offset, value in links.items():
+                if offset[0]<0 and offset[1]<1:
+                    continue
                 text=value[0]
                 sfs=text.split()
                 target=value[1]
