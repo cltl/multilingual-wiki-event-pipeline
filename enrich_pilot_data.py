@@ -1,3 +1,4 @@
+import spacy
 import sys
 from collections import namedtuple
 import pickle
@@ -85,8 +86,8 @@ def get_text_and_links(wikitext):
 def load_mapping_tokens_to_terms(): pass
 
 pilot_folder='pilot_data'
-input_incidents_file='bin/murder_nl,it,en,pilot.bin'
-#input_incidents_file='bin/election_nl,it,ja,en,pilot.bin'
+#input_incidents_file='bin/murder_nl,it,en,pilot.bin'
+input_incidents_file='bin/election_nl,it,ja,en,pilot.bin'
 input_folder='%s/naf' % pilot_folder
 output_folder=Path('%s/naf_with_entities' % pilot_folder)
 
@@ -96,6 +97,10 @@ output_folder.mkdir()
 
 with open(input_incidents_file, 'rb') as f:
     collection=pickle.load(f)
+
+spacy_models={'en': 'en_core_web_sm' ,
+              'nl' : 'nl_core_news_sm',
+              'it': 'it_core_news_sm'}
 
 modelname='wikilinks'
 modelversion='v1'
@@ -110,8 +115,8 @@ for incident in collection.incidents:
         in_naf_filename='%s/%s.naf' % (input_folder, ref_text.name)
         if os.path.isfile(in_naf_filename):
             count_infiles+=1
-            #if ref_text.name!='2009 Icelandic parliamentary election':
-            #    continue
+#            if ref_text.name!='2009 Icelandic parliamentary election':
+#                continue
 
             print(in_naf_filename)
 
@@ -151,7 +156,9 @@ for incident in collection.incidents:
                 #if offset[0]<0 and offset[1]<1:
                 #    continue
                 text=value[0]
-                sfs=text.split()
+                spacy_model=spacy.load(spacy_models[ref_text.language])
+                with_spacy=spacy_model(text)
+                sfs = [t.text for t in with_spacy]
                 target=value[1]
                 ret_tokens, min_token_id=find_next_occurrence(sfs, min_token_id, t_layer, doc)
                 if ret_tokens:
