@@ -86,10 +86,13 @@ def get_text_and_links(wikitext):
 def load_mapping_tokens_to_terms(): pass
 
 pilot_folder='pilot_data'
-#input_incidents_file='bin/murder_nl,it,en,pilot.bin'
-input_incidents_file='bin/election_nl,it,ja,en,pilot.bin'
+event_type='murder'
+if event_type=='murder':
+    input_incidents_file='bin/murder_nl,it,en,pilot.bin'
+else:
+    input_incidents_file='bin/election_nl,it,ja,en,pilot.bin'
 input_folder='%s/naf' % pilot_folder
-output_folder=Path('%s/naf_with_entities' % pilot_folder)
+output_folder=Path('%s/naf_with_entities_%s' % (pilot_folder, event_type))
 
 if output_folder.exists():
     shutil.rmtree(str(output_folder))
