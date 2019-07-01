@@ -12,6 +12,15 @@ import wikitextparser as wtp
 
 EntityElement = namedtuple('EntityElement', ['eid', 'entity_type', 'targets', 'text', 'ext_refs'])
 
+def remove_templates_on_top(text):
+    lines=text.split('\n')
+    my_text=[]
+    for l in lines:
+        template=l.startswith('|') or l.startswith('{{') or l.startswith('}}')
+        if not template:
+            my_text.append(l)
+    return '\n'.join(my_text)
+
 def find_next_occurrence(sf, min_token_id, t_layer, doc):
     if not len(sf): return [], min_token_id
     tokens=t_layer.findall('wf')
@@ -77,7 +86,7 @@ def load_mapping_tokens_to_terms(): pass
 
 pilot_folder='pilot_data'
 input_incidents_file='bin/murder_nl,it,en,pilot.bin'
-input_incidents_file='bin/election_nl,it,ja,en,pilot.bin'
+#input_incidents_file='bin/election_nl,it,ja,en,pilot.bin'
 input_folder='%s/naf' % pilot_folder
 output_folder=Path('%s/naf_with_entities' % pilot_folder)
 
@@ -101,6 +110,8 @@ for incident in collection.incidents:
         in_naf_filename='%s/%s.naf' % (input_folder, ref_text.name)
         if os.path.isfile(in_naf_filename):
             count_infiles+=1
+            #if ref_text.name!='2009 Icelandic parliamentary election':
+            #    continue
 
             print(in_naf_filename)
 
@@ -121,7 +132,7 @@ for incident in collection.incidents:
             lp.set('version', modelversion)
 
             entities_layer = etree.SubElement(root, "entities")
-
+            
             try:
                 sec0=ref_text.text_and_links['*']
             except Exception as e:
@@ -129,15 +140,16 @@ for incident in collection.incidents:
                     with open(naf_output_path, 'w') as outfile:
                         outfile.write(spacy_to_naf.NAF_to_string(NAF=root))
                 continue
-
-            info, links=get_text_and_links(sec0)
+            #print(sec0)
+            clean_sec0=remove_templates_on_top(sec0)
+            info, links=get_text_and_links(clean_sec0)
 
             t_layer = root.find("text")
             min_token_id=1
             next_id=1
             for offset, value in links.items():
-                if offset[0]<0 and offset[1]<1:
-                    continue
+                #if offset[0]<0 and offset[1]<1:
+                #    continue
                 text=value[0]
                 sfs=text.split()
                 target=value[1]
@@ -165,6 +177,6 @@ for incident in collection.incidents:
                 #    print(in_naf_filename)
                 #    input('continue?')
 
-    print('Input NAFs', count_infiles)
-    print('Output NAFs', count_outfiles)
-    print('Count entities', count_entities)
+print('Input NAFs', count_infiles)
+print('Output NAFs', count_outfiles)
+print('Count entities', count_entities)
