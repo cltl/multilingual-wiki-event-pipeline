@@ -1,16 +1,13 @@
-import classes
-
 from collections import namedtuple
 import pickle
 import shutil
-from path import Path
+from pathlib import Path
 import os.path
 import spacy_to_naf
 import xml.etree.ElementTree as ET
 from lxml import etree
 from datetime import datetime
 import wikitextparser as wtp
-import sys 
 
 EntityElement = namedtuple('EntityElement', ['eid', 'entity_type', 'targets', 'text', 'ext_refs'])
 
@@ -75,24 +72,8 @@ def get_text_and_links(wikitext):
 
     return basic_info, saved_links
 
-def add_entity_element(entities_layer, entity_data, add_comments=False):
-    """
-    Function that adds an entity element (with links) to the entity layer.
-    """
-    entity_el = etree.SubElement(entities_layer, "entity")
-    entity_el.set("id", entity_data.eid)
-    entity_el.set("type", entity_data.entity_type)
-    references_el = etree.SubElement(entity_el, "references")
-    span = etree.SubElement(references_el, "span")
-    if add_comments:
-        span.append(etree.Comment(' '.join(entity_data.text)))
-    for target in entity_data.targets:
-        target_el = etree.SubElement(span, "target")
-        target_el.set("id", target)
-    ext_refs_el = etree.SubElement(entity_el, 'externalReferences')
-    for ext_ref in entity_data.ext_refs:
-        one_ext_ref_el=etree.SubElement(ext_refs_el, 'externalRef')
-        one_ext_ref_el.set("reference", ext_ref)
+
+def load_mapping_tokens_to_terms(): pass
 
 pilot_folder='pilot_data'
 input_incidents_file='bin/murder_nl,it,en,pilot.bin'
@@ -120,11 +101,15 @@ for incident in collection.incidents:
         in_naf_filename='%s/%s.naf' % (input_folder, ref_text.name)
         if os.path.isfile(in_naf_filename):
             count_infiles+=1
+
             print(in_naf_filename)
 
             naf_output_path = str(output_folder / f'{ref_text.name}.naf')
 
-            doc=etree.parse(in_naf_filename)
+            parser = etree.XMLParser(remove_blank_text=True)
+            doc=etree.parse(in_naf_filename, parser)
+
+
             root=doc.getroot()
             naf_header = root.find("nafHeader")
             ling_proc=etree.SubElement(naf_header, 'linguisticProcessors')
@@ -146,7 +131,6 @@ for incident in collection.incidents:
                 continue
 
             info, links=get_text_and_links(sec0)
-            print(links)
 
             t_layer = root.find("text")
             min_token_id=1
@@ -162,8 +146,8 @@ for incident in collection.incidents:
 			     entity_type='UNK',
 			     text=text,
 			     targets=ret_tokens, # TODO: MAP TOKENS TO TERMS
-			     ext_refs=[target])
-                    add_entity_element(entities_layer, entity_data, add_comments=True)
+			     ext_refs=[{'reference': target}])
+                    spacy_to_naf.add_entity_element(entities_layer, entity_data, add_comments=True)
                     count_entities+=1
                     next_id+=1
 
@@ -171,6 +155,13 @@ for incident in collection.incidents:
                 with open(naf_output_path, 'w') as outfile:
                     outfile.write(spacy_to_naf.NAF_to_string(NAF=root))
                     count_outfiles+=1
+
+                #if ref_text.language == 'en':
+                #    print(in_naf_filename)
+                #    print(info)
+                #    print(links)
+                #    print(in_naf_filename)
+                #    input('continue?')
 
     print('Input NAFs', count_infiles)
     print('Output NAFs', count_outfiles)
