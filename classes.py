@@ -221,6 +221,7 @@ class ReferenceText:
     
     def __init__(self,
                 uri='',
+                web_archive_uri='',
                 name='',
                 content='',
                 raw_content='',
@@ -233,6 +234,7 @@ class ReferenceText:
                 found_by=''):
         self.name=name
         self.uri=uri
+        self.web_archive_uri=web_archive_uri
         self.content=content
         self.raw_content=raw_content
         self.language=language
