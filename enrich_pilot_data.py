@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 from lxml import etree
 from datetime import datetime
 import wikitextparser as wtp
+import xml_utils
 
 EntityElement = namedtuple('EntityElement', ['eid', 'entity_type', 'targets', 'text', 'ext_refs'])
 
@@ -86,21 +87,17 @@ def get_text_and_links(wikitext):
 def load_mapping_tokens_to_terms(): pass
 
 pilot_folder='pilot_data'
-event_type='murder'
-if event_type=='murder':
-    input_incidents_file='bin/murder_nl,it,en,pilot.bin'
-else:
-    input_incidents_file='bin/election_nl,it,ja,en,pilot.bin'
 input_folder='%s/naf' % pilot_folder
-output_folder=Path('%s/naf_with_entities_%s' % (pilot_folder, event_type))
+output_folder=Path('%s/naf_with_entities' % pilot_folder)
 
 if output_folder.exists():
     shutil.rmtree(str(output_folder))
 output_folder.mkdir()
 
-with open(input_incidents_file, 'rb') as f:
-    collection=pickle.load(f)
-
+eventtype_and_binfile = [
+     ('murder', 'bin/murder_nl,it,en,pilot.bin'),
+     ('election', 'bin/election_nl,it,ja,en,pilot.bin')
+]
 spacy_models={'en': 'en_core_web_sm' ,
               'nl' : 'nl_core_news_sm',
               'it': 'it_core_news_sm'}
@@ -113,79 +110,81 @@ end_time = spacy_to_naf.time_in_correct_format(datetime.now())
 count_outfiles=0
 count_infiles=0
 count_entities=0
-for incident in collection.incidents:
-    for ref_text in incident.reference_texts:
-        in_naf_filename='%s/%s.naf' % (input_folder, ref_text.name)
-        if os.path.isfile(in_naf_filename):
-            count_infiles+=1
-#            if ref_text.name!='2009 Icelandic parliamentary election':
-#                continue
+for eventtype, binfile in eventtype_and_binfile:
 
-            print(in_naf_filename)
+    with open(binfile, 'rb') as f:
+        collection = pickle.load(f)
 
-            naf_output_path = str(output_folder / f'{ref_text.name}.naf')
+    for incident in collection.incidents:
+        for ref_text in incident.reference_texts:
+            in_naf_filename='%s/%s.naf' % (input_folder, ref_text.name)
+            if os.path.isfile(in_naf_filename):
+                count_infiles+=1
+    #            if ref_text.name!='2009 Icelandic parliamentary election':
+    #                continue
 
-            parser = etree.XMLParser(remove_blank_text=True)
-            doc=etree.parse(in_naf_filename, parser)
+                print(in_naf_filename)
 
+                naf_output_path = str(output_folder / f'{ref_text.name}.naf')
 
-            root=doc.getroot()
-            naf_header = root.find("nafHeader")
-            ling_proc=etree.SubElement(naf_header, 'linguisticProcessors')
-            ling_proc.set("layer", 'entities')
-            lp = etree.SubElement(ling_proc, "lp")
-            lp.set("beginTimestamp", start_time)
-            lp.set('endTimestamp', end_time)
-            lp.set('name', modelname)
-            lp.set('version', modelversion)
+                parser = etree.XMLParser(remove_blank_text=True)
+                doc=etree.parse(in_naf_filename, parser)
 
-            entities_layer = etree.SubElement(root, "entities")
-            
-            try:
-                sec0=ref_text.text_and_links['*']
-            except Exception as e:
+                wid2tid = xml_utils.mapping_wid2tid(doc)
+
+                root=doc.getroot()
+                naf_header = root.find("nafHeader")
+                ling_proc=etree.SubElement(naf_header, 'linguisticProcessors')
+                ling_proc.set("layer", 'entities')
+                lp = etree.SubElement(ling_proc, "lp")
+                lp.set("beginTimestamp", start_time)
+                lp.set('endTimestamp', end_time)
+                lp.set('name', modelname)
+                lp.set('version', modelversion)
+
+                entities_layer = etree.SubElement(root, "entities")
+
+                try:
+                    sec0=ref_text.text_and_links['*']
+                except Exception as e:
+                    if naf_output_path is not None:
+                        with open(naf_output_path, 'w') as outfile:
+                            outfile.write(spacy_to_naf.NAF_to_string(NAF=root))
+                    continue
+                #print(sec0)
+                clean_sec0=remove_templates_on_top(sec0)
+                info, links=get_text_and_links(clean_sec0)
+
+                t_layer = root.find("text")
+                min_token_id=1
+                next_id=1
+                for offset, value in links.items():
+                    #if offset[0]<0 and offset[1]<1:
+                    #    continue
+                    text=value[0]
+                    spacy_model=spacy.load(spacy_models[ref_text.language])
+                    with_spacy=spacy_model(text)
+                    sfs = [t.text for t in with_spacy]
+                    target=value[1]
+                    ret_tokens, min_token_id=find_next_occurrence(sfs, min_token_id, t_layer, doc)
+
+                    t_ids = [wid2tid[wid] for wid in ret_tokens]
+
+                    if ret_tokens:
+                        entity_data=EntityElement(
+                     eid='e%d' % next_id,
+                     entity_type='UNK',
+                     text=text,
+                     targets=t_ids,
+                     ext_refs=[{'reference': target}])
+                        spacy_to_naf.add_entity_element(entities_layer, entity_data, add_comments=True)
+                        count_entities+=1
+                        next_id+=1
+
                 if naf_output_path is not None:
                     with open(naf_output_path, 'w') as outfile:
                         outfile.write(spacy_to_naf.NAF_to_string(NAF=root))
-                continue
-            #print(sec0)
-            clean_sec0=remove_templates_on_top(sec0)
-            info, links=get_text_and_links(clean_sec0)
-
-            t_layer = root.find("text")
-            min_token_id=1
-            next_id=1
-            for offset, value in links.items():
-                #if offset[0]<0 and offset[1]<1:
-                #    continue
-                text=value[0]
-                spacy_model=spacy.load(spacy_models[ref_text.language])
-                with_spacy=spacy_model(text)
-                sfs = [t.text for t in with_spacy]
-                target=value[1]
-                ret_tokens, min_token_id=find_next_occurrence(sfs, min_token_id, t_layer, doc)
-                if ret_tokens:
-                    entity_data=EntityElement(
-			     eid='e%d' % next_id,
-			     entity_type='UNK',
-			     text=text,
-			     targets=ret_tokens, # TODO: MAP TOKENS TO TERMS
-			     ext_refs=[{'reference': target}])
-                    spacy_to_naf.add_entity_element(entities_layer, entity_data, add_comments=True)
-                    count_entities+=1
-                    next_id+=1
-
-            if naf_output_path is not None:
-                with open(naf_output_path, 'w') as outfile:
-                    outfile.write(spacy_to_naf.NAF_to_string(NAF=root))
-                    count_outfiles+=1
-
-                #if ref_text.language == 'en':
-                #    print(in_naf_filename)
-                #    print(info)
-                #    print(links)
-                #    print(in_naf_filename)
-                #    input('continue?')
+                        count_outfiles+=1
 
 print('Input NAFs', count_infiles)
 print('Output NAFs', count_outfiles)
