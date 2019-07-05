@@ -12,20 +12,24 @@ This project aims to extract information about incidents of a particular type. T
 
 This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details
 
-#### Python modules (Python 3.7 is used)
+## Setup
+
+### Python modules (Python 3.7 is used)
 A number of external modules need to be installed, which are listed in **requirements.txt**.
 Depending on how you installed Python, you can probably install the requirements using one of following commands:
 ```bash
 pip install -r requirements.txt
 ```
 
-#### Resources
+### Resources
 A number of resources need to be downloaded. This can be done calling:
 ```bash
 bash install.sh
 ```
 
-### Extraction Steps
+## Code documentation
+
+### Extraction steps
 
 All extraction code can be found in the file `extract.py`:
 
