@@ -67,7 +67,8 @@ def construct_and_run_query(type_label, languages, more_props, limit):
                 clause=f"""OPTIONAL {{ \n\t?incident {a_path} {var} }}\n\t"""
                 optional_more_info+=clause
                 opt_vars.append(var)
-                opt_var_labels.append(var + 'Label')
+                if type_label!="election":
+                    opt_var_labels.append(var + 'Label')
 
     query = """
     SELECT DISTINCT ?incident ?incidentLabel %s %s %s WHERE {
@@ -121,7 +122,10 @@ def index_results_by_id(raw_results, lang2var, extra_info):
             for a_path in wdt_prop_paths:
                 var=a_path.replace('wdt:', '').replace('/', '_')       # fn_role.split('@')[-1] 
                 if var in entry.keys() and entry[var]['value']:
-                    complex_value='%s | %s' % (entry[var]['value'], entry[var + 'Label']['value'])
+                    if var + 'Label' in entry.keys() and entry[var + 'Label']['value']:
+                        complex_value='%s | %s' % (entry[var]['value'], entry[var + 'Label']['value'])
+                    else:
+                        complex_value=entry[var]['value']
                     current_result['extra_info'][predicate].add(complex_value)
         indexed_results[wdt_id]=current_result
     return indexed_results
