@@ -41,6 +41,8 @@ def check_ref_text(rt, min_chars=100, max_chars=10000):
 def create_pilot_data(data):
     pilot_incidents=set()
 
+    cached={}
+
     data.incidents=remove_incidents_with_missing_FEs(data.incidents, data.incident_type)
     for incident in data.incidents:
         langs=set()
@@ -62,12 +64,18 @@ def create_pilot_data(data):
                 new_v_set=set()
                 for v in v_set:
                     if '|' not in v:
-                        print('no label for', v)
+                        label=''
                         q_id=v.split('/')[-1]
-                        label=utils.obtain_label(q_id)
+                        if q_id in cached.keys():
+                            label=cached[q_id]
+                            print('cached', q_id)
+                        elif v.startswith('http'):
+                            print('no label for', v)
+                            label=utils.obtain_label(q_id)
+                            time.sleep(1)
+                            cached[q_id]=label
                         v+=' | ' + label
                         new_v_set.add(v)
-                        time.sleep(1)
                     else:
                         new_v_set.add(v)
                 incident.extra_info[p]=new_v_set

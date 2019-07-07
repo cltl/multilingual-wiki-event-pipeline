@@ -2,6 +2,7 @@ import json
 import requests
 import sys
 from collections import defaultdict
+import time
 
 wdt_sparql_url = 'https://query.wikidata.org/sparql'
 
@@ -28,12 +29,19 @@ def obtain_label(wd_id):
     }
     LIMIT 1
     """ % wd_id
-    
-    r = requests.get(wdt_sparql_url,
+ 
+    while True:
+        try:
+            r = requests.get(wdt_sparql_url,
                      params = {'format': 'json', 'query': query})
-    res_text=r.text
-    response = json.loads(res_text)
-#    response = r.json()
+#    res_text=r.text
+#    response = json.loads(res_text)
+            response = r.json()
+            break
+        except:
+            print('error, retrying')
+            time.sleep(2)
+            continue
     results=response['results']['bindings']
     if not len(results):
         return ''
