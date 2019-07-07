@@ -1,5 +1,5 @@
 import json
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, OrderedDict
 from rdflib.namespace import Namespace
 from rdflib.namespace import RDF, RDFS
 from rdflib import Graph
@@ -97,6 +97,7 @@ class IncidentCollection:
         if num_with_sec_rt: 
             desc_sec_rt=stats.describe(np.array(num_sec_rt))
             cntr_sec_rt=Counter(num_sec_rt)
+            cntr_sec_rt = dict(sorted(cntr_sec_rt.items()))
         else:
             desc_sec_rt=None
             cntr_sec_rt=None
