@@ -38,8 +38,8 @@ def obtain_label(wd_id):
 #    response = json.loads(res_text)
             response = r.json()
             break
-        except:
-            print('error, retrying')
+        except Exception as e:
+            print(e, 'error, retrying')
             time.sleep(2)
             continue
     results=response['results']['bindings']

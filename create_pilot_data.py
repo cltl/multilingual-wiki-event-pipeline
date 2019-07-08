@@ -108,7 +108,7 @@ for bin_file in glob(f'{input_folder}/*.bin'):
         for ref_text_obj in incident.reference_texts:
             if ref_text_obj.language in models:
 
-                assert ref_text_obj.uri
+                assert ref_text_obj.uri, f'URI not found for page: {ref_text_obj.name}'
                 naf_output_path = naf_folder / f'{ref_text_obj.name}.naf'
 
                 if ref_text_obj.creation_date:

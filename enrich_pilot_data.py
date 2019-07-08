@@ -1,6 +1,6 @@
 import spacy
 import sys
-from collections import namedtuple
+from collections import namedtuple, Counter
 import pickle
 import shutil
 from pathlib import Path
@@ -37,20 +37,17 @@ def find_next_occurrence(sf, min_token_id, t_layer, doc):
                 return ret_tokens, min_token_id
             else:
                 fits=True
-                print(sf)
                 for i in range(1, len(sf)):
                     sf[i]=sf[i].strip()
                     next_token=doc.findall("//wf[@id='w%d']" % (int_id+i))[0]
                     token_text=next_token.text
                     if not token_text or token_text!=sf[i]:
-                        print(next_token.text, sf[i])
                         fits=False
                         break
                     last_id=next_token.get('id')
                     last_int_id=int(last_id.replace('w', ''))
                     ret_tokens.append(last_id)
                 if fits:
-                    print('fits')
                     min_token_id=last_int_id
                     return ret_tokens, min_token_id
     return [], min_token_id
@@ -96,25 +93,26 @@ output_folder.mkdir()
 
 eventtype_and_binfile = [
      ('murder', 'bin/murder_nl,it,en,pilot.bin'),
-     ('election', 'bin/election_nl,it,ja,en,pilot.bin')
+     ('election', 'bin/election_nl,it,en,pilot.bin')
 ]
-spacy_models={'en': 'en_core_web_sm' ,
-              'nl' : 'nl_core_news_sm',
-              'it': 'it_core_news_sm'}
+spacy_models={'en': spacy.load('en_core_web_sm') ,
+              'nl' : spacy.load('nl_core_news_sm') ,
+              'it': spacy.load('it_core_news_sm')}
 
 modelname='wikilinks'
 modelversion='v1'
 start_time = spacy_to_naf.time_in_correct_format(datetime.now())
 end_time = spacy_to_naf.time_in_correct_format(datetime.now())
 
-count_outfiles=0
-count_infiles=0
-count_entities=0
 for eventtype, binfile in eventtype_and_binfile:
-
+    count_outfiles=0
+    count_infiles=0
+    count_entities=0
+    count_per_doc=[]
+    initial_links=0
     with open(binfile, 'rb') as f:
         collection = pickle.load(f)
-
+    print(len(collection.incidents))
     for incident in collection.incidents:
         for ref_text in incident.reference_texts:
             in_naf_filename='%s/%s.naf' % (input_folder, ref_text.name)
@@ -122,8 +120,6 @@ for eventtype, binfile in eventtype_and_binfile:
                 count_infiles+=1
     #            if ref_text.name!='2009 Icelandic parliamentary election':
     #                continue
-
-                print(in_naf_filename)
 
                 naf_output_path = str(output_folder / f'{ref_text.name}.naf')
 
@@ -145,24 +141,23 @@ for eventtype, binfile in eventtype_and_binfile:
                 entities_layer = etree.SubElement(root, "entities")
 
                 try:
-                    sec0=ref_text.text_and_links['*']
+                    sec0=ref_text.wiki_text_and_links['*']
                 except Exception as e:
                     if naf_output_path is not None:
                         with open(naf_output_path, 'w') as outfile:
                             outfile.write(spacy_to_naf.NAF_to_string(NAF=root))
                     continue
-                #print(sec0)
                 clean_sec0=remove_templates_on_top(sec0)
                 info, links=get_text_and_links(clean_sec0)
 
                 t_layer = root.find("text")
                 min_token_id=1
                 next_id=1
+                initial_links+=len(links.items())
                 for offset, value in links.items():
-                    #if offset[0]<0 and offset[1]<1:
-                    #    continue
                     text=value[0]
-                    spacy_model=spacy.load(spacy_models[ref_text.language])
+                    spacy_model=spacy_models[ref_text.language]
+                    #spacy_model=spacy.load(lang_model)
                     with_spacy=spacy_model(text)
                     sfs = [t.text for t in with_spacy]
                     target=value[1]
@@ -181,11 +176,15 @@ for eventtype, binfile in eventtype_and_binfile:
                         count_entities+=1
                         next_id+=1
 
+                count_per_doc.append(next_id-1)
                 if naf_output_path is not None:
                     with open(naf_output_path, 'w') as outfile:
                         outfile.write(spacy_to_naf.NAF_to_string(NAF=root))
                         count_outfiles+=1
 
-print('Input NAFs', count_infiles)
-print('Output NAFs', count_outfiles)
-print('Count entities', count_entities)
+    print('Input NAFs', count_infiles)
+    print('Output NAFs', count_outfiles)
+    print('Count entities', count_entities)
+    print('Count initial seed', initial_links)
+    dist_links=Counter(count_per_doc)
+    print('Distribution of entity links over files', dict(sorted(dist_links.items())))

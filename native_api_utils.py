@@ -176,5 +176,7 @@ def get_uri_from_title(name, lang):
     for page_id, page_info in j['query']['pages'].items():
         if page_id=='-1': continue
         return page_info['canonicalurl']
-    return ''
+    invented_uri="https://%s.wikipedia.org/wiki/%s" % (lang, name.replace(' ', '_'))
+    print('inventing a URI', inventend_uri)
+    return invented_uri
 
