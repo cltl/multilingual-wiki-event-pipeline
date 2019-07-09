@@ -31,8 +31,6 @@ def check_ref_text(rt, min_chars=100, max_chars=10000):
     num_chars=len(rt.content)
     if num_chars<min_chars or num_chars>max_chars:
         return False
-        #print(rt.content)
-    #regex='.*[1-2]([0-9]){3}-[1-2]([0-9]){3}.*$'
     if re.match(r'.*[1-2]([0-9]){3}-[1-2]([0-9]){3}.*$', rt.name):
         print(rt.name)
         return False

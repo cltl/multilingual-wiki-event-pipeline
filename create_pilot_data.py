@@ -30,6 +30,9 @@ import spacy
 import datetime
 from classes import ReferenceText
 
+import native_api_utils as api
+import config
+
 # load arguments
 arguments = docopt(__doc__)
 print()
@@ -66,6 +69,10 @@ event_type2likely_frames = {
 }
 
 for bin_file in glob(f'{input_folder}/*.bin'):
+
+    if config.pilot and 'pilot' not in bin_file: continue
+    if not config.pilot and 'pilot' in bin_file: continue
+    print('Dealing with the file', bin_file)
 
     # use date of file for dct of reference texts
     file_info = os.stat(bin_file)
@@ -107,6 +114,10 @@ for bin_file in glob(f'{input_folder}/*.bin'):
 
         for ref_text_obj in incident.reference_texts:
             if ref_text_obj.language in models:
+
+                if not ref_text_obj.uri:
+                    ref_text_obj.uri=api.get_uri_from_title(ref_text_obj.name, ref_text_obj.language)
+                    print(ref_text_obj.name, ref_text_obj.language, 'URI', ref_text_obj.uri)
 
                 assert ref_text_obj.uri, f'URI not found for page: {ref_text_obj.name}'
                 naf_output_path = naf_folder / f'{ref_text_obj.name}.naf'
