@@ -207,3 +207,79 @@ example = etree.fromstring("""<span><target id="t351"/></span>""")
 assert get_range_of_targets(example) == range(351, 352)
 example = etree.fromstring("""<span><target id="t351"/><target id="t352"/><target id="t353"/></span>""")
 assert get_range_of_targets(example) == range(351, 354)
+
+
+def get_naf_paths(incidents, event_type, language='en', verbose=0):
+    
+    naf_paths = []
+    for incident, info in incidents.items():
+        if info['event_type'] == event_type:
+            for ref_text_info in info['reference_texts']['en']:
+                naf = ref_text_info['naf_basename']
+                path = f'{pilot_folder}/naf_srl/NAF/{naf}'
+                assert os.path.exists(path), f'{path} does not exist'
+                naf_paths.append(path)
+    
+    if verbose >= 1:
+        print()
+        print(f'found {len(naf_paths)} NAF paths for {event_type} and {language}')
+    return naf_paths
+                
+
+def get_label2freq(naf_paths, xpath_query, attributes, verbose=0):
+    label2freq = defaultdict(int)
+    for naf_path in naf_paths:
+        doc = etree.parse(naf_path)
+        for el in doc.xpath(xpath_query):
+            values = [el.get(attribute)
+                      for attribute in attributes]
+            value_string = '---'.join(values)
+            label2freq[value_string] += 1
+            
+    if verbose >= 1:
+        print()
+        print(f'ran function with {xpath_query} {attributes}')
+        print(f'found {sum(label2freq.values())} occurrences of {len(label2freq)} unique labels')
+    
+    return label2freq
+
+
+def load_start_and_end_offset_to_tid(naf):
+    """
+    """
+    wid2tid = {}
+    for term_el in naf.xpath('terms/term'):
+        tid = term_el.get('id')
+        for span_el in term_el.xpath('span/target'):
+            wid = span_el.get('id')
+            wid2tid[wid] = tid
+
+    start2tid = {}
+    end2tid = {}
+
+    for wf_el in naf.xpath('text/wf'):
+        wid = wf_el.get('id')
+        start_offset = int(wf_el.get('offset'))
+        end_offset = start_offset + int(wf_el.get('length'))
+
+        start2tid[start_offset] = wid2tid[wid]
+        end2tid[end_offset] = wid2tid[wid]
+
+    return start2tid, end2tid
+
+
+def get_range_of_tids(start_tid, end_tid):
+    start = int(start_tid[1:])
+    end = int(end_tid[1:])
+    the_range = range(start, end + 1)
+
+    assert end >= start, f'{end_tid} should not be higher than {start_tid}'
+
+    return [f't{number}'
+            for number in the_range]
+
+
+assert get_range_of_tids('t10', 't10') == ['t10']
+assert get_range_of_tids('t10', 't11') == ['t10', 't11']
+assert get_range_of_tids('t10', 't12') == ['t10', 't11', 't12']
+# assert get_range_of_tids('t12', 't10') # should raise exception
