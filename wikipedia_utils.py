@@ -135,13 +135,17 @@ def run_spacy_on_wiki_text_and_add_hyperlinks(wiki_title,
     assert language in {'nl', 'en', 'it'}, f'{language} not part of supported languages: nl it en'
 
     # try to retrieve JSON of Wikipedia article
-    wiki_uri = urlencode_wikititle(wiki_title, prefix=prefix)
+    wiki_uri = f'{prefix}{wiki_title.replace(" ", "_")}'
+    wiki_uri_encoded = urlencode_wikititle(wiki_title, prefix=prefix)
 
-    if wiki_uri not in wiki_uri2relative_path:
+    if verbose >= 2:
+        print(wiki_uri) 
+
+    if wiki_uri_encoded not in wiki_uri2relative_path:
         reason = 'page not extracted'
         succes = False
     else:
-        relative_path, line_number = wiki_uri2relative_path[wiki_uri]
+        relative_path, line_number = wiki_uri2relative_path[wiki_uri_encoded]
         path = os.path.join(wiki_folder, relative_path)
 
         # load wiki_page
@@ -160,7 +164,7 @@ def run_spacy_on_wiki_text_and_add_hyperlinks(wiki_title,
                                        dct=dct,
                                        layers={'raw', 'text', 'terms'},
                                        title=wiki_title,
-                                       uri=wiki_page['url'],
+                                       uri=wiki_uri,
                                        language=language)
 
 
@@ -170,22 +174,22 @@ def run_spacy_on_wiki_text_and_add_hyperlinks(wiki_title,
         add_hyperlinks(naf,
                        wiki_page['annotations'],
                        prefix,
-                       verbose=0)
+                       verbose=verbose)
 
-    # if wanted, write output to disk
-    if output_folder is not None:
-        if not os.path.exists(output_folder):
-            os.mkdir(output_folder)
-        lang_dir = os.path.join(output_folder, language)
-        if not os.path.exists(lang_dir):
-            os.mkdir(lang_dir)
+        # if wanted, write output to disk
+        if output_folder is not None:
+            if not os.path.exists(output_folder):
+                os.mkdir(output_folder)
+            lang_dir = os.path.join(output_folder, language)
+            if not os.path.exists(lang_dir):
+                os.mkdir(lang_dir)
 
-        output_path = os.path.join(lang_dir, f'{wiki_title}.naf')
-        with open(output_path, 'w') as outfile:
-            naf_string = spacy_to_naf.NAF_to_string(naf)
-            outfile.write(naf_string)
-        if verbose >= 2:
-            print(f'written {wiki_title} ({language}) to {output_path}')
+            output_path = os.path.join(lang_dir, f'{wiki_title}.naf')
+            with open(output_path, 'w') as outfile:
+                naf_string = spacy_to_naf.NAF_to_string(naf)
+                outfile.write(naf_string)
+            if verbose >= 2:
+                print(f'written {wiki_title} ({language}) to {output_path}')
 
 
     message = f'succes:{succes} with reason: {reason} for {wiki_title} ({language})'
@@ -205,11 +209,26 @@ def run_spacy_on_wiki_text_and_add_hyperlinks(wiki_title,
 if __name__ == '__main__':
     import spacy
     import os
+    import shutil
+    import json
     import pickle
+    from datetime import datetime
+    from collections import Counter
+    print('start', datetime.now())
+
     spacy_models = "en-en_core_web_sm;nl-nl_core_news_sm;it-it_core_news_sm"
     wiki_folder = '/home/postma/Wikipedia_Reader/wiki'
     naf_output_folder = 'wiki_output'
-    verbose = 2
+
+    if os.path.exists(naf_output_folder):
+        shutil.rmtree(naf_output_folder)
+
+    verbose = 1
+    language2extraction_succes = {
+        'nl' : [],
+        'en' : [],
+        'it' : []
+        }
 
     # load spaCy models
     models = {}
@@ -222,29 +241,42 @@ if __name__ == '__main__':
     with open(path_uri2path_info, 'rb') as infile:
         wiki_uri2path_info = pickle.load(infile) # make take some time
 
-    language_info_path = os.path.join(wiki_folder, 'language2info.p')
-    with open(language_info_path, 'rb')  as infile:
-        language2info = pickle.load(infile)
+    language_info_path = os.path.join(wiki_folder, 'language2info.json')
+    with open(language_info_path, 'r')  as infile:
+        language2info = json.load(infile)
 
     # load bin file
     bin_path = 'bin/election_nl,it,ja,en,pilot.bin'
     with open(bin_path, 'rb') as infile:
         incident_coll = pickle.load(infile)
 
+    count = 0
     for incident_obj in incident_coll.incidents:
+
+        count += 1
+        if count == 100:
+            break 
+
         for ref_text_obj in incident_obj.reference_texts:
             wiki_title = ref_text_obj.name
             language = ref_text_obj.language
             prefix = language2info[language]['prefix']
-            dct = language2info[language]['dct']
+            year, month, day = language2info[language]['year_month_day']
+            dct = datetime(year, month, day)
             nlp = models[language]
 
-            run_spacy_on_wiki_text_and_add_hyperlinks(wiki_title,
-                                                      prefix,
-                                                      language,
-                                                      nlp,
-                                                      wiki_folder,
-                                                      wiki_uri2path_info,
-                                                      dct,
-                                                      output_folder=naf_output_folder,
-                                                      verbose=2)
+            succes, reason, naf = run_spacy_on_wiki_text_and_add_hyperlinks(wiki_title,
+                                                          prefix,
+                                                          language,
+                                                          nlp,
+                                                          wiki_folder,
+                                                          wiki_uri2path_info,
+                                                          dct,
+                                                          output_folder=naf_output_folder,
+                                                          verbose=verbose)
+            language2extraction_succes[language].append(succes)
+
+for language, info in language2extraction_succes.items():
+    print(language, Counter(info))
+
+print('end', datetime.now())
