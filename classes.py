@@ -33,9 +33,9 @@ class IncidentCollection:
         wiki_from_api_only=0
         wiki_from_sparql_only=0
 
-        num_with_sec_rt=0
-        num_sec_rt=[]
-        num_with_links=0       
+        num_with_prim_rt=0
+        num_prim_rt=[]
+        num_with_annotations=0       
  
         countries=[]
         num_wikis=[]
@@ -61,17 +61,15 @@ class IncidentCollection:
             langs=set()
             print('incident ID: ', incident.wdt_id)
             for ref_text in incident.reference_texts:
-                if ref_text.language=='ja':
-                    continue
                 print('URI', ref_text.uri)
                 if ref_text.content:
                     print(ref_text.name, ', FOUND BY: ', ref_text.found_by)
                     num_with_wikipedia+=1
-                if len(ref_text.secondary_ref_texts):
-                    num_with_sec_rt+=1
-                num_sec_rt.append(len(ref_text.secondary_ref_texts))
-                if len(ref_text.wiki_text_and_links):
-                    num_with_links+=1
+                if len(ref_text.primary_ref_texts):
+                    num_with_prim_rt+=1
+                num_prim_rt.append(len(ref_text.primary_ref_texts))
+                if len(ref_text.annotations):
+                    num_with_annotations+=1
                 found_bys.append('|'.join(ref_text.found_by))
 
                 langs.add(ref_text.language)
@@ -94,13 +92,13 @@ class IncidentCollection:
                     extra_info_dists[p].append(v)
                     count_values[p]+=1
                 count_occurences[p]+=1
-        if num_with_sec_rt: 
-            desc_sec_rt=stats.describe(np.array(num_sec_rt))
-            cntr_sec_rt=Counter(num_sec_rt)
-            cntr_sec_rt = dict(sorted(cntr_sec_rt.items()))
+        if num_with_prim_rt: 
+            desc_prim_rt=stats.describe(np.array(num_prim_rt))
+            cntr_prim_rt=Counter(num_prim_rt)
+            cntr_prim_rt = dict(sorted(cntr_prim_rt.items()))
         else:
-            desc_sec_rt=None
-            cntr_sec_rt=None
+            desc_prim_rt=None
+            cntr_prim_rt=None
         countries_dist=Counter(countries).most_common(10)
         numwiki_dist=Counter(num_wikis)
         
@@ -108,7 +106,7 @@ class IncidentCollection:
         for k, v in extra_info_dists.items():
             extra_info_dist_agg[k]=Counter(v).most_common(10)
 
-        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_sec_rt, num_with_links, desc_sec_rt, cntr_sec_rt, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg,count_occurences, count_values, all_info
+        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_prim_rt, num_with_annotations, desc_prim_rt, cntr_prim_rt, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg, count_occurences, count_values, all_info
     
     def serialize(self, filename=None):
         """
@@ -156,7 +154,7 @@ class IncidentCollection:
                 g.add(( wikipedia_article, DCT.title, Literal(ref_text.name) ))
                 g.add(( wikipedia_article, DCT.language, Literal(ref_text.language) ))
                 g.add(( wikipedia_article, DCT.type, URIRef('http://purl.org/dc/dcmitype/Text') ))
-                for source in ref_text.secondary_ref_texts:
+                for source in ref_text.primary_ref_texts:
                     g.add(( wikipedia_article, DCT.source, URIRef(source) ))        
 
             # event type information
@@ -229,10 +227,10 @@ class ReferenceText:
                 language='',
                 creation_date='',
                 authors=[],
-                secondary_ref_texts='',
-                wiki_text_and_links='',
+                primary_ref_texts='',
                 wiki_langlinks=[],
-                found_by=''):
+                found_by='',
+                annotations=None):
         self.name=name
         self.uri=uri
         self.web_archive_uri=web_archive_uri
@@ -241,10 +239,10 @@ class ReferenceText:
         self.language=language
         self.creation_date=creation_date
         self.authors=authors
-        self.secondary_ref_texts=secondary_ref_texts
-        self.wiki_text_and_links=wiki_text_and_links
+        self.primary_ref_texts=primary_ref_texts
         self.wiki_langlinks=wiki_langlinks
         self.found_by=found_by
+        self.annotations=annotations
 
     def process_spacy_and_convert_to_naf(self,
                                          nlp,

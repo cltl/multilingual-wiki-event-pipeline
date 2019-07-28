@@ -105,6 +105,51 @@ def add_hyperlinks(naf, annotations, prefix, verbose=0):
         spacy_to_naf.add_entity_element(entities_layer, entity_data, add_comments=True)
 
 
+def load_wiki_page_info(wiki_title,
+                        prefix,
+                        language,
+                        wiki_folder,
+                        wiki_uri2relative_path):
+    """
+    :param str wiki_title: Wikipedia article title, e.g., "President van Frankrijk"
+    :param str language: supported: 'nl' | 'en' | 'it'
+    :param str wiki_folder: path to where extracted Wikipedia output is stored, e.g, the folder "wiki",
+    with subfolders for the output per language
+
+    :rtype: tuple
+    :return: (success, reason, naf)
+    """
+
+    success = True
+    reason = 'success'
+    naf = None
+
+    assert language in {'nl', 'en', 'it'}, f'{language} not part of supported languages: nl it en'
+
+    # try to retrieve JSON of Wikipedia article
+    wiki_uri = f'{prefix}{wiki_title.replace(" ", "_")}'
+    wiki_uri_encoded = urlencode_wikititle(wiki_title, prefix=prefix)
+
+    if wiki_uri_encoded not in wiki_uri2relative_path:
+        reason = 'page not extracted'
+        success = False
+        return None, None, success, reason
+    else:
+        relative_path, line_number = wiki_uri2relative_path[wiki_uri_encoded]
+        path = os.path.join(wiki_folder, relative_path)
+
+        # load wiki_page
+        wiki_page = {}
+        with bz2.BZ2File(path, "r") as infile:
+            for index, line in enumerate(infile):
+                if index == line_number:
+                    wiki_page = json.loads(line)
+                    break
+
+        assert wiki_page, f'index is wrong for {language} {wiki_title}'
+
+        return wiki_page['text'], wiki_page['annotations'], success, reason
+
 def run_spacy_on_wiki_text_and_add_hyperlinks(wiki_title,
                                               prefix,
                                               language,
@@ -276,7 +321,7 @@ if __name__ == '__main__':
                                                           verbose=verbose)
             language2extraction_succes[language].append(succes)
 
-for language, info in language2extraction_succes.items():
-    print(language, Counter(info))
+    for language, info in language2extraction_succes.items():
+        print(language, Counter(info))
 
-print('end', datetime.now())
+    print('end', datetime.now())
