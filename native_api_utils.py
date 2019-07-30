@@ -101,6 +101,28 @@ def obtain_results_from_api(url, params):
         print(r.request.url)
     return j
 
+def obtain_primary_rt_links(title, lang):
+
+    params_extlinks={
+            'format': 'json',
+            'action': 'query',
+            'prop': 'extlinks',
+            'titles': title,
+            'redirects': True,
+            'ellimit': 500
+            }
+
+    url='https://%s.wikipedia.org/w/api.php?' % lang
+
+    j_el=obtain_results_from_api(url, params_extlinks)
+    for page_id, page_info in j_el['query']['pages'].items():
+        if page_id=='-1': continue
+
+        if 'extlinks' in page_info.keys():
+            els=adapt_extlinks(page_info['extlinks'])
+            return els
+    return []
+
 def obtain_wiki_page_info(title, lang, props, extract_text=True, other_languages=set()):
     """Obtain information for a Wikipedia page title. The requested pieces of information are defined in the `props` parameter."""
     params_extracts={
@@ -142,7 +164,9 @@ def obtain_wiki_page_info(title, lang, props, extract_text=True, other_languages
     for page_id, page_info in j['query']['pages'].items():
         if page_id=='-1': continue
         data['title']=page_info['title']
-        data['extract']=page_info['extract']
+        if 'extract' in page_info.keys():
+            data['extract']=page_info['extract']
+
         j_el=obtain_results_from_api(url, params_extlinks)
         if page_id in j_el['query']['pages']:
             if 'extlinks' in j_el['query']['pages'][page_id]:

@@ -1,10 +1,13 @@
+import spacy
 import os
 from pprint import pprint
 import pickle
 from tqdm import tqdm
 import json
 from collections import defaultdict
+from datetime import datetime
 
+import pilot_utils
 import native_api_utils
 import classes
 import config
@@ -13,39 +16,6 @@ import wikipedia_utils as wu
 
 incident_types=config.incident_types
 languages_list=config.languages_list
-
-"""
-def get_additional_reference_texts(ref_texts, found_names, found_languages):
-    search_for_languages=set(languages)-set(found_languages)
-    if not search_for_languages:
-        return ref_texts
-
-    to_query=defaultdict(set)
-    for ref_text in ref_texts:
-        wiki_langlinks=ref_text.wiki_langlinks
-        for lang, the_link in wiki_langlinks:
-            if lang in search_for_languages:
-                to_query[lang].add(the_link)
-    props=['extracts', 'langlinks', 'extlinks']
-    for language, pages in to_query.items():
-        for page in pages:
-            page_info=native_api_utils.obtain_wiki_page_info(page, language, props)
-            if 'extract' in page_info.keys():
-                ref_text = classes.ReferenceText(
-                    content=page_info['extract'],
-                    wiki_text_and_links=page_info['wikitext'],
-                    wiki_langlinks=page_info['langlinks'],
-                    name=page,
-                    language=language,
-                    found_by=['langlinks']
-                )
-                if 'extlinks' in page_info.keys():
-                    ref_text.primary_ref_texts=page_info['extlinks']
-                if 'langlinks' in page_info.keys():
-                    ref.text.wiki_langlinks=page_info['langlinks']
-                ref_texts.append(ref_text)
-    return ref_texts
-"""
 
 def add_wikipedia_pages_from_api(incidents, wdt_ids, raw_results):
     assert(len(wdt_ids)>0)
@@ -144,9 +114,18 @@ def obtain_reference_texts(incidents, wiki_folder, wiki_uri2path_info, language2
     print('Retrieval of reference texts done. Number of incidents:', len(new_incidents))
     return new_incidents
 
+def get_primary_rt_links(incidents):
+    for incident in tqdm(incidents):
+        for ref_text in incident.reference_texts:
+            ext_links=native_api_utils.obtain_primary_rt_links(ref_text.name, ref_text.language)
+            if ext_links:
+                ref_text.primary_ref_texts=ext_links
+    return incidents
+
 if __name__ == '__main__':
 
     wiki_folder = '../Wikipedia_Reader/wiki'
+    naf_output_folder = 'wiki_output'
 
     # load index and language info
     path_uri2path_info = os.path.join(wiki_folder, 'page2path.p')
@@ -156,6 +135,13 @@ if __name__ == '__main__':
     language_info_path = os.path.join(wiki_folder, 'language2info.json')
     with open(language_info_path, 'r')  as infile:
         language2info = json.load(infile)
+
+    # load spaCy models
+    spacy_models = "en-en_core_web_sm;nl-nl_core_news_sm;it-it_core_news_sm"
+    models = {}
+    for model_info in spacy_models.split(';'):
+        language, model_name = model_info.split('-')
+        models[language] = spacy.load(model_name)
 
     for incident_type in incident_types:
         for languages in languages_list:
@@ -172,3 +158,41 @@ if __name__ == '__main__':
             
             with open(output_file, 'wb') as of:
                 pickle.dump(collection, of)
+
+            pilots=pilot_utils.create_pilot_data(collection)
+
+            pilots=get_primary_rt_links(pilots)
+
+            pilot_collection=classes.IncidentCollection(incidents=pilots,
+		     incident_type=incident_type,
+		     languages=languages)
+
+            languages.append('pilot')
+            out_file=utils.make_output_filename(incident_type, languages)
+
+            with open(out_file, 'wb') as of:
+                pickle.dump(pilot_collection, of)
+
+            for incident_obj in pilot_collection.incidents:
+
+                for ref_text_obj in incident_obj.reference_texts:
+                    wiki_title = ref_text_obj.name
+                    language = ref_text_obj.language
+                    annotations=ref_text_obj.annotations
+
+                    prefix = language2info[language]['prefix']
+
+                    year, month, day = language2info[language]['year_month_day']
+                    dct = datetime(year, month, day)
+
+                    nlp = models[language]
+
+                    pilot_utils.text_to_naf(wiki_title,
+				annotations,
+				prefix,
+				language,
+				nlp,
+				dct,
+				output_folder=naf_output_folder)
+
+print('end', datetime.now())
