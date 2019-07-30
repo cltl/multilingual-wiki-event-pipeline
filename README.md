@@ -31,26 +31,35 @@ bash install.sh
 
 ### Extraction steps
 
-All extraction code can be found in the file `extract.py`:
+All extraction code can be found in the file `main.py`:
 
 1. Get Wikidata incident IDs for an event type, like 'election' or 'murder'
 2. Obtain time, location, and other predefined properties from Wikidata
 3. Obtain incident name in *at least one of* a predefined set of languages
 4. For each language, get Wikipedia text based on the incident name in that language, or by using the wikipedia link
-5. For each wikipedia article, get sources/reference texts from Wikipedia
+5. Make a selection for a pilot data based on quality criteria
+6. For each wikipedia article, get sources/reference texts from Wikipedia
+7. Process each document with SpaCy
+8. Enrich with entity links, based on Wikipedia hyperlinks
+9. Store to NAF
+10. Serialize to RDF
 
-The final result is an incident collection for a set of languages and an incident type. This collection is stored in a pickle file in the `bin/` folder. 
+The final result is a processed incident collection for a set of languages and an incident type, stored in multiple ways:
+* a pickle file in the `bin/` folder, containing the incident collection as a python class
+* a number of NAF files in the `wiki_output` folder, containing both raw text and NLP layers
+* an RDF Turtle (.ttl) representation of the extracted incidents and documents, in `bin/rdf`
 
 The script `analyze.py` produces statistics of such incident collections.
 
-The .bin files are serialized to RDF Turtle files by using the script `serialize.py`. This script reads a .bin file that contains an incident collection, and converts it to a .ttl file in the same folder. 
-
 The settings for the experiment are stored centrally in the file `config.py`. In theory, adding a new language and/or event type requires simply a change in the config.
 
-The pilot data is selected in the following way:
-1. the script `select_pilot_data.py` selects a subset of the incidents and reference texts that have the most complete information.
-2. the script `create_pilot_data.py` creates a NAF representation of the pilot reference texts. During this step, the text is processed by spacy to extract token information.
-3. the script `enrich_pilot_data.py` adds entity information to the NAFs. Namely, the hyperlinks extracted during the crawling process are now merged within the NAF files and stored in the entity layer.
+The processing relies on the following utility files:
+* `native_api_utils.py` for querying information from the Wikipedia API
+* `pilot_utils.py` contains functions that select, process, enrich, and store the pilot data to NAF.
+* `wikipedia_utils.py` has functions for loading of information from a preprocessed local Wikipedia dump.
+* `xml_utils.py` has functions for working with XML files.
+
+In addition, we make use of the Spacy-to-NAF functionalities.
 
 ### Statistics
 

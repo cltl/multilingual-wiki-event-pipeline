@@ -1,3 +1,4 @@
+import time
 import spacy
 import os
 from pprint import pprint
@@ -124,6 +125,8 @@ def get_primary_rt_links(incidents):
 
 if __name__ == '__main__':
 
+    start = time.time()
+
     wiki_folder = '../Wikipedia_Reader/wiki'
     naf_output_folder = 'wiki_output'
 
@@ -159,9 +162,15 @@ if __name__ == '__main__':
             with open(output_file, 'wb') as of:
                 pickle.dump(collection, of)
 
+            after_extraction = time.time()
+
             pilots=pilot_utils.create_pilot_data(collection)
 
+            after_pilot_selection=time.time()
+
             pilots=get_primary_rt_links(pilots)
+
+            after_primary_texts=time.time()
 
             pilot_collection=classes.IncidentCollection(incidents=pilots,
 		     incident_type=incident_type,
@@ -173,12 +182,15 @@ if __name__ == '__main__':
             with open(out_file, 'wb') as of:
                 pickle.dump(pilot_collection, of)
 
+            print('start pilot data processing', datetime.now())
             for incident_obj in pilot_collection.incidents:
 
                 for ref_text_obj in incident_obj.reference_texts:
                     wiki_title = ref_text_obj.name
                     language = ref_text_obj.language
                     annotations=ref_text_obj.annotations
+                    text=ref_text_obj.content
+                    uri=ref_text_obj.uri
 
                     prefix = language2info[language]['prefix']
 
@@ -188,11 +200,19 @@ if __name__ == '__main__':
                     nlp = models[language]
 
                     pilot_utils.text_to_naf(wiki_title,
+                                text,
+                                uri,
 				annotations,
 				prefix,
 				language,
 				nlp,
 				dct,
 				output_folder=naf_output_folder)
+    end=time.time()
 
-print('end', datetime.now())
+    print('### Total time elapsed', end-start)
+    print('# Init + extraction of incidents+ref texts', after_extraction-start)
+    print('# Selection of pilot data', after_pilot_selection-after_extraction)
+    print('# Loading of primary ref texts', after_primary_texts-after_pilot_selection)
+    print('# Spacy + enriching with links + storing to NAF', end-after_primary_texts)
+    

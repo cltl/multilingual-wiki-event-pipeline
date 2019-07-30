@@ -86,6 +86,27 @@ def create_pilot_data(data):
     print(len(pilot_incidents))
     return pilot_incidents
 
+def load_annotations(annotations, prefix):
+    """
+    load list of dicts in the form of
+    {'surface_form': 'Mannheim', 'uri': 'Mannheim', 'offset': 52}
+    to
+    :rtype: dict
+    :return: (start_offset, end_offset) -> (surface_form, uri)
+    """
+    start_end2info = {}
+
+    for annotation in annotations:
+        start = annotation['offset']
+        sf = annotation['surface_form']
+        uri = f'{prefix}{annotation["uri"]}'
+        uri = urllib.parse.unquote(uri)
+
+        end = start + len(sf)
+
+        start_end2info[(start, end)] = (sf, uri)
+
+    return start_end2info
 
 def add_hyperlinks(naf, annotations, prefix, verbose=0):
     """
@@ -135,6 +156,8 @@ def add_hyperlinks(naf, annotations, prefix, verbose=0):
         spacy_to_naf.add_entity_element(entities_layer, entity_data, add_comments=True)
 
 def text_to_naf(wiki_title,
+                text,
+                wiki_uri,
                 annotations,
                 prefix,
 		language,
