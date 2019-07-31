@@ -15,10 +15,12 @@ class IncidentCollection:
     
     def __init__(self,
                 incident_type,
+                incident_type_uri,
                 languages,
                 incidents=[],
                 ):
         self.incident_type=incident_type
+        self.incident_type_uri=incident_type_uri
         self.languages=languages
         self.incidents=incidents
         
@@ -135,9 +137,10 @@ class IncidentCollection:
         g.bind('pm', PREMON)
 
         # Some core URIs/Literals
-        election=URIRef('https://www.wikidata.org/wiki/Q40231')
-        election_label=Literal('election')
-        country_label=Literal('country')
+        inc_type_literal=Literal(self.incident_type)
+        inc_type_uri=URIRef(self.incident_type_uri)
+
+        country_literal=Literal('country')
         
         for incident in self.incidents:
             event_id = URIRef('http://www.wikidata.org/entity/%s' % incident.wdt_id)
@@ -159,7 +162,7 @@ class IncidentCollection:
 
             # event type information
             g.add( (event_id, RDF.type, SEM.Event) )
-            g.add(( event_id, SEM.eventType, election))
+            g.add(( event_id, SEM.eventType, inc_type_uri))
 
             # Linking to FN1.7 @ Premon
             g.add(( event_id, RDF.type, FN.change_of_leadership ))
@@ -174,6 +177,7 @@ class IncidentCollection:
                     else:
                         RES=PREMON
                     for v in vals:
+                        v=(v.split('|')[0]).strip()
                         if pid not in {'hasTimeStamp', 'time'}:
                             an_obj=URIRef(v)
                         else:
@@ -184,19 +188,7 @@ class IncidentCollection:
                                 an_obj=Literal(v,datatype=XSD.date)
                         g.add(( event_id, RES[pid], an_obj))
 
-            # time information
-            #timestamp=Literal(incident.time)
-            #g.add((event_id, SEM.hasTimeStamp, timestamp))
-
-            # place information
-            #country=URIRef(incident.country_id)
-            #country_name=Literal(incident.country_name)
-            #g.add((event_id, SEM.hasPlace, country))
-            #g.add((country, RDFS.label, country_name))
-            #g.add((country, RDF.type, WDT_ONT.Q6256))
-
-        g.add((election, RDFS.label, election_label))
-        #g.add((country, RDFS.label, country_label))
+        g.add((inc_type_uri, RDFS.label, inc_type_literal))
 
         # Done. Store the resulting .ttl file now...
         if filename: # if a filename was supplied, store it there

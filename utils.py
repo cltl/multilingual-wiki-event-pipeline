@@ -79,7 +79,7 @@ def construct_and_run_query(type_label, languages, more_props, limit):
                     opt_var_labels.append(var + 'Label')
 
     query = """
-    SELECT DISTINCT ?incident ?incidentLabel %s %s %s WHERE {
+    SELECT DISTINCT ?type_id ?incident ?incidentLabel %s %s %s WHERE {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
       ?type_id rdfs:label "%s"@en .
       ?incident wdt:P31*/wdt:P279* ?type_id .
@@ -117,6 +117,7 @@ def index_results_by_id(raw_results, lang2var, extra_info):
         if 'references' not in current_result:
             current_result['references']=defaultdict(str)
         name=entry['incidentLabel']['value']
+        current_result['type_id']=entry['type_id']['value']
 
         for l, var in lang2var.items():
             label_in_lang=var.strip('?')

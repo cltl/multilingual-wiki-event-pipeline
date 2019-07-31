@@ -80,11 +80,12 @@ def retrieve_incidents_per_type(type_label, limit=10):
                 reference_texts=ref_texts
             )
         incidents.append(incident)
+    inc_type_uri=inc_data['type_id']
     print("Wikidata querying and storing finished. Number of incidents:", len(incidents))
     print('### 2. ### Enriching the reference texts through the Wikipedia-Wikidata API...')
     incidents=add_wikipedia_pages_from_api(incidents, wdt_ids, results_by_id)
     print('API querying done. Number of incidents:', len(incidents))
-    return incidents
+    return incidents, inc_type_uri
 
 def obtain_reference_texts(incidents, wiki_folder, wiki_uri2path_info, language2info):
     print('### 3. ### Retrieve reference text information: text and entity annotations from the local version of Wikipedia.')
@@ -129,6 +130,10 @@ if __name__ == '__main__':
 
     wiki_folder = '../Wikipedia_Reader/wiki'
     naf_output_folder = 'wiki_output'
+    rdf_folder = 'rdf'
+
+    if not os.path.exists(rdf_folder):
+        os.mkdir(rdf_folder)
 
     # load index and language info
     path_uri2path_info = os.path.join(wiki_folder, 'page2path.p')
@@ -149,18 +154,22 @@ if __name__ == '__main__':
     for incident_type in incident_types:
         for languages in languages_list:
             # Query SPARQL and the API to get incidents, their properties, and labels.
-            incidents=retrieve_incidents_per_type(incident_type,99999)
+            incidents, inc_type_uri=retrieve_incidents_per_type(incident_type,99999)
 
             new_incidents=obtain_reference_texts(incidents, wiki_folder, wiki_uri2path_info, language2info)
 
             collection=classes.IncidentCollection(incidents=new_incidents,
                                      incident_type=incident_type,
+                                     incident_type_uri=inc_type_uri,
                                      languages=languages)
             
             output_file=utils.make_output_filename(incident_type, languages)
             
             with open(output_file, 'wb') as of:
                 pickle.dump(collection, of)
+
+            ttl_filename = '%s/%s_%s.ttl' % (rdf_folder, incident_type, '_'.join(languages))
+            collection.serialize(ttl_filename)
 
             after_extraction = time.time()
 
@@ -173,6 +182,7 @@ if __name__ == '__main__':
             after_primary_texts=time.time()
 
             pilot_collection=classes.IncidentCollection(incidents=pilots,
+                     incident_type_uri=inc_type_uri,
 		     incident_type=incident_type,
 		     languages=languages)
 
@@ -181,6 +191,9 @@ if __name__ == '__main__':
 
             with open(out_file, 'wb') as of:
                 pickle.dump(pilot_collection, of)
+
+            ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type, '_'.join(languages))
+            pilot_collection.serialize(ttl_filename)
 
             print('start pilot data processing', datetime.now())
             for incident_obj in pilot_collection.incidents:
