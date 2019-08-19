@@ -51,7 +51,10 @@ class IncidentCollection:
 
         all_info=0
 
-        jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[self.incident_type]
+        if self.incident_type in eventtype2json.keys():
+            jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[self.incident_type]
+        else:
+            jsonfilename='wdt_fn_mappings/any.json'
 
         with open(jsonfilename, 'rb') as f:
             wdt_fn_mappings_COL=json.load(f)
@@ -115,8 +118,12 @@ class IncidentCollection:
         Serialize a collection of incidents to a .ttl file.
         """
 
-        jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[self.incident_type]
+        if self.incident_type in eventtype2json.keys():
+            jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[self.incident_type]
+        else:
+            jsonfilename='wdt_fn_mappings/any.json'
 
+        print(jsonfilename)
         with open(jsonfilename, 'rb') as f:
             wdt_fn_mappings_COL=json.load(f)
 

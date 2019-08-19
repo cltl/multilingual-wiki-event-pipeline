@@ -1,3 +1,4 @@
+import shutil
 import time
 import spacy
 import os
@@ -23,7 +24,6 @@ def add_wikipedia_pages_from_api(incidents, wdt_ids, raw_results):
     id_batches=utils.split_in_batches(wdt_ids, 50)
 
     for index, batch in enumerate(id_batches):
-        print('Querying batch number %d' % index)
         wiki_pages=native_api_utils.obtain_wiki_page_titles(batch, languages)
         for incident in incidents:
             if incident.wdt_id in wiki_pages.keys():
@@ -48,8 +48,11 @@ def retrieve_incidents_per_type(type_label, limit=10):
     Given an event type identifier, retrieve incidents that belong to this type.
     """
     eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
-    jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[type_label]
 
+    if type_label in eventtype2json:
+        jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[type_label]
+    else:
+        jsonfilename='wdt_fn_mappings/any.json'
     with open(jsonfilename, 'rb') as f:
         wdt_fn_mappings_COL=json.load(f)
 
@@ -65,7 +68,6 @@ def retrieve_incidents_per_type(type_label, limit=10):
 
         ref_texts=[]
         for language, name in inc_data['references'].items():
-            print(language, name, wdt_id)
             ref_text=classes.ReferenceText(
                         name=name,
                         language=language,
@@ -126,7 +128,7 @@ def get_primary_rt_links(incidents):
 
 if __name__ == '__main__':
 
-    start = time.time()
+    start_init=time.time()
 
     wiki_folder = '../Wikipedia_Reader/wiki'
     naf_output_folder = 'wiki_output'
@@ -134,6 +136,10 @@ if __name__ == '__main__':
 
     if not os.path.exists(rdf_folder):
         os.mkdir(rdf_folder)
+
+    if os.path.exists(naf_output_folder):
+        shutil.rmtree(naf_output_folder)
+    os.mkdir(naf_output_folder)
 
     # load index and language info
     path_uri2path_info = os.path.join(wiki_folder, 'page2path.p')
@@ -151,10 +157,16 @@ if __name__ == '__main__':
         language, model_name = model_info.split('-')
         models[language] = spacy.load(model_name)
 
+    end_init=time.time()
+    print('Time needed to initialize the extractor', end_init-start_init)
+
     for incident_type in incident_types:
         for languages in languages_list:
+
+            start = time.time()
+
             # Query SPARQL and the API to get incidents, their properties, and labels.
-            incidents, inc_type_uri=retrieve_incidents_per_type(incident_type,99999)
+            incidents, inc_type_uri=retrieve_incidents_per_type(incident_type, 99999)
 
             new_incidents=obtain_reference_texts(incidents, wiki_folder, wiki_uri2path_info, language2info)
 
@@ -215,17 +227,19 @@ if __name__ == '__main__':
                     pilot_utils.text_to_naf(wiki_title,
                                 text,
                                 uri,
-				annotations,
-				prefix,
-				language,
-				nlp,
-				dct,
-				output_folder=naf_output_folder)
-    end=time.time()
+                                annotations,
+                                prefix,
+                                language,
+                                nlp,
+                                dct,
+                                output_folder=naf_output_folder)
+            end=time.time()
 
-    print('### Total time elapsed', end-start)
-    print('# Init + extraction of incidents+ref texts', after_extraction-start)
-    print('# Selection of pilot data', after_pilot_selection-after_extraction)
-    print('# Loading of primary ref texts', after_primary_texts-after_pilot_selection)
-    print('# Spacy + enriching with links + storing to NAF', end-after_primary_texts)
-    
+            print()
+            print('Incident type %s finished. Statistics:' % incident_type)
+            print('### Total time elapsed', end-start)
+            print('# Init + extraction of incidents+ref texts', after_extraction-start)
+            print('# Selection of pilot data', after_pilot_selection-after_extraction)
+            print('# Loading of primary ref texts', after_primary_texts-after_pilot_selection)
+            print('# Spacy + enriching with links + storing to NAF', end-after_primary_texts)
+            

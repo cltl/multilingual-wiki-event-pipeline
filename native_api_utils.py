@@ -70,7 +70,6 @@ def obtain_wiki_page_titles(wdt_ids, languages):
                 results_one[data['site'][:2]]=data['title']
             if len(results_one.keys()):
                 results_batch[id]=results_one
-    print(len(results_batch))
     return results_batch
 
 def filter_langlinks(a_list, other_l):
@@ -201,6 +200,5 @@ def get_uri_from_title(name, lang):
         if page_id=='-1': continue
         return page_info['canonicalurl']
     invented_uri="https://%s.wikipedia.org/wiki/%s" % (lang, name.replace(' ', '_'))
-    print('inventing a URI', inventend_uri)
     return invented_uri
 

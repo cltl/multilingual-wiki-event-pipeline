@@ -18,8 +18,10 @@ eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
 def remove_incidents_with_missing_FEs(incidents, event_type):
     new_incidents=[]
 
-    assert event_type in eventtype2json.keys(), 'Event type %s not in the event type JSON' % event_type
-    jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[event_type]
+    if event_type in eventtype2json.keys():
+        jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[event_type]
+    else:
+        jsonfilename='wdt_fn_mappings/any.json'
 
     with open(jsonfilename, 'rb') as f:
         wdt_fn_mappings_COL=json.load(f)
@@ -38,7 +40,6 @@ def check_ref_text(rt, min_chars=100, max_chars=10000):
     if num_chars<min_chars or num_chars>max_chars:
         return False
     if re.match(r'.*[1-2]([0-9]){3}-[1-2]([0-9]){3}.*$', rt.name):
-        print(rt.name)
         return False
     return True
 
@@ -62,7 +63,6 @@ def create_pilot_data(data):
             for ref_text in incident.reference_texts:
                 if not ref_text.uri:
                     ref_text.uri=api.get_uri_from_title(ref_text.name, ref_text.language)
-                    print(ref_text.name, ref_text.language, 'URI', ref_text.uri)
             pilot_incidents.add(incident)
             for p, v_set in incident.extra_info.items():
                 new_v_set=set()
@@ -72,9 +72,7 @@ def create_pilot_data(data):
                         q_id=v.split('/')[-1]
                         if q_id in cached.keys():
                             label=cached[q_id]
-                            print('cached', q_id)
                         elif v.startswith('http'):
-                            print('no label for', v)
                             label=utils.obtain_label(q_id)
                             time.sleep(1)
                             cached[q_id]=label

@@ -93,7 +93,7 @@ def construct_and_run_query(type_label, languages, more_props, limit):
     r = requests.get(wdt_sparql_url, 
                      params = {'format': 'json', 'query': query})
     res_text=r.text
-    print(res_text)
+    #print(res_text)
     response = json.loads(res_text)
 #    response = r.json()
     results=response['results']['bindings']
