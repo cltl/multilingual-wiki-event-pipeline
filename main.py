@@ -57,7 +57,7 @@ def retrieve_incidents_per_type(type_label, limit=10):
         wdt_fn_mappings_COL=json.load(f)
 
     incidents=[]
-    print("### 1. ### Retrieving and storing wikidata information from SPARQL...")
+    print("\n### 1. ### Retrieving and storing wikidata information from SPARQL...")
     results_by_id=utils.construct_and_run_query(type_label, languages, wdt_fn_mappings_COL, limit)  
     wdt_ids=[]
     for full_wdt_id, inc_data in results_by_id.items():
@@ -84,13 +84,13 @@ def retrieve_incidents_per_type(type_label, limit=10):
         incidents.append(incident)
     inc_type_uri=inc_data['type_id']
     print("Wikidata querying and storing finished. Number of incidents:", len(incidents))
-    print('### 2. ### Enriching the reference texts through the Wikipedia-Wikidata API...')
+    print('\n### 2. ### Enriching the reference texts through the Wikipedia-Wikidata API...')
     incidents=add_wikipedia_pages_from_api(incidents, wdt_ids, results_by_id)
     print('API querying done. Number of incidents:', len(incidents))
     return incidents, inc_type_uri
 
 def obtain_reference_texts(incidents, wiki_folder, wiki_uri2path_info, language2info):
-    print('### 3. ### Retrieve reference text information: text and entity annotations from the local version of Wikipedia.')
+    print('\n### 3. ### Retrieve reference text information: text and entity annotations from the local version of Wikipedia.')
     new_incidents=[]
     for incident in tqdm(incidents):
         new_reference_texts=[]
@@ -128,19 +128,21 @@ def get_primary_rt_links(incidents):
 
 if __name__ == '__main__':
 
+    
     start_init=time.time()
 
     wiki_folder = '../Wikipedia_Reader/wiki'
+
     naf_output_folder = 'wiki_output'
     rdf_folder = 'rdf'
+    bin_folder= 'bin'
 
-    if not os.path.exists(rdf_folder):
-        os.mkdir(rdf_folder)
+    utils.remove_and_create_folder(rdf_folder)
+    utils.remove_and_create_folder(naf_output_folder)
+    utils.remove_and_create_folder(bin_folder)    
 
-    if os.path.exists(naf_output_folder):
-        shutil.rmtree(naf_output_folder)
-    os.mkdir(naf_output_folder)
-
+    print('NAF, RDF, and BIN directories have been re-created')
+    
     # load index and language info
     path_uri2path_info = os.path.join(wiki_folder, 'page2path.p')
     with open(path_uri2path_info, 'rb') as infile:
@@ -150,6 +152,8 @@ if __name__ == '__main__':
     with open(language_info_path, 'r')  as infile:
         language2info = json.load(infile)
 
+    print("Wikipedia indices loaded")
+
     # load spaCy models
     spacy_models = "en-en_core_web_sm;nl-nl_core_news_sm;it-it_core_news_sm"
     models = {}
@@ -157,11 +161,17 @@ if __name__ == '__main__':
         language, model_name = model_info.split('-')
         models[language] = spacy.load(model_name)
 
+    print("Spacy models have been loaded.")
+
     end_init=time.time()
-    print('Time needed to initialize the extractor', end_init-start_init)
+    print('Init phase done. Time needed to initialize the extractor', utils.format_time(end_init-start_init), 'sec')
 
     for incident_type in incident_types:
         for languages in languages_list:
+
+            print('\n\n\n')
+            print('----- INCIDENT TYPE: %s -----' % incident_type) 
+            print('\n\n')
 
             start = time.time()
 
@@ -175,7 +185,9 @@ if __name__ == '__main__':
                                      incident_type_uri=inc_type_uri,
                                      languages=languages)
             
-            output_file=utils.make_output_filename(incident_type, languages)
+            output_file=utils.make_output_filename(bin_folder, 
+                                                    incident_type, 
+                                                    languages)
             
             with open(output_file, 'wb') as of:
                 pickle.dump(collection, of)
@@ -194,12 +206,12 @@ if __name__ == '__main__':
             after_primary_texts=time.time()
 
             pilot_collection=classes.IncidentCollection(incidents=pilots,
-                     incident_type_uri=inc_type_uri,
-		     incident_type=incident_type,
-		     languages=languages)
+                                                         incident_type_uri=inc_type_uri,
+                                                         incident_type=incident_type,
+                                                         languages=languages)
 
             languages.append('pilot')
-            out_file=utils.make_output_filename(incident_type, languages)
+            out_file=utils.make_output_filename(bin_folder, incident_type, languages)
 
             with open(out_file, 'wb') as of:
                 pickle.dump(pilot_collection, of)
@@ -207,9 +219,10 @@ if __name__ == '__main__':
             ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type, '_'.join(languages))
             pilot_collection.serialize(ttl_filename)
 
+            assert len(pilot_collection.incidents)>0, 'No pilot incidents for type %s' % incident_type
+
             print('start pilot data processing', datetime.now())
             for incident_obj in pilot_collection.incidents:
-
                 for ref_text_obj in incident_obj.reference_texts:
                     wiki_title = ref_text_obj.name
                     language = ref_text_obj.language
@@ -237,9 +250,10 @@ if __name__ == '__main__':
 
             print()
             print('Incident type %s finished. Statistics:' % incident_type)
-            print('### Total time elapsed', end-start)
-            print('# Init + extraction of incidents+ref texts', after_extraction-start)
-            print('# Selection of pilot data', after_pilot_selection-after_extraction)
-            print('# Loading of primary ref texts', after_primary_texts-after_pilot_selection)
-            print('# Spacy + enriching with links + storing to NAF', end-after_primary_texts)
+            print('### Time elapsed', utils.format_time(end-start), 'sec')
+            print('# Init + extraction of incidents+ref texts', utils.format_time(after_extraction-start), 'sec')
+            print('# Selection of pilot data', utils.format_time(after_pilot_selection-after_extraction), 'sec')
+            print('# Loading of primary ref texts', utils.format_time(after_primary_texts-after_pilot_selection), 'sec')
+            print('# Spacy + enriching with links + storing to NAF', utils.format_time(end-after_primary_texts), 'sec')
             
+    print('TOTAL TIME TO RUN THE SCRIPT for', incident_types, ':', utils.format_time(end-start_init), 'sec')

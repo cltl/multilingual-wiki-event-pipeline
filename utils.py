@@ -1,3 +1,5 @@
+import shutil
+import os.path
 import json
 import requests
 import sys
@@ -6,12 +8,26 @@ import time
 
 wdt_sparql_url = 'https://query.wikidata.org/sparql'
 
-def make_output_filename(incident_type, languages):
+def format_time(t):
+    """
+    Format time with two decimals.
+    """
+    return round(t,2)
+
+def make_output_filename(bindir, incident_type, languages):
     """
     Create a filename based on the incident type and languages. 
     """
-    output_file='bin/%s_%s.bin' % (incident_type, ','.join(languages))
+    output_file='%s/%s_%s.bin' % (bindir, incident_type, ','.join(languages))
     return output_file
+
+def remove_and_create_folder(fldr):
+    """
+    Remove a folder, if existing, and re-create it.
+    """
+    if  os.path.exists(fldr):
+        shutil.rmtree(fldr)
+    os.mkdir(fldr)
 
 def split_in_batches(a_list, batch_size=500):
     """Yield successive n-sized chunks from a_list."""
@@ -88,7 +104,7 @@ def construct_and_run_query(type_label, languages, more_props, limit):
     } limit %d
     """ % (return_langs, ' '.join(opt_vars), ' '.join(opt_var_labels), type_label, optional_clauses_str, optional_more_info, limit)
 
-    print(query)
+    print('QUERY:\n', query)
 
     r = requests.get(wdt_sparql_url, 
                      params = {'format': 'json', 'query': query})

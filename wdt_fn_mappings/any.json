@@ -4,8 +4,5 @@
     ],
     "sem:hasTimeStamp": [
         "wdt:P585"
-    ],
-    "sem:hasActor": [
-        "wdt:P710"
     ]
 }

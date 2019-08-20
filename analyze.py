@@ -7,12 +7,14 @@ def compute_stats_for_all_combinations(combinations, pilot):
     """
     Compute statistics for all combinations of incident type and languages.
     """
-    
+    bin_folder='bin'    
+
     for incident_type, languages in combinations:
        
         if pilot:
             languages.append('pilot')
-        filename=utils.make_output_filename(incident_type, 
+        filename=utils.make_output_filename(bin_folder,
+                                            incident_type, 
                                             languages)
 
         with open(filename, 'rb') as f:

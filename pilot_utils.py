@@ -81,7 +81,7 @@ def create_pilot_data(data):
                     else:
                         new_v_set.add(v)
                 incident.extra_info[p]=new_v_set
-    print(len(pilot_incidents))
+    print('Num of pilot incidents', len(pilot_incidents))
     return pilot_incidents
 
 def load_annotations(annotations, prefix):
