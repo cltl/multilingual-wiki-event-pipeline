@@ -114,6 +114,10 @@ def obtain_primary_rt_links(title, lang):
     url='https://%s.wikipedia.org/w/api.php?' % lang
 
     j_el=obtain_results_from_api(url, params_extlinks)
+    if 'query' not in el.keys(): 
+        print('no query for this page')
+        return []
+
     for page_id, page_info in j_el['query']['pages'].items():
         if page_id=='-1': continue
 

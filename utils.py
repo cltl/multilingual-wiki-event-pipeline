@@ -99,7 +99,7 @@ def construct_and_run_query(type_label, languages, more_props, limit):
                 clause=f"""OPTIONAL {{ \n\t?incident {a_path} {var} }}\n\t"""
                 optional_more_info+=clause
                 opt_vars.append(var)
-                if type_label not in {"election", "tennis tournament"}:
+                if type_label not in {"election"}:
                     opt_var_labels.append(var + 'Label')
 
     query = """
