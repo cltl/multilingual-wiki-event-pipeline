@@ -34,6 +34,24 @@ def split_in_batches(a_list, batch_size=500):
     for i in range(0, len(a_list), batch_size):
         yield a_list[i:i + batch_size]
 
+def get_results_with_retry(wdt_sparql_url, query):
+    """
+    Run SPARQL query multiple times until the results are there.
+    """
+    while True:
+        try:
+            r = requests.get(wdt_sparql_url,
+                     params = {'format': 'json', 'query': query})
+        #    res_text=r.text
+        #    response = json.loads(res_text)
+            response = r.json()
+            break
+        except Exception as e:
+            print(e, 'error, retrying')
+            time.sleep(2)
+            continue
+    return response
+
 def obtain_label(wd_id):
     """
     Obtain an English label for a property of Wikidata.
@@ -45,19 +63,9 @@ def obtain_label(wd_id):
     }
     LIMIT 1
     """ % wd_id
- 
-    while True:
-        try:
-            r = requests.get(wdt_sparql_url,
-                     params = {'format': 'json', 'query': query})
-#    res_text=r.text
-#    response = json.loads(res_text)
-            response = r.json()
-            break
-        except Exception as e:
-            print(e, 'error, retrying')
-            time.sleep(2)
-            continue
+
+    response=get_results_with_retry(wdt_sparql_url, query) 
+
     results=response['results']['bindings']
     if not len(results):
         return ''
@@ -91,7 +99,7 @@ def construct_and_run_query(type_label, languages, more_props, limit):
                 clause=f"""OPTIONAL {{ \n\t?incident {a_path} {var} }}\n\t"""
                 optional_more_info+=clause
                 opt_vars.append(var)
-                if type_label!="election":
+                if type_label not in {"election", "tennis tournament"}:
                     opt_var_labels.append(var + 'Label')
 
     query = """
@@ -106,12 +114,8 @@ def construct_and_run_query(type_label, languages, more_props, limit):
 
     print('QUERY:\n', query)
 
-    r = requests.get(wdt_sparql_url, 
-                     params = {'format': 'json', 'query': query})
-    res_text=r.text
-    #print(res_text)
-    response = json.loads(res_text)
-#    response = r.json()
+    response=get_results_with_retry(wdt_sparql_url, query)
+
     results=response['results']['bindings']
 
     results_by_id=index_results_by_id(results, lang2var, more_props)

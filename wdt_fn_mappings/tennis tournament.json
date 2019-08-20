@@ -1,0 +1,11 @@
+{
+    "sem:hasPlace": [
+        "wdt:P17"
+    ],
+    "sem:hasTimeStamp": [
+        "wdt:P585"
+    ],
+    "sem:hasActor": [
+        "wdt:P710"
+    ]
+}

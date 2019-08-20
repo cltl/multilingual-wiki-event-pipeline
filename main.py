@@ -61,6 +61,8 @@ def retrieve_incidents_per_type(type_label, limit=10):
     print("\n### 1. ### Retrieving and storing wikidata information from SPARQL...")
     results_by_id=utils.construct_and_run_query(type_label, languages, wdt_fn_mappings_COL, limit)  
     wdt_ids=[]
+    if not len(results_by_id.items()):
+        return [], ''
     for full_wdt_id, inc_data in results_by_id.items():
         extra_info=inc_data['extra_info']
             
@@ -172,6 +174,8 @@ if __name__ == '__main__':
     for incident_type in incident_types:
         for languages in languages_list:
 
+            pilot_and_languages=languages + ['pilot']
+
             inc_stats=[incident_type, ','.join(languages)]
 
             print('\n\n\n')
@@ -182,6 +186,10 @@ if __name__ == '__main__':
 
             # Query SPARQL and the API to get incidents, their properties, and labels.
             incidents, inc_type_uri=retrieve_incidents_per_type(incident_type, 99999)
+
+            if not len(incidents):
+                print('NO INCIDENTS FOUND FOR %s. Continuing to next type...')
+                continue
 
             new_incidents=obtain_reference_texts(incidents, wiki_folder, wiki_uri2path_info, language2info)
 
@@ -217,18 +225,19 @@ if __name__ == '__main__':
                                                          incident_type=incident_type,
                                                          languages=languages)
 
-            languages.append('pilot')
-            out_file=utils.make_output_filename(bin_folder, incident_type, languages)
+            out_file=utils.make_output_filename(bin_folder, incident_type, pilot_and_languages)
 
             with open(out_file, 'wb') as of:
                 pickle.dump(pilot_collection, of)
 
-            ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type, '_'.join(languages))
+            ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type, '_'.join(pilot_and_languages))
             pilot_collection.serialize(ttl_filename)
 
-            assert len(pilot_collection.incidents)>0, 'No pilot incidents for type %s' % incident_type
-
-            print('start pilot data processing', datetime.now())
+            #assert len(pilot_collection.incidents)>0, 'No pilot incidents for type %s' % incident_type
+            if len(pilot_collection.incidents)==0:
+                print('No pilot incidents for type %s' % incident_type)
+            else:
+                print('start pilot data processing', datetime.now())
             for incident_obj in pilot_collection.incidents:
                 for ref_text_obj in incident_obj.reference_texts:
                     wiki_title = ref_text_obj.name
