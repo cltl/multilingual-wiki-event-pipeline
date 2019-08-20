@@ -8,6 +8,7 @@ from tqdm import tqdm
 import json
 from collections import defaultdict
 from datetime import datetime
+import pandas as pd
 
 import pilot_utils
 import native_api_utils
@@ -166,8 +167,12 @@ if __name__ == '__main__':
     end_init=time.time()
     print('Init phase done. Time needed to initialize the extractor', utils.format_time(end_init-start_init), 'sec')
 
+    all_inc_stats=[]
+
     for incident_type in incident_types:
         for languages in languages_list:
+
+            inc_stats=[incident_type, ','.join(languages)]
 
             print('\n\n\n')
             print('----- INCIDENT TYPE: %s -----' % incident_type) 
@@ -191,6 +196,8 @@ if __name__ == '__main__':
             
             with open(output_file, 'wb') as of:
                 pickle.dump(collection, of)
+
+            inc_stats.append(len(collection.incidents))
 
             ttl_filename = '%s/%s_%s.ttl' % (rdf_folder, incident_type, '_'.join(languages))
             collection.serialize(ttl_filename)
@@ -246,14 +253,21 @@ if __name__ == '__main__':
                                 nlp,
                                 dct,
                                 output_folder=naf_output_folder)
+            inc_stats.append(len(pilot_collection.incidents))
+    
             end=time.time()
 
-            print()
-            print('Incident type %s finished. Statistics:' % incident_type)
-            print('### Time elapsed', utils.format_time(end-start), 'sec')
-            print('# Init + extraction of incidents+ref texts', utils.format_time(after_extraction-start), 'sec')
-            print('# Selection of pilot data', utils.format_time(after_pilot_selection-after_extraction), 'sec')
-            print('# Loading of primary ref texts', utils.format_time(after_primary_texts-after_pilot_selection), 'sec')
-            print('# Spacy + enriching with links + storing to NAF', utils.format_time(end-after_primary_texts), 'sec')
-            
+            inc_stats.append(utils.format_time(after_extraction-start))
+            inc_stats.append(utils.format_time(after_pilot_selection-after_extraction))
+            inc_stats.append(utils.format_time(after_primary_texts-after_pilot_selection))
+            inc_stats.append(utils.format_time(end-after_primary_texts))
+            inc_stats.append(utils.format_time(end-start))
+
+            all_inc_stats.append(inc_stats)
+
+    headers=['Type', 'Languages', '#incidents', '#pilot incidents', 'Time to extract incidents+RTs', 'Time to select pilot data', 'Time to get primary RT links', 'Time to run spacy, enrich, and store to NAF+RDF', 'Total time']
+
+    df=pd.DataFrame(all_inc_stats, columns=headers)
+    print(df.to_csv(index=False, sep='\t'))
+
     print('TOTAL TIME TO RUN THE SCRIPT for', incident_types, ':', utils.format_time(end-start_init), 'sec')
