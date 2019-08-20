@@ -48,7 +48,7 @@ def retrieve_incidents_per_type(type_label, limit=10):
     """
     Given an event type identifier, retrieve incidents that belong to this type.
     """
-    eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
+    eventtype2json={'election': 'change_of_leadership', 'murder': 'killing', 'tennis tournament': 'tennis tournament'}
 
     if type_label in eventtype2json:
         jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[type_label]
