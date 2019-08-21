@@ -9,7 +9,7 @@ import numpy as np
 
 import spacy_to_naf
 
-eventtype2json={'election': 'change_of_leadership', 'murder': 'killing', 'tennis tournament': 'tennis tournament'}
+eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'} #, 'tennis tournament': 'tennis tournament'}
 
 class IncidentCollection:
     

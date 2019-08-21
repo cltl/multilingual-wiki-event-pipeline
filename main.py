@@ -48,7 +48,7 @@ def retrieve_incidents_per_type(type_label, limit=10):
     """
     Given an event type identifier, retrieve incidents that belong to this type.
     """
-    eventtype2json={'election': 'change_of_leadership', 'murder': 'killing', 'tennis tournament': 'tennis tournament'}
+    eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'} #, 'tennis tournament': 'tennis tournament'}
 
     if type_label in eventtype2json:
         jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[type_label]
@@ -277,6 +277,6 @@ if __name__ == '__main__':
     headers=['Type', 'Languages', '#incidents', '#pilot incidents', 'Time to extract incidents+RTs', 'Time to select pilot data', 'Time to get primary RT links', 'Time to run spacy, enrich, and store to NAF+RDF', 'Total time']
 
     df=pd.DataFrame(all_inc_stats, columns=headers)
-    print(df.to_csv(index=False, sep='\t'))
+    print(df.to_csv(index=False))
 
     print('TOTAL TIME TO RUN THE SCRIPT for', incident_types, ':', utils.format_time(end-start_init), 'sec')

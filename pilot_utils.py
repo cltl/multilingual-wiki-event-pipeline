@@ -13,7 +13,8 @@ import utils
 import native_api_utils as api
 import spacy_to_naf
 
-eventtype2json={'election': 'change_of_leadership', 'murder': 'killing', 'tennis tournament': 'tennis tournament'}
+eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
+#, 'tennis tournament': 'tennis tournament'}
 
 def remove_incidents_with_missing_FEs(incidents, event_type):
     new_incidents=[]
