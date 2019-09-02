@@ -39,6 +39,8 @@ class IncidentCollection:
         num_prim_rt=[]
         num_with_annotations=0       
  
+        direct_types=[]
+
         countries=[]
         num_wikis=[]
         num_languages=defaultdict(int)
@@ -97,6 +99,13 @@ class IncidentCollection:
                     extra_info_dists[p].append(v)
                     count_values[p]+=1
                 count_occurences[p]+=1
+
+            if isinstance(incident.direct_types, set):
+                for value in incident.direct_types:
+                    direct_types.append(value)
+            else:
+                direct_types.append(incident.direct_types)
+
         if num_with_prim_rt: 
             desc_prim_rt=stats.describe(np.array(num_prim_rt))
             cntr_prim_rt=Counter(num_prim_rt)
@@ -111,7 +120,7 @@ class IncidentCollection:
         for k, v in extra_info_dists.items():
             extra_info_dist_agg[k]=Counter(v).most_common(10)
 
-        return num_incidents, num_with_wikipedia, Counter(found_bys), num_with_prim_rt, num_with_annotations, desc_prim_rt, cntr_prim_rt, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg, count_occurences, count_values, all_info
+        return num_incidents, num_with_wikipedia, Counter(found_bys), Counter(direct_types), num_with_prim_rt, num_with_annotations, desc_prim_rt, cntr_prim_rt, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg, count_occurences, count_values, all_info
     
     def serialize(self, filename=None):
         """
@@ -209,11 +218,13 @@ class Incident:
                 incident_type,
                 wdt_id,
                 reference_texts=[],
-                extra_info={}):
+                extra_info={},
+                direct_types=set()):
         self.incident_type=incident_type
         self.wdt_id=wdt_id
         self.reference_texts=reference_texts
         self.extra_info=extra_info
+        self.direct_types=direct_types
 
 class ReferenceText:
     

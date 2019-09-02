@@ -23,6 +23,7 @@ def compute_stats_for_all_combinations(combinations, pilot):
         num_incidents, \
         num_with_wikipedia, \
         wiki_from_which_method, \
+        direct_type_dist, \
         num_with_prim_rt, \
         num_with_annotations, \
         desc_prim_rt, \
@@ -45,7 +46,9 @@ def compute_stats_for_all_combinations(combinations, pilot):
         print('Num incidents:', num_incidents)
         print('With wiki content:', num_with_wikipedia)
         print('Found by:', wiki_from_which_method)
-        
+
+        print('Direct type distribution', direct_type_dist)       
+ 
         print('Wikipages with primary reference texts:', num_with_prim_rt)
         print('Description of primary reference texts:', desc_prim_rt)
         print('Distribution of primary reference texts:', cntr_prim_rt)

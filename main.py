@@ -59,13 +59,13 @@ def retrieve_incidents_per_type(type_label, limit=10):
 
     incidents=[]
     print("\n### 1. ### Retrieving and storing wikidata information from SPARQL...")
-    results_by_id=utils.construct_and_run_query(type_label, languages, wdt_fn_mappings_COL, limit)  
+    results_by_id=utils.construct_and_run_query(type_label, languages, wdt_fn_mappings_COL, limit)
     wdt_ids=[]
     if not len(results_by_id.items()):
         return [], ''
     for full_wdt_id, inc_data in results_by_id.items():
         extra_info=inc_data['extra_info']
-            
+        direct_types=inc_data['direct_types']
         wdt_id=full_wdt_id.split('/')[-1]
         wdt_ids.append(wdt_id)
 
@@ -81,6 +81,7 @@ def retrieve_incidents_per_type(type_label, limit=10):
         incident=classes.Incident(
                 incident_type=type_label,
                 wdt_id=wdt_id,
+                direct_types=direct_types,
                 extra_info=extra_info,
                 reference_texts=ref_texts
             )

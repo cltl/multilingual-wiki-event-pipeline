@@ -16,6 +16,8 @@ import spacy_to_naf
 eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
 #, 'tennis tournament': 'tennis tournament'}
 
+target_languages=config.languages_list[0]
+
 def remove_incidents_with_missing_FEs(incidents, event_type):
     new_incidents=[]
 
@@ -44,6 +46,20 @@ def check_ref_text(rt, min_chars=100, max_chars=10000):
         return False
     return True
 
+def skip_this_incident(ref_texts, rt_langs, must_have_all_languages=True, must_have_english=True, one_page_per_language=True):
+    """ Perform language checks depending on flags set in the config file."""
+    skip_incident=False
+    if must_have_all_languages:
+        for target_lang in target_languages:
+            if target_lang not in rt_langs:
+                skip_incident=True
+                break
+    if must_have_english and 'en' not in rt_langs: 
+        skip_incident=True
+    elif one_page_per_language and len(ref_texts)!=len(rt_langs):
+        skip_incident=True
+    return skip_incident
+
 def create_pilot_data(data):
     pilot_incidents=set()
 
@@ -60,28 +76,35 @@ def create_pilot_data(data):
                 langs.add(ref_text.language)
                 new_ref_texts.append(ref_text)
         incident.reference_texts=new_ref_texts
-        if 'en' in langs and 'it' in langs and 'nl' in langs and len(new_ref_texts)==3:
-            for ref_text in incident.reference_texts:
-                if not ref_text.uri:
-                    ref_text.uri=api.get_uri_from_title(ref_text.name, ref_text.language)
-            pilot_incidents.add(incident)
-            for p, v_set in incident.extra_info.items():
-                new_v_set=set()
-                for v in v_set:
-                    if '|' not in v:
-                        label=''
-                        q_id=v.split('/')[-1]
-                        if q_id in cached.keys():
-                            label=cached[q_id]
-                        elif v.startswith('http'):
-                            label=utils.obtain_label(q_id)
-                            time.sleep(1)
-                            cached[q_id]=label
-                        v+=' | ' + label
-                        new_v_set.add(v)
-                    else:
-                        new_v_set.add(v)
-                incident.extra_info[p]=new_v_set
+
+        if skip_this_incident(new_ref_texts,
+                            langs, 
+                            config.must_have_all_languages, 
+                            config.must_have_english, 
+                            config.one_page_per_language):
+            continue
+            
+        for ref_text in incident.reference_texts:
+            if not ref_text.uri:
+                ref_text.uri=api.get_uri_from_title(ref_text.name, ref_text.language)
+        pilot_incidents.add(incident)
+        for p, v_set in incident.extra_info.items():
+            new_v_set=set()
+            for v in v_set:
+                if '|' not in v:
+                    label=''
+                    q_id=v.split('/')[-1]
+                    if q_id in cached.keys():
+                        label=cached[q_id]
+                    elif v.startswith('http'):
+                        label=utils.obtain_label(q_id)
+                        time.sleep(1)
+                        cached[q_id]=label
+                    v+=' | ' + label
+                    new_v_set.add(v)
+                else:
+                    new_v_set.add(v)
+            incident.extra_info[p]=new_v_set
     print('Num of pilot incidents', len(pilot_incidents))
     return pilot_incidents
 
@@ -164,7 +187,7 @@ def text_to_naf(wiki_title,
 		dct,
 		output_folder=None):
 
-    assert language in {'nl', 'en', 'it'}, f'{language} not part of supported languages: nl it en'
+    assert language in target_languages, f'{language} not part of supported languages: {" ".join(target_languages)}'
 
     # parse with spaCy
     naf = spacy_to_naf.text_to_NAF(text=text,
