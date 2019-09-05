@@ -1,10 +1,11 @@
 import shutil
 import os.path
-import json
 import requests
-import sys
 from collections import defaultdict
 import time
+from datetime import datetime
+import pickle
+import networkx as nx
 
 wdt_sparql_url = 'https://query.wikidata.org/sparql'
 
@@ -186,3 +187,123 @@ def deduplicate_ref_texts(ref_texts):
         if to_keep:
             new_ref_texts.append(rt)
     return new_ref_texts
+
+
+def extract_subclass_of_ontology(wdt_sparql_url,
+                                 output_folder,
+                                 output_basename,
+                                 verbose=0):
+    """
+    determine whether event type one is subclass or instance of event type two
+
+    SELECT ?subclass1 ?subclass2 WHERE {
+      ?subclass1 wdt:P279 ?subclass2 .
+    }
+
+    :rtype: set
+    :return: set of relations, i.e., x is subclass of y
+    """
+    query = """SELECT ?subclass1 ?subclass2 WHERE {
+      ?subclass1 wdt:P279 ?subclass2 .
+    }"""
+    output_path = os.path.join(output_folder, output_basename)
+
+    if os.path.exists(output_path):
+        set_of_relations = pickle.load(open(output_path, 'rb'))
+        if verbose >= 2:
+            print('loaded subclass of relations from cache')
+    else:
+        if verbose >= 2:
+            print('extracting subclass of relations from api')
+        if os.path.exists(output_folder):
+            shutil.rmtree(output_folder)
+        os.mkdir(output_folder)
+
+        if verbose >= 2:
+            print(f'start {datetime.now()}')
+            print(query)
+
+        response = get_results_with_retry(wdt_sparql_url, query)
+
+        set_of_relations = set()
+        for info in response['results']['bindings']:
+            x = info['subclass1']['value']
+            y = info['subclass2']['value']
+            set_of_relations.add((x,y))
+
+        if verbose >= 2:
+            print(f'found {len(set_of_relations)} unique relations')
+            print(f'end {datetime.now()}')
+
+        with open(output_path, 'wb') as outfile:
+            pickle.dump(set_of_relations, outfile)
+
+    return set_of_relations
+
+
+def load_ontology_as_directed_graph(input_path, output_path, verbose=0):
+    """
+
+    :param str input_path: output of function extract_subclass_of_ontology
+
+    :rtype: networkx.classes.digraph.DiGraph
+    :return: directed graph containing all subclass of relations of Wikidata
+    """
+    with open(input_path, 'rb') as infile:
+        set_of_relations = pickle.load(infile)
+
+    if os.path.exists(output_path):
+        g = nx.read_gpickle(output_path)
+        return g
+
+    relations = []
+    for x, y in set_of_relations:  # x is subclass of y
+        x_short = x.replace('http://www.wikidata.org/entity/', 'wd:')
+        y_short = y.replace('http://www.wikidata.org/entity/', 'wd:')
+        relations.append((y_short, x_short))
+
+    g = nx.DiGraph()
+    g.add_edges_from(relations)
+
+    the_ancestors = nx.ancestors(g, 'wd:Q1656682')
+
+    roots = []
+    for the_ancestor in the_ancestors:
+        children = nx.ancestors(g, the_ancestor)
+        if not children:
+            roots.append(the_ancestor)
+
+    assert len(roots) == 1, f'multiple roots found {roots}'
+    root = roots[0]
+
+    event_node = 'wd:Q1656682'
+    shortest_path_to_event = nx.shortest_path(g, root, event_node)
+
+    all_event_subclasses = nx.descendants(g, event_node)
+    if verbose >= 2:
+        print(f'loaded graph with {len(g.edges())} edges')
+        print(f'found {len(all_event_subclasses)} events under the event node in Wikidata')
+        print(f'root: {root}')
+        print(f'shortest path from event node to root node: {shortest_path_to_event}')
+        print(nx.info(g))
+
+    nx.write_gpickle(g, output_path)
+
+    return g
+
+
+def update_incident(instance_of_values, g, verbose=0):
+    """
+    get all items from direct instance of values to event node
+    ('wd:Q1656682')
+
+    :param set instance_of_values: instance of values, i.e.,
+    wd:IDENTIFIER
+    :param networkx.classes.digraph.DiGrap g: directed graph
+    """
+    all_ancestors = set()
+    for instance_of_value in instance_of_values:
+        assert instance_of_value.startswith('wd:')
+        for items in nx.all_simple_paths(g, 'wd:Q1656682', instance_of_value):
+            all_ancestors.update(items)
+    return all_ancestors

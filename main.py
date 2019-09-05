@@ -65,7 +65,8 @@ def retrieve_incidents_per_type(type_label, limit=10):
         return [], ''
     for full_wdt_id, inc_data in results_by_id.items():
         extra_info=inc_data['extra_info']
-        direct_types=inc_data['direct_types']
+        direct_types={direct_type.replace('http://www.wikidata.org/entity/', 'wd:')
+                      for direct_type in inc_data['direct_types']}
         wdt_id=full_wdt_id.split('/')[-1]
         wdt_ids.append(wdt_id)
 
@@ -141,9 +142,19 @@ if __name__ == '__main__':
     rdf_folder = 'rdf'
     bin_folder= 'bin'
 
+    utils.extract_subclass_of_ontology(wdt_sparql_url='https://query.wikidata.org/sparql',
+                                       output_folder='ontology',
+                                       output_basename='relations.p',
+                                       verbose=2)
+    g = utils.load_ontology_as_directed_graph('ontology/relations.p',
+                                              'ontology/g.p',
+                                              verbose=2)
+
+    print('Loaded subclass ontology information')
+
     utils.remove_and_create_folder(rdf_folder)
     utils.remove_and_create_folder(naf_output_folder)
-    utils.remove_and_create_folder(bin_folder)    
+    utils.remove_and_create_folder(bin_folder)
 
     print('NAF, RDF, and BIN directories have been re-created')
     
@@ -198,6 +209,9 @@ if __name__ == '__main__':
                                      incident_type=incident_type,
                                      incident_type_uri=inc_type_uri,
                                      languages=languages)
+
+            collection.update_incidents_with_ancestors_to_event_node(g, verbose=2)
+
             
             output_file=utils.make_output_filename(bin_folder, 
                                                     incident_type, 

@@ -6,6 +6,7 @@ from rdflib import Graph
 from rdflib import URIRef, BNode, Literal, XSD
 from scipy import stats
 import numpy as np
+import networkx as nx
 
 import spacy_to_naf
 
@@ -23,7 +24,8 @@ class IncidentCollection:
         self.incident_type_uri=incident_type_uri
         self.languages=languages
         self.incidents=incidents
-        
+
+
     
     def compute_stats(self):
         """
@@ -121,7 +123,49 @@ class IncidentCollection:
             extra_info_dist_agg[k]=Counter(v).most_common(10)
 
         return num_incidents, num_with_wikipedia, Counter(found_bys), Counter(direct_types), num_with_prim_rt, num_with_annotations, desc_prim_rt, cntr_prim_rt, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg, count_occurences, count_values, all_info
-    
+
+
+    def update_incidents_with_ancestors_to_event_node(self, g, verbose=0):
+        """
+        update incident object with 'attribute' "ancestors_to_event_node"
+        i.e., all items between a Wikidata event type and its ancestors via
+        the subclass of relation to the event node ('wd:Q1656682')
+
+        :param networkx.classes.digraph.DiGrap g: directed graph
+        """
+        all_direct_types = {
+            direct_type
+            for incident_obj in self.incidents
+            for direct_type in incident_obj.direct_types
+        }
+
+        if verbose >= 2:
+            print(f'found {len(all_direct_types)} direct instance types')
+
+        event_node = 'wd:Q1656682'
+        direct_type2ancestors = defaultdict(set)
+        for direct_type in all_direct_types:
+            assert direct_type.startswith('wd:')
+            for items in nx.all_simple_paths(g, event_node, direct_type):
+                for item in items:
+                    if item != direct_type:
+                        direct_type2ancestors[direct_type].add(item)
+
+
+        number_of_ancestors = []
+        for incident_obj in self.incidents:
+            all_the_ancestors = set()
+            for direct_type in incident_obj.direct_types:
+                all_the_ancestors.update(direct_type2ancestors[direct_type])
+            
+            incident_obj.ancestors_to_event_node = all_the_ancestors
+
+            number_of_ancestors.append(len(all_the_ancestors))
+
+        if verbose >= 2:
+            minimum, maximum, length = min(number_of_ancestors), max(number_of_ancestors), len(number_of_ancestors)
+            print(f'added ancestors to event node for {length} incidents: min: {minimum}, max: {maximum}')
+
     def serialize(self, filename=None):
         """
         Serialize a collection of incidents to a .ttl file.
@@ -211,6 +255,8 @@ class IncidentCollection:
             g.serialize(format='turtle', destination=filename)
         else: # else print to the console
             print(g.serialize(format='turtle'))
+
+
 
 class Incident:
 
