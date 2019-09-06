@@ -307,3 +307,44 @@ def update_incident(instance_of_values, g, verbose=0):
         for items in nx.all_simple_paths(g, 'wd:Q1656682', instance_of_value):
             all_ancestors.update(items)
     return all_ancestors
+
+
+def load_event_type2instancefreq(wdt_sparql_url, output_path, verbose=0):
+    """
+
+    :param str wdt_sparql_url:
+    :return:
+    """
+
+    query = """SELECT DISTINCT ?type_id (count(?incident) as ?num) WHERE {
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+        ?type_id wdt:P279* wd:Q1656682 .
+        ?incident wdt:P31 ?type_id .
+        ?incident rdfs:label ?label .
+        FILTER (langMatches( lang(?label), "EN" ) )
+        } group by ?type_id
+        order by desc(?num)
+    """
+
+    if verbose >= 2:
+        print(f'start {datetime.now()}')
+        print(query)
+
+    response = get_results_with_retry(wdt_sparql_url, query)
+
+    event_type2instance_freq = dict()
+    for info in response['results']['bindings']:
+        event_type = info['type_id']['value']
+        event_type_short = event_type.replace('http://www.wikidata.org/entity/', 'wd:')
+        freq = int(info['num']['value'])
+        event_type2instance_freq[event_type_short] = freq
+
+    if verbose >= 2:
+        print(f'found {len(event_type2instance_freq)} unique relations')
+        print(f'min and max: {min(event_type2instance_freq.values())} {max(event_type2instance_freq.values())}')
+        print(f'end {datetime.now()}')
+
+    with open(output_path, 'wb') as outfile:
+        pickle.dump(event_type2instance_freq, outfile)
+
+    return event_type2instance_freq

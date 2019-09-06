@@ -61,15 +61,10 @@ The processing relies on the following utility files:
 
 In addition, we make use of the Spacy-to-NAF functionalities.
 
-### Statistics
 
-#### Elections
+### Paper
+The file **selection_event_types.py** is used to generate a table to indicate the event type selection.
 
-...
-
-#### Murders
-
-...
 
 ### Modeling
 
