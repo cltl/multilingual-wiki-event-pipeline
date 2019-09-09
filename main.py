@@ -18,7 +18,6 @@ import utils
 import wikipedia_utils as wu
 
 incident_types=config.incident_types
-languages_list=config.languages_list
 
 def add_wikipedia_pages_from_api(incidents, wdt_ids, raw_results):
     assert(len(wdt_ids)>0)
@@ -183,111 +182,112 @@ if __name__ == '__main__':
 
     all_inc_stats=[]
 
+    languages=config.languages_list
+
     for incident_type in incident_types:
-        for languages in languages_list:
 
-            pilot_and_languages=languages + ['pilot']
+        pilot_and_languages=languages + ['pilot']
 
-            inc_stats=[incident_type, ','.join(languages)]
+        inc_stats=[incident_type, ','.join(languages)]
 
-            print('\n\n\n')
-            print('----- INCIDENT TYPE: %s -----' % incident_type) 
-            print('\n\n')
+        print('\n\n\n')
+        print('----- INCIDENT TYPE: %s -----' % incident_type) 
+        print('\n\n')
 
-            start = time.time()
+        start = time.time()
 
-            # Query SPARQL and the API to get incidents, their properties, and labels.
-            incidents, inc_type_uri=retrieve_incidents_per_type(incident_type, 99999)
+        # Query SPARQL and the API to get incidents, their properties, and labels.
+        incidents, inc_type_uri=retrieve_incidents_per_type(incident_type, 99999)
 
-            if not len(incidents):
-                print('NO INCIDENTS FOUND FOR %s. Continuing to next type...')
-                continue
+        if not len(incidents):
+            print('NO INCIDENTS FOUND FOR %s. Continuing to next type...')
+            continue
 
-            new_incidents=obtain_reference_texts(incidents, wiki_folder, wiki_uri2path_info, language2info)
+        new_incidents=obtain_reference_texts(incidents, wiki_folder, wiki_uri2path_info, language2info)
 
-            collection=classes.IncidentCollection(incidents=new_incidents,
-                                     incident_type=incident_type,
-                                     incident_type_uri=inc_type_uri,
-                                     languages=languages)
+        collection=classes.IncidentCollection(incidents=new_incidents,
+                                 incident_type=incident_type,
+                                 incident_type_uri=inc_type_uri,
+                                 languages=languages)
 
-            collection.update_incidents_with_ancestors_to_event_node(g, verbose=2)
+        collection.update_incidents_with_ancestors_to_event_node(g, verbose=2)
 
-            
-            output_file=utils.make_output_filename(bin_folder, 
-                                                    incident_type, 
-                                                    languages)
-            
-            with open(output_file, 'wb') as of:
-                pickle.dump(collection, of)
+        
+        output_file=utils.make_output_filename(bin_folder, 
+                                                incident_type, 
+                                                languages)
+        
+        with open(output_file, 'wb') as of:
+            pickle.dump(collection, of)
 
-            inc_stats.append(len(collection.incidents))
+        inc_stats.append(len(collection.incidents))
 
-            ttl_filename = '%s/%s_%s.ttl' % (rdf_folder, incident_type, '_'.join(languages))
-            collection.serialize(ttl_filename)
+        ttl_filename = '%s/%s_%s.ttl' % (rdf_folder, incident_type, '_'.join(languages))
+        collection.serialize(ttl_filename)
 
-            after_extraction = time.time()
+        after_extraction = time.time()
 
-            pilots=pilot_utils.create_pilot_data(collection)
+        pilots=pilot_utils.create_pilot_data(collection)
 
-            after_pilot_selection=time.time()
+        after_pilot_selection=time.time()
 
-            pilots=get_primary_rt_links(pilots)
+        pilots=get_primary_rt_links(pilots)
 
-            after_primary_texts=time.time()
+        after_primary_texts=time.time()
 
-            pilot_collection=classes.IncidentCollection(incidents=pilots,
-                                                         incident_type_uri=inc_type_uri,
-                                                         incident_type=incident_type,
-                                                         languages=languages)
+        pilot_collection=classes.IncidentCollection(incidents=pilots,
+                                                     incident_type_uri=inc_type_uri,
+                                                     incident_type=incident_type,
+                                                     languages=languages)
 
-            out_file=utils.make_output_filename(bin_folder, incident_type, pilot_and_languages)
+        out_file=utils.make_output_filename(bin_folder, incident_type, pilot_and_languages)
 
-            with open(out_file, 'wb') as of:
-                pickle.dump(pilot_collection, of)
+        with open(out_file, 'wb') as of:
+            pickle.dump(pilot_collection, of)
 
-            ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type, '_'.join(pilot_and_languages))
-            pilot_collection.serialize(ttl_filename)
+        ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type, '_'.join(pilot_and_languages))
+        pilot_collection.serialize(ttl_filename)
 
-            #assert len(pilot_collection.incidents)>0, 'No pilot incidents for type %s' % incident_type
-            if len(pilot_collection.incidents)==0:
-                print('No pilot incidents for type %s' % incident_type)
-            else:
-                print('start pilot data processing', datetime.now())
-            for incident_obj in pilot_collection.incidents:
-                for ref_text_obj in incident_obj.reference_texts:
-                    wiki_title = ref_text_obj.name
-                    language = ref_text_obj.language
-                    annotations=ref_text_obj.annotations
-                    text=ref_text_obj.content
-                    uri=ref_text_obj.uri
+        #assert len(pilot_collection.incidents)>0, 'No pilot incidents for type %s' % incident_type
+        if len(pilot_collection.incidents)==0:
+            print('No pilot incidents for type %s' % incident_type)
+        else:
+            print('start pilot data processing', datetime.now())
+        for incident_obj in pilot_collection.incidents:
+            for ref_text_obj in incident_obj.reference_texts:
+                wiki_title = ref_text_obj.name
+                language = ref_text_obj.language
+                annotations=ref_text_obj.annotations
+                text=ref_text_obj.content
+                uri=ref_text_obj.uri
 
-                    prefix = language2info[language]['prefix']
+                prefix = language2info[language]['prefix']
 
-                    year, month, day = language2info[language]['year_month_day']
-                    dct = datetime(year, month, day)
+                year, month, day = language2info[language]['year_month_day']
+                dct = datetime(year, month, day)
 
-                    nlp = models[language]
+                nlp = models[language]
 
-                    pilot_utils.text_to_naf(wiki_title,
-                                text,
-                                uri,
-                                annotations,
-                                prefix,
-                                language,
-                                nlp,
-                                dct,
-                                output_folder=naf_output_folder)
-            inc_stats.append(len(pilot_collection.incidents))
-    
-            end=time.time()
+                pilot_utils.text_to_naf(wiki_title,
+                            text,
+                            uri,
+                            annotations,
+                            prefix,
+                            language,
+                            nlp,
+                            dct,
+                            output_folder=naf_output_folder)
+        inc_stats.append(len(pilot_collection.incidents))
 
-            inc_stats.append(utils.format_time(after_extraction-start))
-            inc_stats.append(utils.format_time(after_pilot_selection-after_extraction))
-            inc_stats.append(utils.format_time(after_primary_texts-after_pilot_selection))
-            inc_stats.append(utils.format_time(end-after_primary_texts))
-            inc_stats.append(utils.format_time(end-start))
+        end=time.time()
 
-            all_inc_stats.append(inc_stats)
+        inc_stats.append(utils.format_time(after_extraction-start))
+        inc_stats.append(utils.format_time(after_pilot_selection-after_extraction))
+        inc_stats.append(utils.format_time(after_primary_texts-after_pilot_selection))
+        inc_stats.append(utils.format_time(end-after_primary_texts))
+        inc_stats.append(utils.format_time(end-start))
+
+        all_inc_stats.append(inc_stats)
 
     headers=['Type', 'Languages', '#incidents', '#pilot incidents', 'Time to extract incidents+RTs', 'Time to select pilot data', 'Time to get primary RT links', 'Time to run spacy, enrich, and store to NAF+RDF', 'Total time']
 

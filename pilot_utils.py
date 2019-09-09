@@ -16,7 +16,7 @@ import spacy_to_naf
 eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
 #, 'tennis tournament': 'tennis tournament'}
 
-target_languages=config.languages_list[0]
+target_languages=config.languages_list
 
 def remove_incidents_with_missing_FEs(incidents, event_type):
     new_incidents=[]

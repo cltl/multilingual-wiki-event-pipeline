@@ -67,7 +67,7 @@ def compute_stats_for_all_combinations(combinations, pilot):
 if __name__ == '__main__':
 
     incident_types=config.incident_types
-    languages_list=config.languages_list
+    languages_list=[config.languages_list]
     pilot=config.pilot
 
     cartesian_product=[(x, y) for x in incident_types for y in languages_list]
