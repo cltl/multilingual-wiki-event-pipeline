@@ -27,6 +27,19 @@ A number of resources need to be downloaded. This can be done calling:
 bash install.sh
 ```
 
+### Config flags
+
+`incident_types` is a list of all event types that we want to extract information about. Example: `['conflagration', 'earthquake', 'murder']`
+
+`languages_list` is a list of languages that we want to extract texts for. Example: `['nl', 'it', 'en']`
+
+There are also several flags that tell the script which criteria to use for the pilot data, namely:
+* `must_have_all_languages` is a Boolean variable that specifies whether the incidents must have a description in all languages from the `languages_list`.
+* `must_have_english` is a Boolean variable, specifying whether English must be among the languages that describe a pilot data incident.
+* `one_page_per_language` is a Boolean variable that specifies whether we only want to keep incidents with exactly one page per language from the `languages_list`.
+
+Finally, the Boolean flag `pilot` is used to perform analysis in the script `analyze.py`, either on the full data or on the pilot data. 
+
 ## Code documentation
 
 ### Extraction steps
