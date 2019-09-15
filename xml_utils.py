@@ -283,3 +283,44 @@ assert get_range_of_tids('t10', 't10') == ['t10']
 assert get_range_of_tids('t10', 't11') == ['t10', 't11']
 assert get_range_of_tids('t10', 't12') == ['t10', 't11', 't12']
 # assert get_range_of_tids('t12', 't10') # should raise exception
+
+
+def iterable_of_lexical_items(doc,
+                              xml_path,
+                              selected_attributes,
+                              attr_requirements={},
+                              verbose=0):
+    """
+    Create generator of values in a NAF files, e.g.,
+    all lemmas that are pos="NOUN"
+
+    :param lxml.etree._ElementTree doc: result of etree.parse(PATH)
+    :param xml_path: e.g., terms/term
+    :param list attribute: list of attributes to concatenate, e.g., ["lemma"] or ["lemma", "pos"]
+    :param dict attr_requirements: whether you want other attributes of the
+    same element to have a specific value, e.g, {"pos": {"NOUN"}}
+
+    :rtype: generator
+    :return generator of values
+    """
+    for el in doc.xpath(xml_path):
+
+        el_attributes = el.attrib
+
+        to_add = True
+
+        for req_attr, ok_values in attr_requirements.items():
+            el_attr_value = el_attributes[req_attr]
+            assert req_attr in el_attributes, f'required attribute not part of element attributes: {attributes}'
+            if el_attr_value not in ok_values:
+                if verbose >= 2:
+                    print(f'skipping element because {req_attr} has value {el_attr_value}')
+                to_add = False
+
+        if not to_add:
+            continue
+
+        values = [el.get(attr)
+                  for attr in selected_attributes]
+        the_value = '--'.join(values)
+        yield the_value

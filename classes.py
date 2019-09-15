@@ -8,12 +8,17 @@ from scipy import stats
 import numpy as np
 import networkx as nx
 
+import os
+import lxml
+from lxml import etree
 import spacy_to_naf
+from xml_utils import iterable_of_lexical_items
+
 
 eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'} #, 'tennis tournament': 'tennis tournament'}
 
 class IncidentCollection:
-    
+
     def __init__(self,
                 incident_type,
                 incident_type_uri,
@@ -25,13 +30,15 @@ class IncidentCollection:
         self.languages=languages
         self.incidents=incidents
 
+        self.direct_type2shortest_path = {}
+        self.direct_type2descendants = {}
 
-    
+
     def compute_stats(self):
         """
         Compute statistics on the incident collection.
         """
-        
+
         num_with_wikipedia=0
         wiki_from_both_methods=0
         wiki_from_api_only=0
@@ -39,8 +46,8 @@ class IncidentCollection:
 
         num_with_prim_rt=0
         num_prim_rt=[]
-        num_with_annotations=0       
- 
+        num_with_annotations=0
+
         direct_types=[]
 
         countries=[]
@@ -108,7 +115,7 @@ class IncidentCollection:
             else:
                 direct_types.append(incident.direct_types)
 
-        if num_with_prim_rt: 
+        if num_with_prim_rt:
             desc_prim_rt=stats.describe(np.array(num_prim_rt))
             cntr_prim_rt=Counter(num_prim_rt)
             cntr_prim_rt = dict(sorted(cntr_prim_rt.items()))
@@ -117,7 +124,7 @@ class IncidentCollection:
             cntr_prim_rt=None
         countries_dist=Counter(countries).most_common(10)
         numwiki_dist=Counter(num_wikis)
-        
+
         extra_info_dist_agg={}
         for k, v in extra_info_dists.items():
             extra_info_dist_agg[k]=Counter(v).most_common(10)
@@ -125,13 +132,50 @@ class IncidentCollection:
         return num_incidents, num_with_wikipedia, Counter(found_bys), Counter(direct_types), num_with_prim_rt, num_with_annotations, desc_prim_rt, cntr_prim_rt, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg, count_occurences, count_values, all_info
 
 
-    def update_incidents_with_ancestors_to_event_node(self, g, verbose=0):
+    def event_expressions_or_meanings_distribution(self, event_type, lang, nlp_task, add_descendants=False, verbose=0):
         """
-        update incident object with 'attribute' "ancestors_to_event_node"
-        i.e., all items between a Wikidata event type and its ancestors via
-        the subclass of relation to the event node ('wd:Q1656682')
+
+        :param list event_types: list of event type
+        :param str lang: nl | en | it
+        :param str nlp_task: lemma, entity, frame
+        :param bool add_descendants: if True, also include all descendants via the subclass of relation
+        """
+        wdt_ids = self.event_type2wdt_ids[event_type]
+
+        if verbose >= 2:
+            print(f'found {len(wdt_ids)} incidents')
+
+        the_descendants = set()
+        if add_descendants:
+            the_descendants = self.direct_type2descendants[event_type]
+            wdt_ids.update(the_descendants)
+
+        if verbose >= 2:
+            print(f'found {len(wdt_ids)} event types for {event_type} (of which {len(the_descendants)} descendants)')
+
+        the_distribution = dict()
+        for incident_obj in self.incidents:
+            if incident_obj.wdt_id in wdt_ids:
+                for ref_text_obj in incident_obj.reference_texts:
+                    if ref_text_obj.language == lang:
+                        for item, freq in ref_text_obj.distributions[nlp_task].items():
+                            if item not in the_distribution:
+                                the_distribution[item] = 0
+                            the_distribution[item] += freq
+
+        return the_distribution
+
+
+
+    def update_incidents_with_subclass_of_info(self, g, top_node='wd:Q1656682', verbose=0):
+        """
+        update incident object with 'attributes':
+         - "shortest_path_to_top_node": shortest path between direct types and chosen top node
+         - "descendants": all descendants of both direct types
+         - "depth_level" : length of shortest path to top node
 
         :param networkx.classes.digraph.DiGrap g: directed graph
+        :param top_node: node to which you want to query the path, e.g., the event node
         """
         all_direct_types = {
             direct_type
@@ -139,32 +183,57 @@ class IncidentCollection:
             for direct_type in incident_obj.direct_types
         }
 
+        assert g.has_node(top_node), f'top node {top_node} not found in subclass of graph'
+
         if verbose >= 2:
             print(f'found {len(all_direct_types)} direct instance types')
 
-        event_node = 'wd:Q1656682'
-        direct_type2ancestors = defaultdict(set)
+        self.direct_type2shortest_path = {}
+        self.direct_type2descendants = {}
+
         for direct_type in all_direct_types:
-            assert direct_type.startswith('wd:')
-            for items in nx.all_simple_paths(g, event_node, direct_type):
-                for item in items:
-                    if item != direct_type:
-                        direct_type2ancestors[direct_type].add(item)
 
+            assert direct_type.startswith('wd:'), f'incorrect node identifier {direct_type}, should start with wd:'
 
-        number_of_ancestors = []
+            if not g.has_node(direct_type):
+                shortest_path = []
+                the_descendants = set()
+
+            else:
+                try:
+                    shortest_path = nx.shortest_path(g, top_node, direct_type)
+                    shortest_path.remove(direct_type)
+                    assert direct_type not in shortest_path, f'direct_type {direct_type} should not be in its own path'
+                except nx.NetworkXNoPath:
+                    shortest_path = []
+
+                the_descendants = nx.descendants(g, direct_type)
+
+            self.direct_type2shortest_path[direct_type] = shortest_path
+            self.direct_type2descendants[direct_type] = the_descendants
+
+        path_lengths = []
         for incident_obj in self.incidents:
-            all_the_ancestors = set()
-            for direct_type in incident_obj.direct_types:
-                all_the_ancestors.update(direct_type2ancestors[direct_type])
-            
-            incident_obj.ancestors_to_event_node = all_the_ancestors
 
-            number_of_ancestors.append(len(all_the_ancestors))
+            for direct_type in incident_obj.direct_types:
+                incident_obj.descendants.update(self.direct_type2descendants[direct_type])
+
+                shortest_path = self.direct_type2shortest_path[direct_type]
+
+                if not incident_obj.shortest_path_to_top_node:
+                    incident_obj.shortest_path_to_top_node = shortest_path
+                else:
+                    if len(shortest_path) < len(incident_obj.shortest_path_to_top_node):
+                        incident_obj.shortest_path_to_top_node = shortest_path
+
+                incident_obj.depth_level = len(incident_obj.shortest_path_to_top_node)
+
+            path_lengths.append(len(incident_obj.shortest_path_to_top_node))
 
         if verbose >= 2:
-            minimum, maximum, length = min(number_of_ancestors), max(number_of_ancestors), len(number_of_ancestors)
-            print(f'added ancestors to event node for {length} incidents: min: {minimum}, max: {maximum}')
+            print()
+            print(f'added ancestors to event node for {len(path_lengths)} incidents: {len(set(path_lengths))} number of unique types')
+            print(Counter(path_lengths))
 
     def serialize(self, filename=None):
         """
@@ -181,7 +250,7 @@ class IncidentCollection:
             wdt_fn_mappings_COL=json.load(f)
 
         g = Graph()
-        
+
         # Namespaces definition
         SEM=Namespace('http://semanticweb.cs.vu.nl/2009/11/sem/')
         WDT_ONT=Namespace('http://www.wikidata.org/wiki/')
@@ -201,7 +270,7 @@ class IncidentCollection:
         inc_type_uri=URIRef(self.incident_type_uri)
 
         country_literal=Literal('country')
-        
+
         for incident in self.incidents:
             event_id = URIRef('http://www.wikidata.org/entity/%s' % incident.wdt_id)
 
@@ -218,7 +287,7 @@ class IncidentCollection:
                 g.add(( wikipedia_article, DCT.language, Literal(ref_text.language) ))
                 g.add(( wikipedia_article, DCT.type, URIRef('http://purl.org/dc/dcmitype/Text') ))
                 for source in ref_text.primary_ref_texts:
-                    g.add(( wikipedia_article, DCT.source, URIRef(source) ))        
+                    g.add(( wikipedia_article, DCT.source, URIRef(source) ))
 
             # event type information
             g.add( (event_id, RDF.type, SEM.Event) )
@@ -258,9 +327,19 @@ class IncidentCollection:
 
 
 
+    def get_index_event_type2wdt_ids(self):
+        event_type2wdt_ids = defaultdict(set)
+        for incident_obj in self.incidents:
+            for direct_type in incident_obj.direct_types:
+                event_type2wdt_ids[direct_type].add(incident_obj.wdt_id)
+
+        return event_type2wdt_ids
+
+
+
 class Incident:
 
-    def __init__(self, 
+    def __init__(self,
                 incident_type,
                 wdt_id,
                 reference_texts=[],
@@ -272,8 +351,12 @@ class Incident:
         self.extra_info=extra_info
         self.direct_types=direct_types
 
+        self.shortest_path_to_top_node = []
+        self.descendants = set()
+        self.depth_level = None
+
 class ReferenceText:
-    
+
     def __init__(self,
                 uri='',
                 web_archive_uri='',
@@ -299,6 +382,7 @@ class ReferenceText:
         self.wiki_langlinks=wiki_langlinks
         self.found_by=found_by
         self.annotations=annotations
+        self.distributions = {}
 
     def process_spacy_and_convert_to_naf(self,
                                          nlp,
@@ -328,3 +412,57 @@ class ReferenceText:
                 outfile.write(spacy_to_naf.NAF_to_string(NAF=root))
 
         return root
+
+    def extract_distributions(self, naf_folder, verbose=0):
+        """
+        extract distributions of lemma, predicates, and entities
+
+        :param str naf_folder: folder with processed NAF files
+
+        """
+        # TODO: remove after rerun of event types
+        self.distributions = {
+            'lemma' : {},
+            'entity' : {},
+            'frame' : {}
+            }
+
+        path = os.path.join(naf_folder, self.language, f'{self.name}.naf')
+
+        if verbose >= 4:
+            print(path)
+
+        if not os.path.exists(path):
+            if verbose >= 3:
+                print(f'does not exist: {path}')
+        else:
+
+            compute = True
+            try:
+                doc = etree.parse(path)
+            except lxml.etree.XMLSyntaxError:
+                if verbose >= 2:
+                    print(f'{path} is empty')
+                    compute = False
+
+            if compute:
+                terms = iterable_of_lexical_items(doc,
+                                                  xml_path='terms/term',
+                                                  selected_attributes=['lemma'],
+                                                  verbose=1)
+
+                entities = iterable_of_lexical_items(doc,
+                                                     xml_path='entities/entity/externalReferences/externalRef',
+                                                     selected_attributes=['reference'],
+                                                     verbose=1)
+
+                frames = iterable_of_lexical_items(doc,
+                                                   xml_path='srl/predicate',
+                                                   selected_attributes=['uri'],
+                                                   verbose=1)
+
+                self.distributions = {
+                    'lemma' : Counter(terms),
+                    'entity' : Counter(entities),
+                    'frame' : Counter(frames)
+                }

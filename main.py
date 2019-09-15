@@ -136,20 +136,9 @@ if __name__ == '__main__':
     start_init=time.time()
 
     wiki_folder = '../Wikipedia_Reader/wiki'
-
     naf_output_folder = 'wiki_output'
     rdf_folder = 'rdf'
     bin_folder= 'bin'
-
-    utils.extract_subclass_of_ontology(wdt_sparql_url='https://query.wikidata.org/sparql',
-                                       output_folder='ontology',
-                                       output_basename='relations.p',
-                                       verbose=2)
-    g = utils.load_ontology_as_directed_graph('ontology/relations.p',
-                                              'ontology/g.p',
-                                              verbose=2)
-
-    print('Loaded subclass ontology information')
 
     utils.remove_and_create_folder(rdf_folder)
     utils.remove_and_create_folder(naf_output_folder)
@@ -167,6 +156,12 @@ if __name__ == '__main__':
         language2info = json.load(infile)
 
     print("Wikipedia indices loaded")
+
+    wiki_langlinks_path = 'resources/Wikipedia_langlinks/resources/wikipedia-parallel-titles/output/merged_indices.p'
+    with open(wiki_langlinks_path, 'rb') as infile:
+        wiki_langlinks = pickle.load(infile)
+
+    print('Wikipedia parallel titles loaded')
 
     # load spaCy models
     spacy_models = "en-en_core_web_sm;nl-nl_core_news_sm;it-it_core_news_sm"
@@ -210,9 +205,6 @@ if __name__ == '__main__':
                                  incident_type_uri=inc_type_uri,
                                  languages=languages)
 
-        collection.update_incidents_with_ancestors_to_event_node(g, verbose=2)
-
-        
         output_file=utils.make_output_filename(bin_folder, 
                                                 incident_type, 
                                                 languages)
@@ -276,7 +268,8 @@ if __name__ == '__main__':
                             language,
                             nlp,
                             dct,
-                            output_folder=naf_output_folder)
+                            output_folder=naf_output_folder,
+                            wiki_langlinks=wiki_langlinks)
         inc_stats.append(len(pilot_collection.incidents))
 
         end=time.time()

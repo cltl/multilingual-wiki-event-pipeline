@@ -15,3 +15,9 @@ cd FN_Reader
 pip install -r requirements.txt
 bash install.sh
 cd ..
+
+git clone https://github.com/cltl/Wikipedia_langlinks
+cd Wikipedia_langlinks
+bash download.sh
+bash extract.sh
+

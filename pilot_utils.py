@@ -130,7 +130,7 @@ def load_annotations(annotations, prefix):
 
     return start_end2info
 
-def add_hyperlinks(naf, annotations, prefix, verbose=0):
+def add_hyperlinks(naf, annotations, prefix, language, dct, wiki_langlinks={}, verbose=0):
     """
     :param lxml.etree._Element naf: the root element of the XML file    :param wiki_page:
     :param list annotations: list of annotations, e.g.,
@@ -149,6 +149,17 @@ def add_hyperlinks(naf, annotations, prefix, verbose=0):
 
     next_id = 1
     entities_layer = etree.SubElement(naf, "entities")
+
+    naf_header = naf.find('nafHeader')
+    ling_proc = etree.SubElement(naf_header, "linguisticProcessors")
+    ling_proc.set("layer", 'entities')
+    lp = etree.SubElement(ling_proc, "lp")
+    the_time = spacy_to_naf.time_in_correct_format(dct)
+    lp.set("beginTimestamp", the_time)
+    lp.set('endTimestamp', the_time)
+    lp.set('name', 'Wikipedia')
+    lp.set('version', '2019-07-20') # TODO: change this if we move to other version of Wikipedia
+
     for (start, end), (sf, uri) in start_end2info.items():
 
         if start not in from_start2tid:
@@ -167,12 +178,17 @@ def add_hyperlinks(naf, annotations, prefix, verbose=0):
         t_ids = xml_utils.get_range_of_tids(start_tid,
                                             end_tid)
 
+        ext_refs = [{'resource' : 'Wikipedia', 'reference': uri}]
+        if wiki_langlinks:
+            for lang, uri in wiki_langlinks[language][uri].items():
+                ext_refs.append({'resource' : 'Wikipedia', 'reference': uri})
+
         entity_data=spacy_to_naf.EntityElement(
                                              eid='e%d' % next_id,
                                              entity_type='UNK',
                                              text=sf,
                                              targets=t_ids,
-                                             ext_refs=[{'reference': uri}])
+                                             ext_refs=ext_refs)
         next_id += 1
 
         spacy_to_naf.add_entity_element(entities_layer, entity_data, add_comments=True)
@@ -182,11 +198,11 @@ def text_to_naf(wiki_title,
                 wiki_uri,
                 annotations,
                 prefix,
-		language,
-		nlp, 
-		dct,
-		output_folder=None):
-
+		        language,
+		        nlp, 
+		        dct,
+		        output_folder=None,
+                wiki_langlinks={}):
     assert language in target_languages, f'{language} not part of supported languages: {" ".join(target_languages)}'
 
     # parse with spaCy
@@ -203,7 +219,10 @@ def text_to_naf(wiki_title,
     # add hyperlinks as entity elements
     add_hyperlinks(naf,
 	           annotations,
-	           prefix)
+	           prefix,
+               language,
+               dct,
+               wiki_langlinks=wiki_langlinks)
 
     # if wanted, write output to disk
     if output_folder is not None:
