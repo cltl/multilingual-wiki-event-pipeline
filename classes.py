@@ -13,6 +13,7 @@ import lxml
 from lxml import etree
 import spacy_to_naf
 from xml_utils import iterable_of_lexical_items
+from resources.NAF_indexer import naf_classes
 
 
 eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'} #, 'tennis tournament': 'tennis tournament'}
@@ -34,7 +35,7 @@ class IncidentCollection:
         self.direct_type2descendants = {}
 
 
-    def compute_stats(self):
+    def compute_stats(self, verbose=0):
         """
         Compute statistics on the incident collection.
         """
@@ -75,11 +76,14 @@ class IncidentCollection:
         num_incidents=len(self.incidents)
         for incident in self.incidents:
             langs=set()
-            print('incident ID: ', incident.wdt_id)
+            if verbose >= 1:
+                print('incident ID: ', incident.wdt_id)
             for ref_text in incident.reference_texts:
-                print('URI', ref_text.uri)
+                if verbose >= 1:
+                    print('URI', ref_text.uri)
                 if ref_text.content:
-                    print(ref_text.name, ', FOUND BY: ', ref_text.found_by)
+                    if verbose >= 1:
+                        print(ref_text.name, ', FOUND BY: ', ref_text.found_by)
                     num_with_wikipedia+=1
                 if len(ref_text.primary_ref_texts):
                     num_with_prim_rt+=1
@@ -132,38 +136,44 @@ class IncidentCollection:
         return num_incidents, num_with_wikipedia, Counter(found_bys), Counter(direct_types), num_with_prim_rt, num_with_annotations, desc_prim_rt, cntr_prim_rt, countries_dist, numwiki_dist, num_languages, extra_info_dist_agg, count_occurences, count_values, all_info
 
 
-    def event_expressions_or_meanings_distribution(self, event_type, lang, nlp_task, add_descendants=False, verbose=0):
+    def event_expressions_or_meanings_distribution(self, event_type, lang, 
+                                                   add_descendants=False, verbose=0):
         """
 
         :param list event_types: list of event type
         :param str lang: nl | en | it
-        :param str nlp_task: lemma, entity, frame
         :param bool add_descendants: if True, also include all descendants via the subclass of relation
         """
         wdt_ids = self.event_type2wdt_ids[event_type]
 
-        if verbose >= 2:
-            print(f'found {len(wdt_ids)} incidents')
-
         the_descendants = set()
         if add_descendants:
             the_descendants = self.direct_type2descendants[event_type]
-            wdt_ids.update(the_descendants)
+            descendants_wdt_ids = set()
+            for the_descendant in the_descendants:
+                descendants_wdt_ids.update(self.event_type2wdt_ids.get(the_descendant, set()))
+
+            wdt_ids.update(descendants_wdt_ids)
 
         if verbose >= 2:
-            print(f'found {len(wdt_ids)} event types for {event_type} (of which {len(the_descendants)} descendants)')
+            print(f'found {len(wdt_ids)} incidents for {event_type}')
+            if add_descendants:
+                print(f'found {len(the_descendants)} different descendant event types') 
+                print(f'number of incidents in descendants: {len(descendants_wdt_ids)}')
+            
 
-        the_distribution = dict()
+        naf_coll_obj = naf_classes.NAF_collection()
         for incident_obj in self.incidents:
             if incident_obj.wdt_id in wdt_ids:
                 for ref_text_obj in incident_obj.reference_texts:
                     if ref_text_obj.language == lang:
-                        for item, freq in ref_text_obj.distributions[nlp_task].items():
-                            if item not in the_distribution:
-                                the_distribution[item] = 0
-                            the_distribution[item] += freq
+                        if ref_text_obj.naf is not None:
+                            naf_coll_obj.add_naf_objects([ref_text_obj.naf])
 
-        return the_distribution
+        naf_coll_obj.merge_distributions('terms')
+        naf_coll_obj.merge_distributions('predicates')
+
+        return naf_coll_obj
 
 
 
@@ -383,6 +393,7 @@ class ReferenceText:
         self.found_by=found_by
         self.annotations=annotations
         self.distributions = {}
+        self.naf = None
 
     def process_spacy_and_convert_to_naf(self,
                                          nlp,
@@ -413,56 +424,3 @@ class ReferenceText:
 
         return root
 
-    def extract_distributions(self, naf_folder, verbose=0):
-        """
-        extract distributions of lemma, predicates, and entities
-
-        :param str naf_folder: folder with processed NAF files
-
-        """
-        # TODO: remove after rerun of event types
-        self.distributions = {
-            'lemma' : {},
-            'entity' : {},
-            'frame' : {}
-            }
-
-        path = os.path.join(naf_folder, self.language, f'{self.name}.naf')
-
-        if verbose >= 4:
-            print(path)
-
-        if not os.path.exists(path):
-            if verbose >= 3:
-                print(f'does not exist: {path}')
-        else:
-
-            compute = True
-            try:
-                doc = etree.parse(path)
-            except lxml.etree.XMLSyntaxError:
-                if verbose >= 2:
-                    print(f'{path} is empty')
-                    compute = False
-
-            if compute:
-                terms = iterable_of_lexical_items(doc,
-                                                  xml_path='terms/term',
-                                                  selected_attributes=['lemma'],
-                                                  verbose=1)
-
-                entities = iterable_of_lexical_items(doc,
-                                                     xml_path='entities/entity/externalReferences/externalRef',
-                                                     selected_attributes=['reference'],
-                                                     verbose=1)
-
-                frames = iterable_of_lexical_items(doc,
-                                                   xml_path='srl/predicate',
-                                                   selected_attributes=['uri'],
-                                                   verbose=1)
-
-                self.distributions = {
-                    'lemma' : Counter(terms),
-                    'entity' : Counter(entities),
-                    'frame' : Counter(frames)
-                }

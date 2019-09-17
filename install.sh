@@ -16,6 +16,11 @@ pip install -r requirements.txt
 bash install.sh
 cd ..
 
+git clone https://github.com/cltl/NAF_indexer
+cd NAF_indexer
+pip install -r requirements.txt
+cd ..
+
 git clone https://github.com/cltl/Wikipedia_langlinks
 cd Wikipedia_langlinks
 bash download.sh
