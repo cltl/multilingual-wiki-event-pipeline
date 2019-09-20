@@ -404,7 +404,7 @@ def merge_incident_collections(paths_incident_collections,
                 to_add = False
 
             if all([config.must_have_all_languages,
-                    set(config.language_list) - found_langs]):
+                    set(config.languages_list) - found_langs]):
                 to_add = False
             
         if to_add:
