@@ -6,6 +6,9 @@ import time
 from datetime import datetime
 import pickle
 import networkx as nx
+from glob import glob
+import os
+import classes
 
 wdt_sparql_url = 'https://query.wikidata.org/sparql'
 
@@ -348,3 +351,101 @@ def load_event_type2instancefreq(wdt_sparql_url, output_path, verbose=0):
         pickle.dump(event_type2instance_freq, outfile)
 
     return event_type2instance_freq
+
+
+def merge_incident_collections(paths_incident_collections,
+                               config,
+                               incident_type,
+                               incident_type_uri,
+                               g,
+                               verbose=0):
+    """
+    merge incident collections
+
+    :param iterable paths_incident_collections: iterable of paths where IncidentCollection objects are stored
+    :param module config: the module config.py (in the same directory)
+    :param str incident_type: event type, e.g., 'event'
+    :param str incident_type_uri: uri of incident type, e.g., https://www.wikidata.org/wiki/Q1656682
+    :param g: directed graph containing subclass of directed graph from Wikidata
+
+    :rtype: IncidentCollection
+    :return: instance of IncidentCollection
+    """
+    # create new IncidentCollection object
+    merged_inc_coll_obj = classes.IncidentCollection(incident_type=incident_type,
+                                                     incident_type_uri=incident_type_uri,
+                                                     languages=[])
+
+    for inc_coll_obj_path in paths_incident_collections:
+    
+        with open(inc_coll_obj_path, 'rb') as infile:
+            inc_coll_obj = pickle.load(infile)
+
+        # merge languages
+        for language in inc_coll_obj.languages:
+            if language not in merged_inc_coll_obj.languages:
+                merged_inc_coll_obj.languages.append(language)
+
+        # merge incidents
+        to_add = True 
+
+        inc_ids_added = set()
+        for incident_obj in inc_coll_obj.incidents:
+            if incident_obj.wdt_id in inc_ids_added:
+                to_add = False
+                if verbose >= 2:
+                    print(f'found {incident_obj.wdt_id} in more than one incident collection')
+    
+            found_langs = {ref_text_obj.language
+                           for ref_text_obj in incident_obj.reference_texts}
+            
+            if all([config.must_have_english,
+                    'en' not in found_langs]):
+                to_add = False
+
+            if all([config.must_have_all_languages,
+                    set(config.language_list) - found_langs]):
+                to_add = False
+            
+        if to_add:
+            merged_inc_coll_obj.incidents.append(incident_obj)
+            inc_ids_added.add(incident_obj.wdt_id)
+
+        # update subclass of information
+        merged_inc_coll_obj.update_incidents_with_subclass_of_info(g, top_node='wd:Q1656682', verbose=verbose)
+        merged_inc_coll_obj.event_type2wdt_ids = merged_inc_coll_obj.get_index_event_type2wdt_ids()
+
+    if verbose >= 1:
+        print(f'New IncidentCollection object contains information:')
+        print(f'about {len(merged_inc_coll_obj.languages)} languages')
+        print(f'about {len(merged_inc_coll_obj.incidents)} incidents')
+        print(f'about {len(merged_inc_coll_obj.event_type2wdt_ids)} different event types')
+
+    return merged_inc_coll_obj
+
+def get_bin_paths(folder, suffix, pilot=False):
+    """
+    return iterable of paths with the specified requirements
+
+    :param str folder: folder with *bin files (instances of class IncidentCollection
+    :param str suffix: path suffixs
+    :param bool pilot: True -> return only files co
+
+    :rtype: list
+    :return: list of paths
+    """
+    paths = []
+
+    for path in glob(f'{folder}/*{suffix}'):
+
+        basename = os.path.basename(path)
+        if pilot:
+            if 'pilot' not in basename:
+                continue
+        else:
+            if 'pilot' in basename:
+                continue
+
+        paths.append(path)
+
+    return paths

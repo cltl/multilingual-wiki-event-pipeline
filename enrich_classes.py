@@ -17,8 +17,10 @@ import json
 import pickle
 import utils
 from docopt import docopt
+import config
 from glob import glob
 from xml_utils import iterable_of_lexical_items
+from collections import defaultdict 
 
 from resources.NAF_indexer import naf_classes 
 
@@ -49,7 +51,12 @@ g = utils.load_ontology_as_directed_graph('ontology/relations.p',
                                           verbose=verbose)
 
 # add incident_collection_obj with mapping from event_type -> 'descendants' 'list_of_shortest_path' 'depth_level'
+succes = defaultdict(list)
+
 for bin_path in glob(f'{bin_folder}/*bin'):
+
+    if 'voting' not in bin_path:
+        continue 
 
     output_bin_path = bin_path + '.enriched'
 
@@ -63,7 +70,9 @@ for bin_path in glob(f'{bin_folder}/*bin'):
     naf_coll_obj = naf_classes.NAF_collection()
 
     for incident_obj in inc_coll_obj.incidents:
+        filtered_reference_texts = []
         for ref_text_obj in incident_obj.reference_texts:
+        
             path = os.path.join(naf_folder, 
                                 ref_text_obj.language, 
                                 f'{ref_text_obj.name}.naf')
@@ -82,11 +91,46 @@ for bin_path in glob(f'{bin_folder}/*bin'):
                     print(f'loaded {path}')
             
             ref_text_obj.naf = naf_obj
+
+            found = ref_text_obj.naf is not None
+            if ref_text_obj.naf is not None:
+                filtered_reference_texts.append(ref_text_obj)
+            
+            succes[ref_text_obj.language].append(found)
+
+        incident_obj.reference_texts = filtered_reference_texts
             
                     
             
     # save enriched class objects to disk
     with open(output_bin_path, 'wb') as outfile:
         pickle.dump(inc_coll_obj, outfile)
+
+for lang, info in succes.items():
+    print(lang)
+    print(f'Wiki documents found: {info.count(True)}')
+    print(f'Wiki document not found: {info.count(False)}')
+
+# merge IncidentCollection objects
+for pilot in [True, False]:
+    suffix = '.bin.enriched'
+    pilot_paths = utils.get_bin_paths(folder=bin_folder,
+                                      suffix=suffix,
+                                      pilot=pilot)
+
+    prefix = 'merged.'
+    if pilot:
+        prefix = 'merged_pilot.'
+    output_path = os.path.join(bin_folder, prefix + ','.join(config.languages_list) + suffix)
+
+    merged_pilot_inc_coll_objs = utils.merge_incident_collections(pilot_paths,
+                                                                  config,
+                                                                  incident_type='event',
+                                                                  incident_type_uri='https://www.wikidata.org/wiki/Q1656682',
+                                                                  g=g,
+                                                                  verbose=verbose)
+
+    with open(output_path, 'wb') as outfile:
+        pickle.dump(merged_pilot_inc_coll_objs, outfile)
 
 
