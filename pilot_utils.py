@@ -13,7 +13,7 @@ import utils
 import native_api_utils as api
 import spacy_to_naf
 
-eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'}
+eventtype2json=config.qid2fn
 #, 'tennis tournament': 'tennis tournament'}
 
 target_languages=config.languages_list
@@ -148,6 +148,7 @@ def add_hyperlinks(naf, annotations, prefix, language, dct, wiki_langlinks={}, v
                           for w_el in naf.xpath('text/wf')}
 
     next_id = 1
+    naf=naf.getroot()
     entities_layer = etree.SubElement(naf, "entities")
 
     naf_header = naf.find('nafHeader')

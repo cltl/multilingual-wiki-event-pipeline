@@ -43,14 +43,14 @@ def add_wikipedia_pages_from_api(incidents, wdt_ids, raw_results):
                         incident.reference_texts.append(ref_text)
     return incidents
 
-def retrieve_incidents_per_type(type_label, limit=10):
+def retrieve_incidents_per_type(type_qid, type_label, limit=10):
     """
     Given an event type identifier, retrieve incidents that belong to this type.
     """
-    eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'} #, 'tennis tournament': 'tennis tournament'}
+    eventtype2json=config.qid2fn
 
-    if type_label in eventtype2json:
-        jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[type_label]
+    if type_qid in eventtype2json:
+        jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[type_qid]
     else:
         jsonfilename='wdt_fn_mappings/any.json'
     with open(jsonfilename, 'rb') as f:
@@ -58,7 +58,7 @@ def retrieve_incidents_per_type(type_label, limit=10):
 
     incidents=[]
     print("\n### 1. ### Retrieving and storing wikidata information from SPARQL...")
-    results_by_id=utils.construct_and_run_query(type_label, languages, wdt_fn_mappings_COL, limit)
+    results_by_id=utils.construct_and_run_query(type_qid, languages, wdt_fn_mappings_COL, limit)
     wdt_ids=[]
     if not len(results_by_id.items()):
         return [], ''
@@ -91,7 +91,7 @@ def retrieve_incidents_per_type(type_label, limit=10):
     print('\n### 2. ### Enriching the reference texts through the Wikipedia-Wikidata API...')
     incidents=add_wikipedia_pages_from_api(incidents, wdt_ids, results_by_id)
     print('API querying done. Number of incidents:', len(incidents))
-    return incidents, inc_type_uri
+    return incidents
 
 def obtain_reference_texts(incidents, wiki_folder, wiki_uri2path_info, language2info):
     print('\n### 3. ### Retrieve reference text information: text and entity annotations from the local version of Wikipedia.')
@@ -179,20 +179,22 @@ if __name__ == '__main__':
 
     languages=config.languages_list
 
-    for incident_type in incident_types:
+    for incident_type_uri in incident_types:
+
+        incident_type=""
 
         pilot_and_languages=languages + ['pilot']
 
-        inc_stats=[incident_type, ','.join(languages)]
+        inc_stats=[incident_type_uri, ','.join(languages)]
 
         print('\n\n\n')
-        print('----- INCIDENT TYPE: %s -----' % incident_type) 
+        print('----- INCIDENT TYPE: %s -----' % incident_type_uri) 
         print('\n\n')
 
         start = time.time()
 
         # Query SPARQL and the API to get incidents, their properties, and labels.
-        incidents, inc_type_uri=retrieve_incidents_per_type(incident_type, 99999)
+        incidents=retrieve_incidents_per_type(incident_type_uri, incident_type, 99999)
 
         if not len(incidents):
             print('NO INCIDENTS FOUND FOR %s. Continuing to next type...')
@@ -202,11 +204,11 @@ if __name__ == '__main__':
 
         collection=classes.IncidentCollection(incidents=new_incidents,
                                  incident_type=incident_type,
-                                 incident_type_uri=inc_type_uri,
+                                 incident_type_uri=incident_type_uri,
                                  languages=languages)
 
         output_file=utils.make_output_filename(bin_folder, 
-                                                incident_type, 
+                                                incident_type_uri, 
                                                 languages)
         
         with open(output_file, 'wb') as of:
@@ -214,7 +216,7 @@ if __name__ == '__main__':
 
         inc_stats.append(len(collection.incidents))
 
-        ttl_filename = '%s/%s_%s.ttl' % (rdf_folder, incident_type, '_'.join(languages))
+        ttl_filename = '%s/%s_%s.ttl' % (rdf_folder, incident_type_uri, '_'.join(languages))
         collection.serialize(ttl_filename)
 
         after_extraction = time.time()
@@ -228,21 +230,21 @@ if __name__ == '__main__':
         after_primary_texts=time.time()
 
         pilot_collection=classes.IncidentCollection(incidents=pilots,
-                                                     incident_type_uri=inc_type_uri,
+                                                     incident_type_uri=incident_type_uri,
                                                      incident_type=incident_type,
                                                      languages=languages)
 
-        out_file=utils.make_output_filename(bin_folder, incident_type, pilot_and_languages)
+        out_file=utils.make_output_filename(bin_folder, incident_type_uri, pilot_and_languages)
 
         with open(out_file, 'wb') as of:
             pickle.dump(pilot_collection, of)
 
-        ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type, '_'.join(pilot_and_languages))
+        ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type_uri, '_'.join(pilot_and_languages))
         pilot_collection.serialize(ttl_filename)
 
         #assert len(pilot_collection.incidents)>0, 'No pilot incidents for type %s' % incident_type
         if len(pilot_collection.incidents)==0:
-            print('No pilot incidents for type %s' % incident_type)
+            print('No pilot incidents for type %s' % incident_type_uri)
         else:
             print('start pilot data processing', datetime.now())
         for incident_obj in pilot_collection.incidents:

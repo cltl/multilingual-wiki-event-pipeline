@@ -15,8 +15,9 @@ import spacy_to_naf
 from xml_utils import iterable_of_lexical_items
 from resources.NAF_indexer import naf_classes
 
+import config
 
-eventtype2json={'election': 'change_of_leadership', 'murder': 'killing'} #, 'tennis tournament': 'tennis tournament'}
+eventtype2json=config.qid2fn
 
 class IncidentCollection:
 

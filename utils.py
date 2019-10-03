@@ -76,7 +76,7 @@ def obtain_label(wd_id):
     the_label=results[0]['label']['value']
     return the_label
 
-def construct_and_run_query(type_label, languages, more_props, limit):
+def construct_and_run_query(type_qid, languages, more_props, limit):
     """
     Construct a wikidata query to obtain all events of a specific type with their structured data, then run this query.
     """
@@ -103,19 +103,18 @@ def construct_and_run_query(type_label, languages, more_props, limit):
                 clause=f"""OPTIONAL {{ \n\t?incident {a_path} {var} }}\n\t"""
                 optional_more_info+=clause
                 opt_vars.append(var)
-                if type_label not in {"election"}:
+                if type_qid not in {"Q40231"}:
                     opt_var_labels.append(var + 'Label')
 
     query = """
-    SELECT DISTINCT ?type_id ?direct_type ?incident ?incidentLabel %s %s %s WHERE {
+    SELECT DISTINCT ?direct_type ?incident ?incidentLabel %s %s %s WHERE {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
-      ?type_id rdfs:label "%s"@en .
-      ?incident wdt:P31*/wdt:P279* ?type_id ;
+      ?incident wdt:P31*/wdt:P279* wd:%s ;
                 wdt:P31 ?direct_type .
       %s
       %s
     } limit %d
-    """ % (return_langs, ' '.join(opt_vars), ' '.join(opt_var_labels), type_label, optional_clauses_str, optional_more_info, limit)
+    """ % (return_langs, ' '.join(opt_vars), ' '.join(opt_var_labels), type_qid, optional_clauses_str, optional_more_info, limit)
 
     print('QUERY:\n', query)
 
@@ -142,7 +141,7 @@ def index_results_by_id(raw_results, lang2var, extra_info):
         if 'references' not in current_result:
             current_result['references']=defaultdict(str)
         name=entry['incidentLabel']['value']
-        current_result['type_id']=entry['type_id']['value']
+        #current_result['type_id']=entry['type_id']['value']
 
         if 'direct_types' not in current_result.keys():
             current_result['direct_types']=set()
