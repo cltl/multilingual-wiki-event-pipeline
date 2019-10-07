@@ -79,7 +79,7 @@ def retrieve_incidents_per_type(type_qid, type_label, limit=10):
             ref_texts.append(ref_text)
 
         incident=classes.Incident(
-                incident_type=type_label,
+                incident_type=type_qid,
                 wdt_id=wdt_id,
                 direct_types=direct_types,
                 extra_info=extra_info,

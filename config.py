@@ -3,7 +3,7 @@
 #incident_types=['murder']
 #incident_types=['conflagration', 'earthquake', 'murder']
 #incident_types=['conflagration', 'earthquake', 'battle', 'murder', 'film festival', 'space flight', 'art exhibition', 'football match', 'convention', 'wrestling event', 'terrorist attack', 'tennis tournament']
-incident_types=['Q132821']
+incident_types=['Q132821', 'Q168983']
 languages_list=['nl', 'it', 'en']
 
 # Pilot extraction flags
