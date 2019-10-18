@@ -181,7 +181,7 @@ if __name__ == '__main__':
 
     for incident_type_uri in incident_types:
 
-        incident_type=""
+        incident_type=incident_type_uri
 
         pilot_and_languages=languages + ['pilot']
 

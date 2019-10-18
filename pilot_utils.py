@@ -21,6 +21,7 @@ target_languages=config.languages_list
 def remove_incidents_with_missing_FEs(incidents, event_type):
     new_incidents=[]
 
+    print('EType', event_type, eventtype2json.keys())
     if event_type in eventtype2json.keys():
         jsonfilename='wdt_fn_mappings/%s.json' % eventtype2json[event_type]
     else:
