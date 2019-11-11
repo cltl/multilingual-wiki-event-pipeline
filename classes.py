@@ -12,7 +12,7 @@ import os
 import lxml
 from lxml import etree
 import spacy_to_naf
-from xml_utils import iterable_of_lexical_items
+#from xml_utils import iterable_of_lexical_items
 from resources.NAF_indexer import naf_classes
 
 import config
