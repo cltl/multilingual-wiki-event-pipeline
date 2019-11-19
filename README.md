@@ -1,6 +1,6 @@
 # multilingual-wiki-event-pipeline
 
-This project aims to extract information about incidents of a particular type. This information consists of structured data on the incidents from Wikidata, as well as unstructured description and supporting sources from Wikipedia. We obtain information from Wikipedia in multiple languages (currently tested with Dutch, Italian, and Japanese).
+This project aims to extract information about incidents of a particular type. This information consists of structured data on the incidents from Wikidata, as well as unstructured description and supporting sources from Wikipedia. We obtain information from Wikipedia in multiple languages (currently tested with Dutch, Italian, English, and Japanese).
 
 
 ## Authors
@@ -26,6 +26,8 @@ A number of resources need to be downloaded. This can be done calling:
 ```bash
 bash install.sh
 ```
+
+This installation takes some minutes. Grab a coffee (or two).
 
 ### Config flags
 
