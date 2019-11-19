@@ -16,6 +16,7 @@ import classes
 import config
 import utils
 import wikipedia_utils as wu
+import json_utils
 
 incident_types=config.incident_types
 
@@ -139,6 +140,9 @@ if __name__ == '__main__':
     naf_output_folder = 'wiki_output'
     rdf_folder = 'rdf'
     bin_folder= 'bin'
+    json_folder= 'json'
+
+    project='pilot'
 
     utils.remove_and_create_folder(rdf_folder)
     utils.remove_and_create_folder(naf_output_folder)
@@ -273,6 +277,8 @@ if __name__ == '__main__':
                             output_folder=naf_output_folder,
                             wiki_langlinks=wiki_langlinks)
         inc_stats.append(len(pilot_collection.incidents))
+
+        json_utils.create_indices_from_bin(pilot_collection, project, json_folder)
 
         end=time.time()
 
