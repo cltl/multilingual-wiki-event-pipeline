@@ -147,8 +147,9 @@ if __name__ == '__main__':
     utils.remove_and_create_folder(rdf_folder)
     utils.remove_and_create_folder(naf_output_folder)
     utils.remove_and_create_folder(bin_folder)
+    utils.remove_and_create_folder(json_folder)
 
-    print('NAF, RDF, and BIN directories have been re-created')
+    print('NAF, RDF, JSON, and BIN directories have been re-created')
     
     # load index and language info
     path_uri2path_info = os.path.join(wiki_folder, 'page2path.p')
