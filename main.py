@@ -184,6 +184,8 @@ if __name__ == '__main__':
 
     languages=config.languages_list
 
+    pilot_collections=[]
+
     for incident_type_uri in incident_types:
 
         incident_type=incident_type_uri
@@ -239,6 +241,8 @@ if __name__ == '__main__':
                                                      incident_type=incident_type,
                                                      languages=languages)
 
+        pilot_collections.append(pilot_collection)
+
         out_file=utils.make_output_filename(bin_folder, incident_type_uri, pilot_and_languages)
 
         with open(out_file, 'wb') as of:
@@ -279,7 +283,6 @@ if __name__ == '__main__':
                             wiki_langlinks=wiki_langlinks)
         inc_stats.append(len(pilot_collection.incidents))
 
-        json_utils.create_indices_from_bin(pilot_collection, project, json_folder)
 
         end=time.time()
 
@@ -290,6 +293,9 @@ if __name__ == '__main__':
         inc_stats.append(utils.format_time(end-start))
 
         all_inc_stats.append(inc_stats)
+
+
+    json_utils.create_indices_from_bin(pilot_collections, project, json_folder)
 
     headers=['Type', 'Languages', '#incidents', '#pilot incidents', 'Time to extract incidents+RTs', 'Time to select pilot data', 'Time to get primary RT links', 'Time to run spacy, enrich, and store to NAF+RDF', 'Total time']
 

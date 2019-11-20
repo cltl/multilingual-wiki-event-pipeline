@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict
 
-def create_indices_from_bin(inc_data, project, json_dir):
+def create_indices_from_bin(datasets, project, json_dir):
 
     inc2doc_file='%s/inc2doc_index.json' % json_dir
     inc2str_file='%s/inc2str_index.json' % json_dir
@@ -13,20 +13,21 @@ def create_indices_from_bin(inc_data, project, json_dir):
     proj2inc=defaultdict(set)
     type2inc=defaultdict(set)
 
-    for inc in inc_data.incidents:
-        str_data={}
-        for k, v in inc.extra_info.items():
-            str_data[k]=list(v)
-            
-        rts=[]
-        for rt in inc.reference_texts:
-            rt_info='%s/%s' % (rt.language, rt.name)
-            rts.append(rt_info)
-        key=inc.wdt_id
-        inc2doc[key]=rts
-        inc2str[key]=str_data
-        proj2inc[project].add(key)
-        type2inc[inc.incident_type].add(key)
+    for inc_data in datasets:
+        for inc in inc_data.incidents:
+            str_data={}
+            for k, v in inc.extra_info.items():
+                str_data[k]=list(v)
+                
+            rts=[]
+            for rt in inc.reference_texts:
+                rt_info='%s/%s' % (rt.language, rt.name)
+                rts.append(rt_info)
+            key=inc.wdt_id
+            inc2doc[key]=rts
+            inc2str[key]=str_data
+            proj2inc[project].add(key)
+            type2inc[inc.incident_type].add(key)
 
 
     new_t2i={}

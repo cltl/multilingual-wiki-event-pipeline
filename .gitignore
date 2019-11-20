@@ -4,7 +4,9 @@ wiki_output/
 spacy_to_naf.py
 *.zip
 pilot_data/
+json/
 bin/
+ontology/
 development/
 .DS_Store
 .ipynb_checkpoints/
