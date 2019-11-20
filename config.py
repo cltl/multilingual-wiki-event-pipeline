@@ -12,7 +12,8 @@ must_have_english=True #True
 one_page_per_language=False # True
 
 # Analyze pilot data only, or the full data
-pilot=False
+pilot=True
+#False
 
 qid2fn={'Q40231': 'change_of_leadership', 'Q132821': 'killing'} #, 'tennis tournament': 'tennis tournament'}
 

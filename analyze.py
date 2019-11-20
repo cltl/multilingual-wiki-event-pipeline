@@ -12,9 +12,12 @@ def compute_stats_for_all_combinations(combinations, pilot):
     for incident_type, languages in combinations:
        
         if pilot:
-            languages.append('pilot')
-        filename=utils.make_output_filename(bin_folder,
+            filename=utils.make_output_filename(bin_folder,
                                             incident_type, 
+                                            languages + ['pilot'])
+        else:
+            filename=utils.make_output_filename(bin_folder,
+                                            incident_type,
                                             languages)
 
         with open(filename, 'rb') as f:
