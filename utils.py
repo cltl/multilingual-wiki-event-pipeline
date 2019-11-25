@@ -241,56 +241,104 @@ def extract_subclass_of_ontology(wdt_sparql_url,
 
     return set_of_relations
 
-
-def load_ontology_as_directed_graph(input_path, output_path, verbose=0):
+def all_english_labels_of_descendants_of_topnode(topnode, verbose=0):
     """
 
-    :param str input_path: output of function extract_subclass_of_ontology
+    :param str topnode: e.g., "wd:Q1656682"
+    :return:
+    """
+    query = """SELECT DISTINCT ?type_id ?label WHERE {
+            SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+            ?type_id wdt:P279* %s .
+            ?type_id rdfs:label ?label .
+            FILTER (langMatches( lang(?label), "EN" ) )
+            }
+        """ % topnode
+
+    wdt_id2label_en = {}
+
+    if verbose >= 2:
+        print(f'start {datetime.now()}')
+        print(query)
+
+    response = get_results_with_retry(wdt_sparql_url, query)
+
+    for info in response['results']['bindings']:
+        label_en = info['label']['value']
+        full_wdtid = info['type_id']['value']
+        wdtid = full_wdtid.replace('http://www.wikidata.org/entity/', 'wd:')
+        wdt_id2label_en[wdtid] = label_en
+
+    if verbose >= 2:
+        print()
+        print(f'found {len(wdt_id2label_en)} Wikidata items with English label for topnode {topnode}')
+
+    return wdt_id2label_en
+
+def load_ontology_as_directed_graph(output_folder, top_node, verbose=0):
+    """
+
+    :param str output_folder: folder where all information will be stored
+    :param str top_node: top node to use in graph, e.g., 'wd:Q1656682'
 
     :rtype: networkx.classes.digraph.DiGraph
     :return: directed graph containing all subclass of relations of Wikidata
     """
-    with open(input_path, 'rb') as infile:
-        set_of_relations = pickle.load(infile)
+    graph_path = f'{output_folder}/g.p'
+    if os.path.exists(graph_path):
+        sub_g = nx.read_gpickle(graph_path)
+        return sub_g
 
-    if os.path.exists(output_path):
-        g = nx.read_gpickle(output_path)
-        return g
+    set_of_relations = extract_subclass_of_ontology(wdt_sparql_url,
+                                                    output_folder,
+                                                    'relations.p',
+                                                    verbose=verbose)
+
+    event_type2instance_freq = load_event_type2instancefreq(wdt_sparql_url,
+                                                            f'{output_folder}/eventtype2instance_freq.p',
+                                                            verbose=verbose)
+
+    event_type2label = all_english_labels_of_descendants_of_topnode(top_node, verbose=verbose)
 
     relations = []
     for x, y in set_of_relations:  # x is subclass of y
         x_short = x.replace('http://www.wikidata.org/entity/', 'wd:')
         y_short = y.replace('http://www.wikidata.org/entity/', 'wd:')
-        relations.append((y_short, x_short))
+
+        if all([x_short in event_type2label,
+                y_short in event_type2label]):
+                relations.append((y_short, x_short))
 
     g = nx.DiGraph()
     g.add_edges_from(relations)
 
-    the_ancestors = nx.ancestors(g, 'wd:Q1656682')
+    the_descendants = nx.descendants(g, top_node)
+    the_descendants.add(top_node)
+    sub_g = g.subgraph(the_descendants).copy()
 
-    roots = []
-    for the_ancestor in the_ancestors:
-        children = nx.ancestors(g, the_ancestor)
-        if not children:
-            roots.append(the_ancestor)
+    node_attrs = {}
+    for node in sub_g.nodes():
+        label = event_type2label[node]
+        freq = event_type2instance_freq.get(node, 0)
 
-    assert len(roots) == 1, f'multiple roots found {roots}'
-    root = roots[0]
+        info = {
+            'label' : label,
+            'occurrence_frequency' : freq,
+            'features' : [],
+            'num_features' : []
+        }
+        node_attrs[node] = info
 
-    event_node = 'wd:Q1656682'
-    shortest_path_to_event = nx.shortest_path(g, root, event_node)
+    nx.set_node_attributes(sub_g, node_attrs)
 
-    all_event_subclasses = nx.descendants(g, event_node)
     if verbose >= 2:
-        print(f'loaded graph with {len(g.edges())} edges')
-        print(f'found {len(all_event_subclasses)} events under the event node in Wikidata')
-        print(f'root: {root}')
-        print(f'shortest path from event node to root node: {shortest_path_to_event}')
-        print(nx.info(g))
+        print(f'loaded graph with {len(sub_g.edges())} edges')
+        print(nx.info(sub_g))
+        print('top node information', sub_g.nodes[top_node])
 
-    nx.write_gpickle(g, output_path)
+    nx.write_gpickle(sub_g, graph_path)
 
-    return g
+    return sub_g
 
 
 def update_incident(instance_of_values, g, verbose=0):
