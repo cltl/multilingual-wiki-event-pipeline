@@ -8,7 +8,6 @@ import pickle
 import networkx as nx
 from glob import glob
 import os
-import classes
 
 wdt_sparql_url = 'https://query.wikidata.org/sparql'
 

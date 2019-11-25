@@ -92,3 +92,6 @@ The modeling in the .ttl file is based on the SEM model. Here is an excerpt of t
 
 * Wikipedia API documentation:
 https://wikipedia.readthedocs.io/en/latest/code.html
+
+### TODO's
+* refactor classes.py to remove postprocessing
