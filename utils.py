@@ -227,12 +227,15 @@ def extract_subclass_of_ontology(wdt_sparql_url,
         response = get_results_with_retry(wdt_sparql_url, query)
 
         set_of_relations = set()
+        nodes = set()
         for info in response['results']['bindings']:
             x = info['subclass1']['value']
             y = info['subclass2']['value']
             set_of_relations.add((x,y))
+            nodes.update([x, y])
 
         if verbose >= 2:
+            print(f'found {len(nodes)} unique nodes')
             print(f'found {len(set_of_relations)} unique relations')
             print(f'end {datetime.now()}')
 
