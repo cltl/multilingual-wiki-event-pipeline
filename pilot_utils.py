@@ -209,22 +209,22 @@ def text_to_naf(wiki_title,
 
     # parse with spaCy
     naf = spacy_to_naf.text_to_NAF(text=text,
-                                       nlp=nlp,
-                                       dct=dct,
-                                       layers={'raw', 'text', 'terms'},
-                                       title=wiki_title,
-                                       uri=wiki_uri,
-                                       language=language)
+                                   nlp=nlp,
+                                   dct=dct,
+                                   layers={'raw', 'text', 'terms'},
+                                   title=wiki_title,
+                                   uri=wiki_uri,
+                                   language=language)
 
     assert naf.find('raw').text == text, f'mismatch between raw text JSON and NAF file'
 
     # add hyperlinks as entity elements
     add_hyperlinks(naf,
-	           annotations,
-	           prefix,
-               language,
-               dct,
-               wiki_langlinks=wiki_langlinks)
+	               annotations,
+	               prefix,
+                   language,
+                   dct,
+                   wiki_langlinks=wiki_langlinks)
 
     # if wanted, write output to disk
     if output_folder is not None:
