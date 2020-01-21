@@ -14,7 +14,7 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENS
 
 ## Setup
 
-### Python modules (Python 3.7 is used)
+### Python modules (Python 3.6 is used)
 A number of external modules need to be installed, which are listed in **requirements.txt**.
 Depending on how you installed Python, you can probably install the requirements using one of following commands:
 ```bash
@@ -76,17 +76,11 @@ The processing relies on the following utility files:
 
 In addition, we make use of the Spacy-to-NAF functionalities.
 
-
-### Paper
-The file **selection_event_types.py** is used to generate a table to indicate the event type selection.
-
-
 ### Modeling
 
 The modeling in the .ttl file is based on the SEM model. Here is an excerpt of the resulting graph:
 
 ![Alt text](img/model.png?raw=true "Model")
-
 
 ### Helpful links
 
@@ -94,4 +88,5 @@ The modeling in the .ttl file is based on the SEM model. Here is an excerpt of t
 https://wikipedia.readthedocs.io/en/latest/code.html
 
 ### TODO's
-* refactor classes.py to remove postprocessing
+* update spaCy models to newest version
+* refactor classes.py
