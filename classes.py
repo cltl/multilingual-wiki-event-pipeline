@@ -8,13 +8,6 @@ from scipy import stats
 import numpy as np
 import networkx as nx
 
-import os
-import lxml
-from lxml import etree
-import spacy_to_naf
-#from xml_utils import iterable_of_lexical_items
-from resources.NAF_indexer import naf_classes
-
 import config
 
 eventtype2json=config.qid2fn
@@ -361,10 +354,6 @@ class Incident:
         self.reference_texts=reference_texts
         self.extra_info=extra_info
         self.direct_types=direct_types
-
-        self.shortest_path_to_top_node = []
-        self.descendants = set()
-        self.depth_level = None
 
 class ReferenceText:
 
