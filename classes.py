@@ -25,10 +25,6 @@ class IncidentCollection:
         self.languages=languages
         self.incidents=incidents
 
-        self.direct_type2shortest_path = {}
-        self.direct_type2descendants = {}
-
-
     def compute_stats(self, verbose=0):
         """
         Compute statistics on the incident collection.
@@ -169,76 +165,6 @@ class IncidentCollection:
 
         return naf_coll_obj
 
-
-
-    def update_incidents_with_subclass_of_info(self, g, top_node='wd:Q1656682', verbose=0):
-        """
-        update incident object with 'attributes':
-         - "shortest_path_to_top_node": shortest path between direct types and chosen top node
-         - "descendants": all descendants of both direct types
-         - "depth_level" : length of shortest path to top node
-
-        :param networkx.classes.digraph.DiGrap g: directed graph
-        :param top_node: node to which you want to query the path, e.g., the event node
-        """
-        all_direct_types = {
-            direct_type
-            for incident_obj in self.incidents
-            for direct_type in incident_obj.direct_types
-        }
-
-        assert g.has_node(top_node), f'top node {top_node} not found in subclass of graph'
-
-        if verbose >= 2:
-            print(f'found {len(all_direct_types)} direct instance types')
-
-        self.direct_type2shortest_path = {}
-        self.direct_type2descendants = {}
-
-        for direct_type in all_direct_types:
-
-            assert direct_type.startswith('wd:'), f'incorrect node identifier {direct_type}, should start with wd:'
-
-            if not g.has_node(direct_type):
-                shortest_path = []
-                the_descendants = set()
-
-            else:
-                try:
-                    shortest_path = nx.shortest_path(g, top_node, direct_type)
-                    shortest_path.remove(direct_type)
-                    assert direct_type not in shortest_path, f'direct_type {direct_type} should not be in its own path'
-                except nx.NetworkXNoPath:
-                    shortest_path = []
-
-                the_descendants = nx.descendants(g, direct_type)
-
-            self.direct_type2shortest_path[direct_type] = shortest_path
-            self.direct_type2descendants[direct_type] = the_descendants
-
-        path_lengths = []
-        for incident_obj in self.incidents:
-
-            for direct_type in incident_obj.direct_types:
-                incident_obj.descendants.update(self.direct_type2descendants[direct_type])
-
-                shortest_path = self.direct_type2shortest_path[direct_type]
-
-                if not incident_obj.shortest_path_to_top_node:
-                    incident_obj.shortest_path_to_top_node = shortest_path
-                else:
-                    if len(shortest_path) < len(incident_obj.shortest_path_to_top_node):
-                        incident_obj.shortest_path_to_top_node = shortest_path
-
-                incident_obj.depth_level = len(incident_obj.shortest_path_to_top_node)
-
-            path_lengths.append(len(incident_obj.shortest_path_to_top_node))
-
-        if verbose >= 2:
-            print()
-            print(f'added ancestors to event node for {len(path_lengths)} incidents: {len(set(path_lengths))} number of unique types')
-            print(Counter(path_lengths))
-
     def serialize(self, filename=None):
         """
         Serialize a collection of incidents to a .ttl file.
@@ -328,8 +254,6 @@ class IncidentCollection:
             g.serialize(format='turtle', destination=filename)
         else: # else print to the console
             print(g.serialize(format='turtle'))
-
-
 
     def get_index_event_type2wdt_ids(self):
         event_type2wdt_ids = defaultdict(set)
