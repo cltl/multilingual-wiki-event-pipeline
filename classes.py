@@ -8,9 +8,7 @@ from scipy import stats
 import numpy as np
 import networkx as nx
 
-import config
-
-eventtype2json=config.qid2fn
+eventtype2json={}
 
 class IncidentCollection:
 
