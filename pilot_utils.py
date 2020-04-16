@@ -204,7 +204,8 @@ def text_to_naf(wiki_title,
 		        nlp, 
 		        dct,
 		        output_folder=None,
-                wiki_langlinks={}):
+                wiki_langlinks={},
+                verbose=0):
     assert language in target_languages, f'{language} not part of supported languages: {" ".join(target_languages)}'
 
     # parse with spaCy
@@ -212,6 +213,7 @@ def text_to_naf(wiki_title,
                                    nlp=nlp,
                                    dct=dct,
                                    layers={'raw', 'text', 'terms'},
+                                   naf_version='v4',
                                    title=wiki_title,
                                    uri=wiki_uri,
                                    language=language)
@@ -237,5 +239,8 @@ def text_to_naf(wiki_title,
         with open(output_path, 'w') as outfile:
             naf_string = spacy_to_naf.NAF_to_string(naf)
             outfile.write(naf_string)
+
+    if verbose >= 3:
+        print(f'saved to {output_path}')
 
     return naf

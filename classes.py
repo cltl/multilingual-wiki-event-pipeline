@@ -291,7 +291,7 @@ class ReferenceText:
                 primary_ref_texts='',
                 wiki_langlinks=[],
                 found_by='',
-                annotations=None):
+                annotations=[]):
         self.name=name
         self.uri=uri
         self.web_archive_uri=web_archive_uri

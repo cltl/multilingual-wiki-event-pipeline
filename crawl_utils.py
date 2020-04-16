@@ -1,4 +1,5 @@
 from collections import Counter
+from collections import defaultdict
 import urllib
 import http
 import ast
@@ -28,7 +29,6 @@ def generate_wayback_uri(url,
     :return: (status, URL or None)
     """
     http = urllib3.PoolManager()
-    status = 'succes'
     wb_url = None
 
     params = {'url': url,
@@ -38,27 +38,37 @@ def generate_wayback_uri(url,
     encoded_uri = WAYBACK_CDX_SERVER + urlencode(params)
     r = http.request('GET', encoded_uri)
 
-    if verbose >= 3:
-        print(encoded_uri)
-
     if r.status != 200:
         status = 'status code not 200'
-        if verbose >= 3:
+        if verbose >= 4:
             print(f'status code: {r.status_code}')
 
-    if status == 'succes':
-        data_as_string = r.data.decode('utf-8')
-        snapshots = ast.literal_eval(data_as_string[:-1])
+    data_as_string = r.data.decode('utf-8')
+    snapshots = ast.literal_eval(data_as_string[:-1])
 
-        for (urlkey,
-             timestamp,
-             original,
-             mimetype,
-             statuscode,
-             digest,
-             length) in snapshots[1:]:
-            if int(statuscode) == 200:
-                wb_url = f'http://web.archive.org/web/{timestamp}/{original}'
+    for (urlkey,
+         timestamp,
+         original,
+         mimetype,
+         statuscode,
+         digest,
+         length) in snapshots[1:]:
+
+        if statuscode == '-':
+            continue 
+
+        if int(statuscode) == 200:
+            wb_url = f'http://web.archive.org/web/{timestamp}/{original}'
+            status = 'succes'
+
+    if wb_url is None:
+        status = 'Wayback Machine URL not found'
+
+    if status == 'succes':
+        if verbose >= 3:
+            print()
+            print(f'Wayback machine: {wb_url} for url {url}')
+            print(f'used the following query: {encoded_uri}')
 
     return status, wb_url
 
@@ -87,20 +97,23 @@ def run_newsplease(url,
     :return (status, None of dict with all NewsPlease information)
     """
     status = 'succes'
+    wb_url = None
     news_please_info = None
 
     if startswith:
         if not url.startswith(startswith):
             status = 'not a valid url'
 
-    if 'web.archive.org/web/' not in url:
-        wb_status, wb_url = generate_wayback_uri(url, verbose=0)
-    else:
-        wb_status = 'succes'
-        wb_url = url
+    for excluded_domain in excluded_domains:
+        if excluded_domain in url:
+            status = 'excluded domain'
 
-    if wb_status != 'succes':
-        status = 'No Waybach Machine URL found'
+    if status == 'succes':
+        if 'web.archive.org/web/' not in url:
+            status, wb_url = generate_wayback_uri(url, verbose=verbose)
+        else:
+            status = 'succes'
+            wb_url = url
 
     # TODO: what if url is not the same as the one crawler (via redirects?)
 
@@ -124,9 +137,6 @@ def run_newsplease(url,
 
         # validate attributes based on settings
         news_please_info = article.get_dict()
-
-        if news_please_info['source_domain'] in excluded_domains:
-            status = 'excluded domain'
 
         if accepted_languages:
             if news_please_info['language'] not in accepted_languages:
@@ -157,13 +167,14 @@ def run_newsplease(url,
 
             print('num chars', len(news_please_info['text']))
         else:
-            print(status, url)
+            print()
+            print(status, wb_url, url)
 
     return status, news_please_info
 
 status, article = run_newsplease(url='https://www.aasdfjsoidfj.nl',
                                  timeout=10)
-assert status == 'URL error'
+assert status == 'Wayback Machine URL not found'
 
 status, article = run_newsplease(url='https://www.rt.com/news/203203-ukraine-russia-troops-border/',
                                  timeout=10)
@@ -193,9 +204,8 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
     :return: mapping from uri ->
     classes.ReferenceText object
     """
-    # TODO: descriptive statistics about succes rate regarding various properties
-    # TODO: file paths for those files
     url_to_info = {}
+    stati = defaultdict(int)
 
     for url in urls:
         status, result = run_newsplease(url,
@@ -208,7 +218,7 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
                                         verbose=verbose)
 
         info = {
-            'status' : None,
+            'status' : status,
             'web_archive_uri' : None,
             'name' : None,
             'creation_date' : None,
@@ -218,7 +228,6 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
         }
 
         if status == 'succes':
-            info['status'] = status
             info['web_archive_uri']  = result['url']
             info['name'] = result['title']
             info['creation_date'] = result['date_publish']
@@ -230,6 +239,7 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
 
     url_to_ref_text_obj = {}
     for url, info in url_to_info.items():
+        stati[info['status']] += 1
         if info['status'] == 'succes':
             ref_text_obj = classes.ReferenceText(
                 uri=url,
@@ -238,7 +248,7 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
                 content=info['content'],
                 language=info['language'],
                 creation_date=info['creation_date'],
-                found_by=[info['found_by']]
+                found_by=[info['found_by']],
             )
 
             url_to_ref_text_obj[url] = ref_text_obj
@@ -247,6 +257,8 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
         print()
         print(f'processed {len(urls)} urls')
         print(f'represented {len(url_to_ref_text_obj)} as ReferenceText object')
+        print(stati)
+        
 
     return url_to_ref_text_obj
 
@@ -259,7 +271,7 @@ if __name__ == '__main__':
             'https://www.imdb.com/event/ev0000401/2005/',
             'https://web.archive.org/web/20140126184012/http://www.tvweeklogieawards.com.au/logie-history/2000s/2005/']
 
-    exluded_domains = {'www.jstor.org'}
+    exluded_domains = {'jstor.org'}
     accepted_languages = {'en'}
     title_required = True
     num_chars_range = range(100, 10001)
