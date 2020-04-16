@@ -6,6 +6,8 @@ import socket
 from urllib.parse import urlencode
 import urllib3
 
+import classes
+
 from newsplease import NewsPlease
 
 WAYBACK_CDX_SERVER = 'http://web.archive.org/cdx/search/cdx?'
@@ -167,16 +169,17 @@ status, article = run_newsplease(url='https://www.rt.com/news/203203-ukraine-rus
                                  timeout=10)
 assert status == 'succes'
 
-def get_info_primary_reference_texts(urls,
-                                     timeout,
-                                     startswith=None,
-                                     accepted_languages=set(),
-                                     excluded_domains=set(),
-                                     title_required=True,
-                                     num_chars_range=False,
-                                     verbose=0):
+def get_ref_text_obj_of_primary_reference_texts(urls,
+                                                timeout,
+                                                startswith=None,
+                                                accepted_languages=set(),
+                                                excluded_domains=set(),
+                                                title_required=True,
+                                                num_chars_range=False,
+                                                verbose=0):
     """
-    crawl urls using newsplease
+    crawl urls using newsplease and represent succesful crawls
+    using the classes.ReferenceText object
 
     :param urls:
     :param timeout: see function "run_newsplease"
@@ -188,12 +191,7 @@ def get_info_primary_reference_texts(urls,
 
     :rtype: dict
     :return: mapping from uri ->
-    "status" : result status from crawling
-    "web_archive_uri": web archive uri
-    "name" : title
-    "creation_date" : datetime object or None
-    "language" : language
-    "found_by" "Wikipedia source"
+    classes.ReferenceText object
     """
     # TODO: descriptive statistics about succes rate regarding various properties
     # TODO: file paths for those files
@@ -215,26 +213,43 @@ def get_info_primary_reference_texts(urls,
             'name' : None,
             'creation_date' : None,
             'language' : None,
-            'found_by' : None
+            'found_by' : None,
+            'content' : None,
         }
-        info['status'] = status
 
         if status == 'succes':
+            info['status'] = status
             info['web_archive_uri']  = result['url']
             info['name'] = result['title']
             info['creation_date'] = result['date_publish']
             info['language'] = result['language']
             info['found_by'] = 'Wikipedia source'
-
+            info['content'] = result['text']
         url_to_info[url] = info
+
+
+    url_to_ref_text_obj = {}
+    for url, info in url_to_info.items():
+        if info['status'] == 'succes':
+            ref_text_obj = classes.ReferenceText(
+                uri=url,
+                web_archive_uri=info['web_archive_uri'],
+                name=info['name'],
+                content=info['content'],
+                language=info['language'],
+                creation_date=info['creation_date'],
+                found_by=[info['found_by']]
+            )
+
+            url_to_ref_text_obj[url] = ref_text_obj
 
     if verbose >= 2:
         print()
         print(f'processed {len(urls)} urls')
-        print(Counter([info['status']
-                       for info in url_to_info.values()]))
+        print(f'represented {len(url_to_ref_text_obj)} as ReferenceText object')
 
-    return url_to_info
+    return url_to_ref_text_obj
+
 
 if __name__ == '__main__':
 
@@ -251,11 +266,11 @@ if __name__ == '__main__':
     startswith = 'http'
     timeout = 2
 
-    get_info_primary_reference_texts(urls,
-                                     timeout,
-                                     startswith=startswith,
-                                     accepted_languages=accepted_languages,
-                                     excluded_domains=exluded_domains,
-                                     title_required=True,
-                                     num_chars_range=num_chars_range,
-                                     verbose=2)
+    url_to_info = get_ref_text_obj_of_primary_reference_texts(urls,
+                                                              timeout,
+                                                              startswith=startswith,
+                                                              accepted_languages=accepted_languages,
+                                                              excluded_domains=exluded_domains,
+                                                              title_required=True,
+                                                              num_chars_range=num_chars_range,
+                                                              verbose=2)
