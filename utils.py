@@ -75,7 +75,11 @@ def obtain_label(wd_id):
     the_label=results[0]['label']['value']
     return the_label
 
-def construct_and_run_query(type_qid, languages, more_props, limit):
+def construct_and_run_query(type_qid,
+                            event_type_matching,
+                            languages,
+                            more_props,
+                            limit):
     """
     Construct a wikidata query to obtain all events of a specific type with their structured data, then run this query.
     """
@@ -105,15 +109,25 @@ def construct_and_run_query(type_qid, languages, more_props, limit):
                 if type_qid not in {"Q40231"}:
                     opt_var_labels.append(var + 'Label')
 
+    if event_type_matching == 'direct_match':
+        main_part = f'?incident wdt:P31 wd:{type_qid} .\nBIND(wd:{type_qid} as ?direct_type) .'
+    elif event_type_matching == 'subsumed_by':
+        main_part = f'?incident wdt:P31*/wdt:P279* wd:{type_qid} ;\nwdt:P31 ?direct_type .'
+
     query = """
     SELECT DISTINCT ?direct_type ?incident ?incidentLabel %s %s %s WHERE {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
-      ?incident wdt:P31*/wdt:P279* wd:%s ;
-                wdt:P31 ?direct_type .
+      %s
       %s
       %s
     } limit %d
-    """ % (return_langs, ' '.join(opt_vars), ' '.join(opt_var_labels), type_qid, optional_clauses_str, optional_more_info, limit)
+    """ % (return_langs,
+           ' '.join(opt_vars),
+           ' '.join(opt_var_labels),
+           main_part,
+           optional_clauses_str,
+           optional_more_info,
+           limit)
 
     print('QUERY:\n', query)
 

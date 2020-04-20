@@ -69,7 +69,9 @@ def add_wikipedia_pages_from_api(incidents, wdt_ids):
     return incidents
 
 
-def retrieve_incidents_per_type(type_qid, limit=10):
+def retrieve_incidents_per_type(type_qid,
+                                event_type_matching,
+                                limit=10):
     """
     Given an event type identifier, retrieve incidents that belong to this type.
     """
@@ -84,7 +86,11 @@ def retrieve_incidents_per_type(type_qid, limit=10):
 
     incidents = []
     print("\n### 1. ### Retrieving and storing wikidata information from SPARQL...")
-    results_by_id = utils.construct_and_run_query(type_qid, languages, wdt_fn_mappings_COL, limit)
+    results_by_id = utils.construct_and_run_query(type_qid,
+                                                  event_type_matching,
+                                                  languages,
+                                                  wdt_fn_mappings_COL,
+                                                  limit)
     wdt_ids = []
     if not len(results_by_id.items()):
         return [], ''
@@ -194,6 +200,7 @@ if __name__ == '__main__':
     bin_folder = mwep_settings['bin_folder']
     json_folder = mwep_settings['json_folder']
 
+    event_type_matching = arguments['event_type_matching']
     project = arguments['--project']
 
     utils.remove_and_create_folder(rdf_folder)
@@ -253,7 +260,9 @@ if __name__ == '__main__':
         start = time.time()
 
         # Query SPARQL and the API to get incidents, their properties, and labels.
-        incidents = retrieve_incidents_per_type(incident_type_uri, 99999)
+        incidents = retrieve_incidents_per_type(incident_type_uri,
+                                                event_type_matching,
+                                                99999)
 
         if not len(incidents):
             print('NO INCIDENTS FOUND FOR %s. Continuing to next type...')

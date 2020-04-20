@@ -11,6 +11,7 @@
     "startswith" : "http",
     "timeout" : 2
     },
+  "event_type_matching" : "direct_match",
   "wiki_langlinks_path" : "resources/Wikipedia_langlinks/resources/wikipedia-parallel-titles/output/merged_indices.p",
   "wiki_folder" : "../Wikipedia_Reader/wiki",
   "naf_output_folder" : "wiki_output",
