@@ -18,7 +18,7 @@ Options:
     --verbose=<verbose> 0 --> no stdout 1 --> general stdout 2 --> detailed stdout
 
 Example:
-    python main.py --config_path="config_files/mwep_settings.json"\
+    python main.py --config_path="config/mwep_settings.json"\
     --project="pilot"\
     --path_event_types="config/event_types.txt"\
     --languages="nl-en"\
@@ -180,8 +180,8 @@ if __name__ == '__main__':
 
     # settings for crawling Wikipedia sources
     exluded_domains = set(mwep_settings['newsplease']['excluded_domains'])
-    accepted_languages = list(arguments['languages'])
-    title_required = mwep_settings['title_required']
+    accepted_languages = list(arguments['--languages'])
+    title_required = mwep_settings['newsplease']['title_required']
     range_start, range_end = mwep_settings['newsplease']['num_chars_range']
     num_chars_range = range(int(range_start),
                             int(range_end))
@@ -281,9 +281,10 @@ if __name__ == '__main__':
         after_extraction = time.time()
 
         pilots = pilot_utils.create_pilot_data(collection,
-                                               mwep_settings["must_have_all_languages"],
-                                               mwep_settings["must_have_english"],
-                                               mwep_settings["one_page_per_language"])
+                                               languages,
+                                               mwep_settings['processing']["must_have_all_languages"],
+                                               mwep_settings['processing']["must_have_english"],
+                                               mwep_settings['processing']["one_page_per_language"])
 
         after_pilot_selection = time.time()
 
@@ -347,6 +348,7 @@ if __name__ == '__main__':
                 nlp = models[language]
 
                 pilot_utils.text_to_naf(wiki_title,
+                                        languages,
                                         text,
                                         uri,
                                         annotations,
