@@ -200,7 +200,7 @@ if __name__ == '__main__':
     bin_folder = mwep_settings['bin_folder']
     json_folder = mwep_settings['json_folder']
 
-    event_type_matching = arguments['event_type_matching']
+    event_type_matching = mwep_settings['event_type_matching']
     project = arguments['--project']
 
     utils.remove_and_create_folder(rdf_folder)
