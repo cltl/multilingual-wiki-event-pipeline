@@ -61,7 +61,10 @@ def skip_this_incident(ref_texts, rt_langs, must_have_all_languages=True, must_h
         skip_incident=True
     return skip_incident
 
-def create_pilot_data(data):
+def create_pilot_data(data,
+                      must_have_all_languages,
+                      must_have_english,
+                      one_page_per_language):
     pilot_incidents=set()
 
     cached={}
@@ -79,10 +82,10 @@ def create_pilot_data(data):
         incident.reference_texts=new_ref_texts
 
         if skip_this_incident(new_ref_texts,
-                            langs, 
-                            config.must_have_all_languages, 
-                            config.must_have_english, 
-                            config.one_page_per_language):
+                             langs,
+                             must_have_all_languages,
+                             must_have_english,
+                             one_page_per_language):
             continue
             
         for ref_text in incident.reference_texts:

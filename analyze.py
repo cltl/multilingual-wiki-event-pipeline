@@ -1,6 +1,4 @@
 import pickle
-
-import config
 import utils
 
 def compute_stats_for_all_combinations(combinations, pilot):

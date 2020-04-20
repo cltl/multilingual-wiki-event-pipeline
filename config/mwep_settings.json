@@ -1,0 +1,21 @@
+{
+  "processing" : {
+    "must_have_all_languages" : false,
+    "must_have_english" : true,
+    "one_page_per_language" : false
+  },
+  "newsplease" : {
+    "excluded_domains" : ["www.jstor.org"],
+    "title_required" : true,
+    "num_chars_range" : [100, 10001],
+    "startswith" : "http",
+    "timeout" : 2
+    },
+  "wiki_langlinks_path" : "resources/Wikipedia_langlinks/resources/wikipedia-parallel-titles/output/merged_indices.p",
+  "wiki_folder" : "../Wikipedia_Reader/wiki",
+  "naf_output_folder" : "wiki_output",
+  "rdf_folder" : "rdf",
+  "bin_folder" : "bin",
+  "json_folder" : "json",
+  "spacy_models" : "en-en_core_web_sm;nl-nl_core_news_sm;it-it_core_news_sm"
+}
