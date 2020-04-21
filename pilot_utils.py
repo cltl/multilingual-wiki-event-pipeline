@@ -220,7 +220,10 @@ def add_hyperlinks(naf, annotations, prefix, language, dct, wiki_langlinks={}, v
             ext_refs=ext_refs)
         next_id += 1
 
-        spacy_to_naf.add_entity_element(entities_layer, entity_data, add_comments=True)
+        spacy_to_naf.add_entity_element(entities_layer,     
+                                        'v4',
+                                        entity_data, 
+                                        add_comments=True)
 
 
 def text_to_naf(wiki_title,
