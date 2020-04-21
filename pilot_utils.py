@@ -3,6 +3,7 @@ import os
 import re
 import time
 import urllib.parse
+from datetime import datetime
 
 import spacy_to_naf
 from lxml import etree
@@ -143,6 +144,10 @@ def load_annotations(annotations, prefix):
     return start_end2info
 
 
+def time_in_correct_format(datetime_obj):
+    "Function that returns the current time (UTC)"
+    return datetime_obj.strftime("%Y-%m-%dT%H:%M:%SUTC")
+
 def add_hyperlinks(naf, annotations, prefix, language, dct, wiki_langlinks={}, verbose=0):
     """
     :param lxml.etree._Element naf: the root element of the XML file    :param wiki_page:
@@ -171,8 +176,12 @@ def add_hyperlinks(naf, annotations, prefix, language, dct, wiki_langlinks={}, v
     the_time = spacy_to_naf.time_in_correct_format(dct)
     lp.set("beginTimestamp", the_time)
     lp.set('endTimestamp', the_time)
-    lp.set('name', 'Wikipedia')
-    lp.set('version', '2019-07-20')  # TODO: change this if we move to other version of Wikipedia
+    lp.set('name', 'Wikipedia hyperlinks')
+    lp.set('version', 'Wikipedia dump from 2019-07-20')  # TODO: change this if we move to other version of Wikipedia
+
+    date = datetime(2019, 7, 20)
+    date_as_string = time_in_correct_format(date)
+
 
     for (start, end), (sf, uri) in start_end2info.items():
 
@@ -192,10 +201,16 @@ def add_hyperlinks(naf, annotations, prefix, language, dct, wiki_langlinks={}, v
         t_ids = xml_utils.get_range_of_tids(start_tid,
                                             end_tid)
 
-        ext_refs = [{'resource': 'Wikipedia', 'reference': uri}]
+        ext_refs = [{'resource': 'Wikipedia hyperlinks',
+                     'reference': uri,
+                     'source': 'https://www.wikipedia.org/',
+                     'timestamp' : date_as_string}]
         if wiki_langlinks:
             for lang, uri in wiki_langlinks[language][uri].items():
-                ext_refs.append({'resource': 'Wikipedia', 'reference': uri})
+                ext_refs.append({'resource': 'Wikipedia hyperlinks',
+                                 'reference': uri,
+                                 'source' : 'https://www.wikipedia.org/',
+                                 'timestamp' : date_as_string})
 
         entity_data = spacy_to_naf.EntityElement(
             eid='e%d' % next_id,
