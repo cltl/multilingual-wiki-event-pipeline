@@ -4,6 +4,11 @@ import pickle
 from lxml import etree
 import inspect
 
+import utils
+import native_api_utils
+
+COREFERENCES_ID = 'Wikipedia_hyperlinks'
+WIKIDATA_PREFIX = utils.WIKIDATA_PREFIX
 
 def mapping_wid2tid(doc):
     """
@@ -324,3 +329,257 @@ def iterable_of_lexical_items(doc,
                   for attr in selected_attributes]
         the_value = '--'.join(values)
         yield the_value
+
+def get_naf_paths(inc_coll_obj,
+                  main_naf_folder,
+                  verbose=0):
+    """
+
+    :param inc_coll_obj:
+    :param str main_naf_folder: folder where NAF files are stored,
+    usually called wik_output with subfolders en, nl and it
+    :param verbose:
+    :return:
+    """
+    naf_paths = set()
+    for inc_obj in inc_coll_obj.incidents:
+        for ref_text_obj in inc_obj.reference_texts:
+            naf_path = os.path.join(main_naf_folder,
+                                    ref_text_obj.language,
+                                    f'{ref_text_obj.name}.naf')
+            assert os.path.exists(naf_path), f'path for ref text does not exist on disk : {naf_path}'
+            naf_paths.add(naf_path)
+
+    if verbose >= 2:
+        print()
+        print(f'found {len(naf_paths)} NAF paths')
+
+    return naf_paths
+
+def add_wd_uris_to_naf_file(naf_path,
+                            wiki_to_wd,
+                            pass_if_coreferences_el_exists=True,
+                            verbose=0):
+    """
+
+    :param naf_path:
+    :param wiki_to_wd:
+    :return:
+    """
+    parser = etree.XMLParser(remove_blank_text=True)
+    doc = etree.parse(naf_path, parser)
+    changed = False
+
+    if pass_if_coreferences_el_exists:
+        coreferences_header_el = doc.find('nafHeader/linguisticProcessors[@layer="coreferences"]')
+        if coreferences_header_el is not None:
+            if verbose >= 5:
+                print(f'skipped {naf_path} since it already contains coreferences layer.')
+            return
+
+    for ext_refs_el in doc.xpath('entities/entity/externalReferences'):
+        ext_ref_els = ext_refs_el.xpath('externalRef')
+        for ext_ref_el in ext_ref_els:
+            wiki_reference = ext_ref_el.get('reference')
+            if wiki_reference in wiki_to_wd:
+
+                # add externalRef element
+                new_ext_ref_el = etree.SubElement(ext_refs_el, 'externalRef')
+                new_ext_ref_el.set('reference', wiki_to_wd[wiki_reference])
+                new_ext_ref_el.set('source', ext_ref_el.get('source'))
+                new_ext_ref_el.set('timestamp', ext_ref_el.get('timestamp'))
+                new_ext_ref_el.set('resource', ext_ref_el.get('resource'))
+
+                ext_ref_els.append(new_ext_ref_el)
+
+                changed = True
+
+    # overwrite NAF file
+    if changed:
+        doc.write(naf_path,
+                  encoding = 'utf-8',
+                  pretty_print = True,
+                  xml_declaration = True)
+
+        if verbose >= 4:
+            print(f'add links to {naf_path}')
+
+
+def add_coreferences_layer(naf_path,
+                           uri_to_rels,
+                           pass_if_coreferences_el_exists=True,
+                           verbose=0):
+    """
+
+    :param str naf_path: NAF file with entities layer
+    and without coreferences layer
+    :param verbose:
+    """
+    parser = etree.XMLParser(remove_blank_text=True)
+    doc = etree.parse(naf_path, parser)
+    root = doc.getroot()
+
+    if pass_if_coreferences_el_exists:
+        coreferences_header_el = doc.find('nafHeader/linguisticProcessors[@layer="coreferences"]')
+        if coreferences_header_el is not None:
+            if verbose >= 5:
+                print(f'skipped {naf_path} since it already contains coreferences layer.')
+            return
+
+    added = False
+
+    # extract wd_uri -> set of spans
+    wd_uri_to_spans = defaultdict(list)
+    for entity_el in doc.xpath('entities/entity'):
+        target_ids = [target.get('id')
+                      for target in entity_el.xpath('span/target')]
+        for ext_ref_el in entity_el.xpath('externalReferences/externalRef'):
+            reference = ext_ref_el.get('reference')
+            if reference.startswith(WIKIDATA_PREFIX):
+                if target_ids not in wd_uri_to_spans[reference]:
+                    wd_uri_to_spans[reference].append(target_ids)
+
+    if not wd_uri_to_spans:
+        return added
+
+    # add coreferences header
+    naf_header_el = doc.find('nafHeader')
+    ent_lp_el = naf_header_el.find('linguisticProcessors[@layer="entities"]/lp')
+    coreferences_header_el = etree.Element(_tag='linguisticProcessors',
+                                           attrib={'layer': 'coreferences'})
+
+    coreferences_lp_el = etree.Element(_tag='lp',
+                                       attrib={
+                                           'beginTimestamp' : ent_lp_el.get('beginTimestamp'),
+                                           'endTimestamp' : ent_lp_el.get('endTimestamp'),
+                                           'name' : ent_lp_el.get('name'),
+                                           'id' : COREFERENCES_ID,
+                                           'version' : ent_lp_el.get('version')
+                                       })
+    # add coreferences layer
+    coreferences_el = etree.Element(_tag='coreferences')
+    naf_header_el.append(coreferences_lp_el)
+
+    naf_header_el.append(coreferences_header_el)
+    coreferences_header_el.append(coreferences_lp_el)
+
+
+
+    for index, (wd_uri, spans) in enumerate(wd_uri_to_spans.items(),
+                                            1):
+
+
+        q_id = wd_uri.replace(WIKIDATA_PREFIX, '')
+        sem_rels = uri_to_rels[q_id]
+
+        if not sem_rels:
+            continue
+
+        if len(sem_rels) >= 2:
+            if verbose:
+                print(f'ignoring uri: {wd_uri}')
+                print(f'it has 2 or more sem rels: {sem_rels}')
+            continue
+
+        sem_rel = list(sem_rels)[0]
+        if sem_rel == 'http://semanticweb.cs.vu.nl/2009/11/sem/Event':
+            coref_type = 'event'
+        else:
+            coref_type = 'entity'
+
+        # coref element
+        coref_el = etree.Element(_tag='coref',
+                                 attrib={
+                                     'id' : f'co{index}',
+                                     'status' : 'system',
+                                     'type' : coref_type
+                                 })
+
+
+        for span in spans:
+            span_el = etree.Element(_tag='span',
+                                    attrib={
+                                        'status': 'system'
+                                    })
+
+            for target_id in span:
+                target_el = etree.Element(_tag='target',
+                                          attrib={
+                                          'id' : target_id
+                                      })
+            span_el.append(target_el)
+
+            coref_el.append(span_el)
+
+        ext_refs_el = etree.Element(_tag='externalReferences')
+        new_ext_ref_el = etree.Element(_tag='externalRef',
+                                       attrib={
+                                           'reference' : wd_uri,
+                                           'resource' : 'http://www.wikidata.org',
+                                           'source' : COREFERENCES_ID,
+                                           'reftype' : sem_rel,
+                                           'timestamp' : ent_lp_el.get('endTimestamp')
+                                       })
+
+        ext_refs_el.append(new_ext_ref_el)
+
+        coref_el.append(ext_refs_el)
+        coreferences_el.append(coref_el)
+
+    root.append(coreferences_el)
+    added = True
+
+    # overwrite NAF file
+    doc.write(naf_path,
+              encoding='utf-8',
+              pretty_print=True,
+              xml_declaration=True)
+
+    if verbose >= 4:
+        print(f'add links to {naf_path}')
+
+    return added
+
+
+def add_wikidata_uris_to_naf_files(inc_coll_obj,
+                                   main_naf_folder,
+                                   languages,
+                                   verbose=0):
+    """
+
+    :param inc_coll_obj:
+    :return:
+    """
+    # get NAF paths
+    naf_paths = get_naf_paths(inc_coll_obj,
+                              main_naf_folder,
+                              verbose=verbose)
+
+    # get uris
+    uri_to_rels = utils.get_uris(inc_coll_obj,
+                           verbose=verbose)
+
+    # get mapping Wikidata <-> Wikipedia
+    wd_to_wiki,\
+    wiki_to_wd = native_api_utils.map_wd_uri_to_wikipedia_uri(uri_to_rels,
+                                                              languages,
+                                                              verbose=verbose)
+
+    # add entity links to NAF files
+    for naf_path in naf_paths:
+        add_wd_uris_to_naf_file(naf_path,
+                                wiki_to_wd,
+                                verbose=verbose)
+
+    # add links to coreferences elements
+    nafs_with_coref = 0
+    for naf_path in naf_paths:
+        result = add_coreferences_layer(naf_path,
+                                        uri_to_rels,
+                                        verbose=verbose)
+        if result:
+            nafs_with_coref += 1
+
+    if verbose >= 2:
+        print()
+        print(f'added coreferences layer to {nafs_with_coref} NAF files.')

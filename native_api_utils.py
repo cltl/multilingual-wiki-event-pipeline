@@ -1,4 +1,10 @@
+from collections import defaultdict
+
+import utils
+
 import requests
+
+WIKIDATA_PREFIX = utils.WIKIDATA_PREFIX
 
 def obtain_date_of_creation(titles, language):
     """
@@ -47,7 +53,7 @@ def obtain_contributors(titles, language):
         contributors[page_info['title']]=c
     return contributors
 
-def obtain_wiki_page_titles(wdt_ids, languages):
+def obtain_wiki_page_titles(wdt_ids, languages, verbose=0):
     """Obtain Wikipedia page titles from a set of Wikidata IDs."""
     ids_filter='|'.join(wdt_ids)
     languages_filter='|'.join(list(map(lambda x: x + 'wiki', languages)))
@@ -59,8 +65,18 @@ def obtain_wiki_page_titles(wdt_ids, languages):
             'format': 'json'
             }
     url='https://www.wikidata.org/w/api.php?'
+
+    if verbose >= 4:
+        print()
+        print(url)
+        print(params)
+
     r=requests.get(url, params=params)
     j=r.json()
+
+    if verbose >= 4:
+        print(j)
+
     results_batch={}
     if 'entities' in j.keys():
         for id, id_data in j['entities'].items():
@@ -205,4 +221,41 @@ def get_uri_from_title(name, lang):
         return page_info['canonicalurl']
     invented_uri="https://%s.wikipedia.org/wiki/%s" % (lang, name.replace(' ', '_'))
     return invented_uri
+
+
+def map_wd_uri_to_wikipedia_uri(uris,
+                                languages,
+                                verbose=0):
+    """
+
+    :param set uris: set of Wikidata uris,
+    e,g, {'Q76', 'Q37079'}
+    :param set languages: set of languages, e.g.,
+    {'nl', 'en', 'it'}
+
+    :rtype: dict
+    :return: wikipedia_page -> wikidata uri
+    """
+    wd_to_wiki = defaultdict(dict)
+    wiki_to_wd = {}
+    batches = utils.split_in_batches(list(uris), batch_size=50)
+    for index, batch in enumerate(batches):
+        wikipages = obtain_wiki_page_titles(batch,
+                                            languages,
+                                            verbose=verbose)
+
+        for wdt_id, lang_to_name in wikipages.items():
+            wikidata_uri = f'{WIKIDATA_PREFIX}{wdt_id}'
+            for lang, name in lang_to_name.items():
+                name_with_underscores = name.replace(' ', '_')
+                wiki_uri = f'http://{lang}.wikipedia.org/wiki/{name_with_underscores}'
+
+                wd_to_wiki[wikidata_uri][lang] = wiki_uri
+                wiki_to_wd[wiki_uri] = wikidata_uri
+
+    if verbose >= 2:
+        print()
+        print(f'found {len(wiki_to_wd)} mappings from Wikidata to Wikipedia')
+
+    return wd_to_wiki, wiki_to_wd
 

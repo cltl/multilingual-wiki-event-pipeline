@@ -10,6 +10,7 @@ from glob import glob
 import os
 
 wdt_sparql_url = 'https://query.wikidata.org/sparql'
+WIKIDATA_PREFIX = 'http://www.wikidata.org/entity/'
 
 def format_time(t):
     """
@@ -443,3 +444,47 @@ def get_bin_paths(folder, suffix, pilot=False):
         paths.append(path)
 
     return paths
+
+
+def get_uris(inc_coll_obj,
+             prefix=WIKIDATA_PREFIX,
+             rels_to_ignore={'sem:hasTimeStamp'},
+             verbose=0):
+    """
+
+    :param inc_coll_obj:
+    :return:
+    """
+
+    short_rel_to_full = {
+        'incident' : 'http://semanticweb.cs.vu.nl/2009/11/sem/Event',
+        'sem:hasPlace' : 'http://semanticweb.cs.vu.nl/2009/11/sem/hasPlace',
+        'sem:hasActor' : 'http://semanticweb.cs.vu.nl/2009/11/sem/hasActor'
+    }
+
+    uri_to_rels = defaultdict(set)
+    for inc_obj in inc_coll_obj.incidents:
+
+        uri_to_rels[inc_obj.wdt_id].add(short_rel_to_full['incident'])
+
+        for rel, set_with_uri_and_label in inc_obj.extra_info.items():
+
+            if rel in rels_to_ignore:
+                continue
+
+            for uri_and_label in set_with_uri_and_label:
+                uri, label = uri_and_label.split(' | ')
+                if prefix:
+                    if not uri.startswith(prefix):
+                        continue
+
+                if prefix:
+                    uri = uri.replace(prefix, '')
+
+                uri_to_rels[uri].add(short_rel_to_full[rel])
+
+    if verbose >= 2:
+        print()
+        print(f'detected {len(uri_to_rels)} Wikidata uris according to Incident.extra_info')
+
+    return uri_to_rels

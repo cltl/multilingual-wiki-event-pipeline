@@ -38,6 +38,7 @@ from tqdm import tqdm
 import classes
 import crawl_utils
 import json_utils
+import xml_utils
 import native_api_utils
 import pilot_utils
 import utils
@@ -367,6 +368,13 @@ if __name__ == '__main__':
                                         dct,
                                         output_folder=naf_output_folder,
                                         wiki_langlinks=wiki_langlinks)
+
+        # add Wikidata information to NAF (entities and coreferences layer)
+        xml_utils.add_wikidata_uris_to_naf_files(inc_coll_obj=collection,
+                                                 naf_output_folder=mwep_settings['naf_output_folder'],
+                                                 languages=accepted_languages,
+                                                 verbose=2)
+
         inc_stats.append(len(pilot_collection.incidents))
 
         end = time.time()
