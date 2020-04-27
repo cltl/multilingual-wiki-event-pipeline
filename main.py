@@ -371,7 +371,7 @@ if __name__ == '__main__':
 
         # add Wikidata information to NAF (entities and coreferences layer)
         xml_utils.add_wikidata_uris_to_naf_files(inc_coll_obj=collection,
-                                                 naf_output_folder=mwep_settings['naf_output_folder'],
+                                                 main_naf_folder=mwep_settings['naf_output_folder'],
                                                  languages=accepted_languages,
                                                  verbose=2)
 
