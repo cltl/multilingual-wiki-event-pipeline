@@ -214,23 +214,6 @@ example = etree.fromstring("""<span><target id="t351"/><target id="t352"/><targe
 assert get_range_of_targets(example) == range(351, 354)
 
 
-def get_naf_paths(incidents, event_type, language='en', verbose=0):
-    
-    naf_paths = []
-    for incident, info in incidents.items():
-        if info['event_type'] == event_type:
-            for ref_text_info in info['reference_texts']['en']:
-                naf = ref_text_info['naf_basename']
-                path = f'{pilot_folder}/naf_srl/NAF/{naf}'
-                assert os.path.exists(path), f'{path} does not exist'
-                naf_paths.append(path)
-    
-    if verbose >= 1:
-        print()
-        print(f'found {len(naf_paths)} NAF paths for {event_type} and {language}')
-    return naf_paths
-                
-
 def get_label2freq(naf_paths, xpath_query, attributes, verbose=0):
     label2freq = defaultdict(int)
     for naf_path in naf_paths:
@@ -342,6 +325,7 @@ def get_naf_paths(inc_coll_obj,
     :return:
     """
     naf_paths = set()
+    naf_to_inc_id = {}
     for inc_obj in inc_coll_obj.incidents:
         for ref_text_obj in inc_obj.reference_texts:
             naf_path = os.path.join(main_naf_folder,
@@ -349,12 +333,13 @@ def get_naf_paths(inc_coll_obj,
                                     f'{ref_text_obj.name}.naf')
             assert os.path.exists(naf_path), f'path for ref text does not exist on disk : {naf_path}'
             naf_paths.add(naf_path)
+            naf_to_inc_id[naf_path] = f'{WIKIDATA_PREFIX}{inc_obj.wdt_id}'
 
     if verbose >= 2:
         print()
         print(f'found {len(naf_paths)} NAF paths')
 
-    return naf_paths
+    return naf_paths, naf_to_inc_id
 
 def add_wd_uris_to_naf_file(naf_path,
                             wiki_to_wd,
@@ -378,10 +363,17 @@ def add_wd_uris_to_naf_file(naf_path,
             return
 
     for ext_refs_el in doc.xpath('entities/entity/externalReferences'):
-        ext_ref_els = ext_refs_el.xpath('externalRef')
+        ext_ref_els = list(ext_refs_el.xpath('externalRef'))
+
+        all_refs = {ext_ref_el.get('reference')
+                    for ext_ref_el in ext_ref_els}
+
         for ext_ref_el in ext_ref_els:
             wiki_reference = ext_ref_el.get('reference')
-            if wiki_reference in wiki_to_wd:
+            wd_reference = wiki_to_wd.get(wiki_reference, None)
+
+            if all([wd_reference is not None,
+                    wd_reference not in all_refs]):
 
                 # add externalRef element
                 new_ext_ref_el = etree.SubElement(ext_refs_el, 'externalRef')
@@ -391,8 +383,13 @@ def add_wd_uris_to_naf_file(naf_path,
                 new_ext_ref_el.set('resource', ext_ref_el.get('resource'))
 
                 ext_ref_els.append(new_ext_ref_el)
+                all_refs.add(wd_reference)
 
                 changed = True
+
+        all_refs = [ext_ref_el.get('reference')
+                    for ext_ref_el in ext_ref_els]
+        assert len(all_refs) == len(set(all_refs)), f'duplicate references in {naf_path}'
 
     # overwrite NAF file
     if changed:
@@ -407,6 +404,7 @@ def add_wd_uris_to_naf_file(naf_path,
 
 def add_coreferences_layer(naf_path,
                            uri_to_rels,
+                           wd_uris_of_inc_id,
                            pass_if_coreferences_el_exists=True,
                            verbose=0):
     """
@@ -435,7 +433,10 @@ def add_coreferences_layer(naf_path,
                       for target in entity_el.xpath('span/target')]
         for ext_ref_el in entity_el.xpath('externalReferences/externalRef'):
             reference = ext_ref_el.get('reference')
-            if reference.startswith(WIKIDATA_PREFIX):
+
+            if all([reference.startswith(WIKIDATA_PREFIX), # is Wikidata link
+                    reference in wd_uris_of_inc_id         # is part of structured data
+                    ]):
                 if target_ids not in wd_uri_to_spans[reference]:
                     wd_uri_to_spans[reference].append(target_ids)
 
@@ -551,13 +552,13 @@ def add_wikidata_uris_to_naf_files(inc_coll_obj,
     :return:
     """
     # get NAF paths
-    naf_paths = get_naf_paths(inc_coll_obj,
-                              main_naf_folder,
-                              verbose=verbose)
+    naf_paths, naf_to_inc_id = get_naf_paths(inc_coll_obj,
+                                             main_naf_folder,
+                                             verbose=verbose)
 
     # get uris
-    uri_to_rels = utils.get_uris(inc_coll_obj,
-                           verbose=verbose)
+    uri_to_rels, inc_id_to_wd_uris = utils.get_uris(inc_coll_obj,
+                                                    verbose=verbose)
 
     # get mapping Wikidata <-> Wikipedia
     wd_to_wiki,\
@@ -574,8 +575,13 @@ def add_wikidata_uris_to_naf_files(inc_coll_obj,
     # add links to coreferences elements
     nafs_with_coref = 0
     for naf_path in naf_paths:
+
+        inc_id = naf_to_inc_id[naf_path]
+        wd_uris_of_inc_id = inc_id_to_wd_uris[inc_id]
+
         result = add_coreferences_layer(naf_path,
                                         uri_to_rels,
+                                        wd_uris_of_inc_id,
                                         verbose=verbose)
         if result:
             nafs_with_coref += 1

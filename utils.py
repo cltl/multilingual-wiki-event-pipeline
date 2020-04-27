@@ -463,9 +463,13 @@ def get_uris(inc_coll_obj,
     }
 
     uri_to_rels = defaultdict(set)
+    inc_id_to_wd_uris = defaultdict(set)
+
     for inc_obj in inc_coll_obj.incidents:
 
         uri_to_rels[inc_obj.wdt_id].add(short_rel_to_full['incident'])
+        wd_inc_uri = f'{WIKIDATA_PREFIX}{inc_obj.wdt_id}'
+        inc_id_to_wd_uris[wd_inc_uri].add(wd_inc_uri)
 
         for rel, set_with_uri_and_label in inc_obj.extra_info.items():
 
@@ -482,9 +486,10 @@ def get_uris(inc_coll_obj,
                     uri = uri.replace(prefix, '')
 
                 uri_to_rels[uri].add(short_rel_to_full[rel])
+                inc_id_to_wd_uris[wd_inc_uri].add(f'{WIKIDATA_PREFIX}{uri}')
 
     if verbose >= 2:
         print()
         print(f'detected {len(uri_to_rels)} Wikidata uris according to Incident.extra_info')
 
-    return uri_to_rels
+    return uri_to_rels, inc_id_to_wd_uris
