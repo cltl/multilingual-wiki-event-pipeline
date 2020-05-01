@@ -8,7 +8,7 @@ import utils
 import native_api_utils
 
 COREFERENCES_ID = 'Wikipedia_hyperlinks'
-WIKIDATA_PREFIX 'http://www.wikidata.org/entity/'
+WIKIDATA_PREFIX = 'http://www.wikidata.org/entity/'
 
 def mapping_wid2tid(doc):
     """
