@@ -8,7 +8,7 @@ import utils
 import native_api_utils
 
 COREFERENCES_ID = 'Wikipedia_hyperlinks'
-WIKIDATA_PREFIX = utils.WIKIDATA_PREFIX
+WIKIDATA_PREFIX = 'http://www.wikidata.org/entity/'
 
 def mapping_wid2tid(doc):
     """
@@ -331,9 +331,9 @@ def get_naf_paths(inc_coll_obj,
             naf_path = os.path.join(main_naf_folder,
                                     ref_text_obj.language,
                                     f'{ref_text_obj.name}.naf')
-            assert os.path.exists(naf_path), f'path for ref text does not exist on disk : {naf_path}'
-            naf_paths.add(naf_path)
-            naf_to_inc_id[naf_path] = f'{WIKIDATA_PREFIX}{inc_obj.wdt_id}'
+            if os.path.exists(naf_path):
+                naf_paths.add(naf_path)
+                naf_to_inc_id[naf_path] = f'{WIKIDATA_PREFIX}{inc_obj.wdt_id}'
 
     if verbose >= 2:
         print()

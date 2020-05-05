@@ -44,7 +44,11 @@ def generate_wayback_uri(url,
             print(f'status code: {r.status_code}')
 
     data_as_string = r.data.decode('utf-8')
-    snapshots = ast.literal_eval(data_as_string[:-1])
+    try:
+        snapshots = ast.literal_eval(data_as_string[:-1])
+    except:
+        # org.archive.util.io.RuntimeIOException: org.archive.wayback.exception.AdministrativeAccessControlException: Blocked Site Error
+        snapshots = ['']
 
     for (urlkey,
          timestamp,
