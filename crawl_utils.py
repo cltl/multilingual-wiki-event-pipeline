@@ -80,6 +80,7 @@ def run_newsplease(url,
                    excluded_domains=set(),
                    title_required=True,
                    num_chars_range=False,
+                   illegal_substrings=[],
                    verbose=0):
     """
     apply newsplease on a url
@@ -92,6 +93,8 @@ def run_newsplease(url,
     :param bool title_required: the article.title value can not be None
     :param num_chars_range: if of type range, an article will only be included
     if the number of characters falls within the specified range.
+    :param set illegal_substrings: if an article contains any of these substrings,
+    do not include them
 
     :rtype: tuple
     :return (status, None of dict with all NewsPlease information)
@@ -142,6 +145,10 @@ def run_newsplease(url,
             if news_please_info['language'] not in accepted_languages:
                 status = 'not in accepted languages'
 
+        for illegal_substring in illegal_substrings:
+            if illegal_substring in news_please_info['text']:
+                status = 'illegal substring'
+
         if num_chars_range:
             num_chars = len(news_please_info['text'])
             if num_chars not in num_chars_range:
@@ -187,6 +194,7 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
                                                 excluded_domains=set(),
                                                 title_required=True,
                                                 num_chars_range=False,
+                                                illegal_substrings=[],
                                                 verbose=0):
     """
     crawl urls using newsplease and represent succesful crawls
@@ -215,6 +223,7 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
                                         accepted_languages=accepted_languages,
                                         title_required=title_required,
                                         num_chars_range=num_chars_range,
+                                        illegal_substrings=illegal_substrings,
                                         verbose=verbose)
 
         info = {
@@ -264,25 +273,33 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
 
 
 if __name__ == '__main__':
+    import native_api_utils
 
-    urls = ['http://www.tvweeklogieawards.com.au/logie-history/2000s/2005/',
-            'http://www.australiantelevision.net/awards/logie2005.html',
-            'https://www.smh.com.au/entertainment/once-twice-three-times-a-gold-logie-20050502-gdl8io.html',
-            'https://www.imdb.com/event/ev0000401/2005/',
-            'https://web.archive.org/web/20140126184012/http://www.tvweeklogieawards.com.au/logie-history/2000s/2005/']
+    #links = native_api_utils.obtain_primary_rt_links('Aanslag_in_Utrecht_op_18_maart_2019', 'nl')
+    links = ['https://nos.nl/artikel/2312406-rechtbank-verplicht-verdachte-van-tramaanslag-om-naar-zitting-te-komen.html']
 
     exluded_domains = {'jstor.org'}
-    accepted_languages = {'en'}
+    accepted_languages = {'nl'}
     title_required = True
     num_chars_range = range(100, 10001)
     startswith = 'http'
-    timeout = 2
+    timeout = 4
+    illegal_substrings = ["These crawls are part of an effort to archive pages",
+                          "Formed in 2009, the Archive Team"]
 
-    url_to_info = get_ref_text_obj_of_primary_reference_texts(urls,
-                                                              timeout,
+    url_to_info = get_ref_text_obj_of_primary_reference_texts(urls=links,
+                                                              timeout=timeout,
                                                               startswith=startswith,
                                                               accepted_languages=accepted_languages,
                                                               excluded_domains=exluded_domains,
                                                               title_required=True,
                                                               num_chars_range=num_chars_range,
+                                                              illegal_substrings=illegal_substrings,
                                                               verbose=2)
+
+    for url, info in url_to_info.items():
+        print()
+        print(url)
+        print(info.web_archive_uri)
+        print(info.creation_date)
+        print(info.content)
