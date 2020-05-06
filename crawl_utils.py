@@ -85,6 +85,7 @@ def run_newsplease(url,
                    title_required=True,
                    num_chars_range=False,
                    illegal_substrings=[],
+                   illegal_chars_in_title=set(),
                    verbose=0):
     """
     apply newsplease on a url
@@ -161,6 +162,10 @@ def run_newsplease(url,
         if title_required:
             if news_please_info['title'] is None:
                 status = 'no title'
+            else:
+                for illegal_char_in_title in illegal_chars_in_title:
+                    if illegal_char_in_title in news_please_info['title']:
+                        status = 'illegal char in title'
 
     if verbose >= 3:
         if status == 'succes':
@@ -199,6 +204,7 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
                                                 title_required=True,
                                                 num_chars_range=False,
                                                 illegal_substrings=[],
+                                                illegal_chars_in_title=set(),
                                                 verbose=0):
     """
     crawl urls using newsplease and represent succesful crawls
@@ -228,6 +234,7 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
                                         title_required=title_required,
                                         num_chars_range=num_chars_range,
                                         illegal_substrings=illegal_substrings,
+                                        illegal_chars_in_title=illegal_chars_in_title,
                                         verbose=verbose)
 
         info = {
@@ -290,6 +297,7 @@ if __name__ == '__main__':
     timeout = 4
     illegal_substrings = ["These crawls are part of an effort to archive pages",
                           "Formed in 2009, the Archive Team"]
+    illegal_chars_in_title = {'/'}
 
     url_to_info = get_ref_text_obj_of_primary_reference_texts(urls=links,
                                                               timeout=timeout,
@@ -299,6 +307,7 @@ if __name__ == '__main__':
                                                               title_required=True,
                                                               num_chars_range=num_chars_range,
                                                               illegal_substrings=illegal_substrings,
+                                                              illegal_chars_in_title=illegal_chars_in_title,
                                                               verbose=2)
 
     for url, info in url_to_info.items():
