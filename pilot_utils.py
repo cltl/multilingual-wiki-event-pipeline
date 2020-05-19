@@ -241,14 +241,19 @@ def text_to_naf(wiki_title,
     assert language in target_languages, f'{language} not part of supported languages: {" ".join(target_languages)}'
 
     # parse with spaCy
+    add_mw = False
+    if language in {'en', 'nl'}:
+        add_mw = True
+
     naf = spacy_to_naf.text_to_NAF(text=text,
                                    nlp=nlp,
                                    dct=dct,
-                                   layers={'raw', 'text', 'terms'},
+                                   layers={'raw', 'text', 'terms', 'deps'},
                                    naf_version='v4',
                                    title=wiki_title,
                                    uri=wiki_uri,
-                                   language=language)
+                                   language=language,
+                                   add_mws=add_mw)
 
     assert naf.find('raw').text == text, f'mismatch between raw text JSON and NAF file'
 
@@ -268,9 +273,7 @@ def text_to_naf(wiki_title,
         if not os.path.exists(lang_dir):
             os.mkdir(lang_dir)
         output_path = os.path.join(lang_dir, f'{wiki_title}.naf')
-        with open(output_path, 'w') as outfile:
-            naf_string = spacy_to_naf.NAF_to_string(naf)
-            outfile.write(naf_string)
+        spacy_to_naf.NAF_to_file(naf, output_path)
 
     if verbose >= 3:
         print(f'saved to {output_path}')

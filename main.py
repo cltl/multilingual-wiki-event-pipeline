@@ -356,6 +356,8 @@ if __name__ == '__main__':
                 dct = datetime(year, month, day)
 
                 nlp = models[language]
+    
+                
 
                 pilot_utils.text_to_naf(wiki_title,
                                         languages,
@@ -367,7 +369,7 @@ if __name__ == '__main__':
                                         nlp,
                                         dct,
                                         output_folder=naf_output_folder,
-                                        wiki_langlinks=wiki_langlinks)
+                                        wiki_langlinks=wiki_langlinks) 
 
         # add Wikidata information to NAF (entities and coreferences layer)
         xml_utils.add_wikidata_uris_to_naf_files(inc_coll_obj=collection,
