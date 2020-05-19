@@ -22,7 +22,7 @@ def make_output_filename(bindir, incident_type, languages):
     """
     Create a filename based on the incident type and languages. 
     """
-    output_file='%s/%s_%s.bin' % (bindir, incident_type, ','.join(languages))
+    output_file='%s/%s_%s.bin' % (bindir, incident_type, ','.join(sorted(languages)))
     return output_file
 
 def remove_and_create_folder(fldr):

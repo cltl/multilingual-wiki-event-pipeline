@@ -11,3 +11,4 @@ xlrd==1.2.0
 pandas==0.24.2
 openpyxl==2.6.1
 news-please==1.4.24
+attrs==19.3.0
