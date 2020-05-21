@@ -331,10 +331,12 @@ def get_naf_paths(inc_coll_obj,
             naf_path = os.path.join(main_naf_folder,
                                     ref_text_obj.language,
                                     f'{ref_text_obj.name}.naf')
-            print(repr(ref_text_obj.name))
-            if os.path.exists(naf_path):
-                naf_paths.add(naf_path)
-                naf_to_inc_id[naf_path] = f'{WIKIDATA_PREFIX}{inc_obj.wdt_id}'
+            try:
+                if os.path.exists(naf_path):
+                    naf_paths.add(naf_path)
+                    naf_to_inc_id[naf_path] = f'{WIKIDATA_PREFIX}{inc_obj.wdt_id}'
+            except Exception as e:
+                print(e)
 
     if verbose >= 2:
         print()
@@ -556,8 +558,6 @@ def add_wikidata_uris_to_naf_files(inc_coll_obj,
     naf_paths, naf_to_inc_id = get_naf_paths(inc_coll_obj,
                                              main_naf_folder,
                                              verbose=verbose)
-
-    print(naf_paths)
 
     # get uris
     uri_to_rels, inc_id_to_wd_uris = utils.get_uris(inc_coll_obj,
