@@ -44,6 +44,7 @@ import pilot_utils
 import utils
 import wikipedia_utils as wu
 
+for_encoding = 'é'
 
 def add_wikipedia_pages_from_api(incidents, wdt_ids):
     assert (len(wdt_ids) > 0)

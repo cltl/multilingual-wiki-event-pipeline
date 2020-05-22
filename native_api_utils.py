@@ -4,6 +4,7 @@ import utils
 
 import requests
 
+for_encoding = 'é'
 WIKIDATA_PREFIX = 'http://www.wikidata.org/entity/'
 
 def obtain_date_of_creation(titles, language):

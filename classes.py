@@ -9,6 +9,7 @@ import numpy as np
 import networkx as nx
 
 eventtype2json={}
+for_encoding = 'é'
 
 class IncidentCollection:
 

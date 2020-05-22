@@ -1,6 +1,8 @@
 import json
 from collections import defaultdict
 
+for_encoding = 'é'
+
 def create_indices_from_bin(datasets, project, json_dir):
 
     inc2doc_file='%s/inc2doc_index.json' % json_dir

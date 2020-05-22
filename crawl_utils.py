@@ -11,6 +11,7 @@ import classes
 
 from newsplease import NewsPlease
 
+for_encoding = 'é'
 WAYBACK_CDX_SERVER = 'http://web.archive.org/cdx/search/cdx?'
 
 def generate_wayback_uri(url,

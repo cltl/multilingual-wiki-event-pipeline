@@ -1,6 +1,9 @@
 import pickle
 import utils
 
+
+for_encoding = 'é'
+
 def compute_stats_for_all_combinations(combinations, pilot):
     """
     Compute statistics for all combinations of incident type and languages.

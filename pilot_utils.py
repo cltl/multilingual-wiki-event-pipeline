@@ -13,6 +13,7 @@ import utils
 import xml_utils
 
 eventtype2json = {}
+for_encoding = 'é'
 
 
 # , 'tennis tournament': 'tennis tournament'}

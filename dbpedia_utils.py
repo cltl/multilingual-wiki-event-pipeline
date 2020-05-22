@@ -4,6 +4,7 @@ import wikipedia
 import requests
 import json
 
+for_encoding = 'é'
 
 def get_interlanguage_links(page_names,
                             languages_of_interest={'it', 'nl'},

@@ -9,6 +9,7 @@ import networkx as nx
 from glob import glob
 import os
 
+for_encoding = 'é'
 wdt_sparql_url = 'https://query.wikidata.org/sparql'
 WIKIDATA_PREFIX = 'http://www.wikidata.org/entity/'
 
@@ -110,6 +111,7 @@ def construct_and_run_query(type_qid,
                 if type_qid not in {"Q40231"}:
                     opt_var_labels.append(var + 'Label')
 
+    
     if event_type_matching == 'direct_match':
         main_part = f'?incident wdt:P31 wd:{type_qid} .\nBIND(wd:{type_qid} as ?direct_type) .'
     elif event_type_matching == 'subsumed_by':
@@ -133,7 +135,7 @@ def construct_and_run_query(type_qid,
     print('QUERY:\n', query)
 
     response=get_results_with_retry(wdt_sparql_url, query)
-
+    
     results=response['results']['bindings']
 
     results_by_id=index_results_by_id(results, lang2var, more_props)
