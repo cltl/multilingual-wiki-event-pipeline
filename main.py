@@ -5,6 +5,7 @@ Usage:
   main.py --config_path=<config_path>\
    --project=<project>\
    --path_event_types=<path_event_types>\
+   --path_mapping_wd_to_sem=<path_mapping_wd_to_sem>\
    --languages=<languages>\
    --wikipedia_sources=<wikipedia_sources>\
    --verbose=<verbose>
@@ -13,6 +14,7 @@ Options:
     --config_path=<config_path>
     --project=<project> project name, e.g., pilot
     --path_event_types=<path_event_types> txt file, one event type per line, e.g., Q132821
+    --path_mapping_wd_to_sem=<path_mapping_wd_to_sem> see wdt_fn_mappings/any.json as example
     --languages=<languages> languages separated by -, e.g., "nl-it-en"
     --wikipedia_sources=<wikipedia_sources> if "True", crawl Wikipedia sources
     --verbose=<verbose> 0 --> no stdout 1 --> general stdout 2 --> detailed stdout
@@ -21,6 +23,7 @@ Example:
     python main.py --config_path="config/mwep_settings.json"\
     --project="pilot"\
     --path_event_types="config/event_types.txt"\
+    --path_mapping_wd_to_sem="wdt_fn_mappings/any.json"\
     --languages="nl-en"\
     --wikipedia_sources="False"\
     --verbose=1
@@ -73,17 +76,12 @@ def add_wikipedia_pages_from_api(incidents, wdt_ids):
 
 def retrieve_incidents_per_type(type_qid,
                                 event_type_matching,
+                                json_wd_to_sem,
                                 limit=10):
     """
     Given an event type identifier, retrieve incidents that belong to this type.
     """
-    eventtype2json = {}
-
-    if type_qid in eventtype2json:
-        jsonfilename = 'wdt_fn_mappings/%s.json' % eventtype2json[type_qid]
-    else:
-        jsonfilename = 'wdt_fn_mappings/any.json'
-    with open(jsonfilename, 'rb') as f:
+    with open(json_wd_to_sem, 'rb') as f:
         wdt_fn_mappings_COL = json.load(f)
 
     incidents = []
@@ -203,6 +201,8 @@ if __name__ == '__main__':
     json_folder = mwep_settings['json_folder']
 
     event_type_matching = mwep_settings['event_type_matching']
+    json_wd_to_sem = arguments['--path_mapping_wd_to_sem']
+
     project = arguments['--project']
 
     utils.remove_and_create_folder(rdf_folder)
@@ -264,6 +264,7 @@ if __name__ == '__main__':
         # Query SPARQL and the API to get incidents, their properties, and labels.
         incidents = retrieve_incidents_per_type(incident_type_uri,
                                                 event_type_matching,
+                                                json_wd_to_sem,
                                                 99999)
 
         if not len(incidents):
