@@ -222,7 +222,7 @@ def add_hyperlinks(naf, annotations, prefix, language, dct, wiki_langlinks={}, v
         next_id += 1
 
         spacy_to_naf.add_entity_element(entities_layer,     
-                                        'v4',
+                                        'v3.1',
                                         entity_data, 
                                         add_comments=True)
 
@@ -250,7 +250,7 @@ def text_to_naf(wiki_title,
                                    nlp=nlp,
                                    dct=dct,
                                    layers={'raw', 'text', 'terms', 'deps'},
-                                   naf_version='v4',
+                                   naf_version='v3.1',
                                    title=wiki_title,
                                    uri=wiki_uri,
                                    language=language,
