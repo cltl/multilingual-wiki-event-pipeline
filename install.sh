@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-rm -f spacy_to_naf.py
-wget https://raw.githubusercontent.com/cltl/SpaCy-to-NAF/master/spacy_to_naf.py
-
 python -m spacy download en_core_web_sm
 python -m spacy download nl_core_news_sm
 python -m spacy download it_core_news_sm
@@ -10,19 +7,10 @@ python -m spacy download it_core_news_sm
 rm -rf resources
 mkdir resources
 cd resources
-git clone https://github.com/cltl/FN_Reader
-cd FN_Reader
-pip install -r requirements.txt
-bash install.sh
-cd ..
 
-git clone https://github.com/cltl/NAF_indexer
-cd NAF_indexer
-pip install -r requirements.txt
-cd ..
+wget http://kyoto.let.vu.nl/~postma/dfn/mwep/merged_indices.p
 
-git clone https://github.com/cltl/Wikipedia_langlinks
-cd Wikipedia_langlinks
-bash download.sh
-bash extract.sh
+git clone https://github.com/cltl/SpaCy-to-NAF
+cp SpaCy-to-NAF/spacy_to_naf.py ../
+
 
