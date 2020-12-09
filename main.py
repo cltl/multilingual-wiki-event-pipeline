@@ -183,16 +183,19 @@ if __name__ == '__main__':
     event_types = {line.strip()
                    for line in open(arguments['--path_event_types'])}
     crawl_wikipedia_sources = arguments['--wikipedia_sources'] == "True"
+    verbose = int(arguments['--verbose'])
 
     # settings for crawling Wikipedia sources
-    exluded_domains = set(mwep_settings['newsplease']['excluded_domains'])
-    accepted_languages = list(arguments['--languages'])
+    excluded_domains = set(mwep_settings['newsplease']['excluded_domains'])
+    accepted_languages = arguments['--languages'].split('-')
     title_required = mwep_settings['newsplease']['title_required']
     range_start, range_end = mwep_settings['newsplease']['num_chars_range']
     num_chars_range = range(int(range_start),
                             int(range_end))
     startswith = mwep_settings['newsplease']['startswith']
     timeout = mwep_settings['newsplease']['timeout']
+    illegal_substrings = mwep_settings['newsplease']['illegal_substrings']
+    illegal_chars_in_title = mwep_settings['newsplease']['illegal_chars_in_title']
 
     wiki_folder = mwep_settings['wiki_folder']
     naf_output_folder = mwep_settings['naf_output_folder']
@@ -311,11 +314,6 @@ if __name__ == '__main__':
 
         pilot_collections.append(pilot_collection)
 
-        out_file = utils.make_output_filename(bin_folder, incident_type_uri, pilot_and_languages)
-
-        with open(out_file, 'wb') as of:
-            pickle.dump(pilot_collection, of)
-
         ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type_uri, '_'.join(pilot_and_languages))
         pilot_collection.serialize(ttl_filename)
 
@@ -335,11 +333,12 @@ if __name__ == '__main__':
                                                                                                       timeout,
                                                                                                       startswith=startswith,
                                                                                                       accepted_languages=accepted_languages,
-                                                                                                      excluded_domains=exluded_domains,
+                                                                                                      excluded_domains=excluded_domains,
                                                                                                       title_required=True,
                                                                                                       num_chars_range=num_chars_range,
-                                                                                                      verbose=2
-                                                                                                      )
+                                                                                                      illegal_substrings=illegal_substrings,
+                                                                                                      illegal_chars_in_title=illegal_chars_in_title,
+                                                                                                      verbose=verbose)
 
                 for url, primary_ref_text_obj in primary_url_to_ref_text_obj.items():
                     incident_obj.reference_texts.append(primary_ref_text_obj)
@@ -371,7 +370,12 @@ if __name__ == '__main__':
                                         nlp,
                                         dct,
                                         output_folder=naf_output_folder,
-                                        wiki_langlinks=wiki_langlinks) 
+                                        wiki_langlinks=wiki_langlinks)
+
+        out_file = utils.make_output_filename(bin_folder, incident_type_uri, pilot_and_languages)
+
+        with open(out_file, 'wb') as of:
+            pickle.dump(pilot_collection, of)
 
         # add Wikidata information to NAF (entities and coreferences layer)
         xml_utils.add_wikidata_uris_to_naf_files(inc_coll_obj=collection,

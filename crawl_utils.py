@@ -1,4 +1,3 @@
-from collections import Counter
 from collections import defaultdict
 import urllib
 import http
@@ -10,6 +9,7 @@ import urllib3
 import classes
 
 from newsplease import NewsPlease
+import langdetect
 
 for_encoding = 'é'
 WAYBACK_CDX_SERVER = 'http://web.archive.org/cdx/search/cdx?'
@@ -42,7 +42,7 @@ def generate_wayback_uri(url,
     if r.status != 200:
         status = 'status code not 200'
         if verbose >= 4:
-            print(f'status code: {r.status_code}')
+            print(f'status code: {r.status}')
 
     data_as_string = r.data.decode('utf-8')
     try:
@@ -138,7 +138,9 @@ def run_newsplease(url,
         except (urllib.error.URLError,
                 ValueError,
                 http.client.RemoteDisconnected,
-                socket.timeout) as e:
+                socket.timeout,
+                langdetect.lang_detect_exception.LangDetectException
+                ) as e:
             article = None
             status = 'URL error'
 
@@ -226,7 +228,13 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
     url_to_info = {}
     stati = defaultdict(int)
 
-    for url in urls:
+    for index, url in enumerate(urls, 1):
+
+        if verbose >= 5:
+            if index == 5:
+                print(f'QUITTING AFTER 5 BECAUSE VERBOSE == 5')
+                break
+
         status, result = run_newsplease(url,
                                         timeout=timeout,
                                         startswith=startswith,
