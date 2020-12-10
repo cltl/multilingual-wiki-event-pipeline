@@ -231,8 +231,8 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
     for index, url in enumerate(urls, 1):
 
         if verbose >= 5:
-            if index == 5:
-                print(f'QUITTING AFTER 5 BECAUSE VERBOSE == 5')
+            if index == 50:
+                print(f'QUITTING AFTER 5 BECAUSE VERBOSE == 50')
                 break
 
         status, result = run_newsplease(url,

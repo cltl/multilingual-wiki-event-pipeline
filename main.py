@@ -353,12 +353,19 @@ if __name__ == '__main__':
 
                 prefix = language2info[language]['prefix']
 
-                year, month, day = language2info[language]['year_month_day']
-                dct = datetime(year, month, day)
+                # dct of document
+                if ref_text_obj.found_by == ['Wikipedia source']:
+                    if ref_text_obj.creation_date is not None:
+                        dct = ref_text_obj.creation_date
+                    else:
+                        dct = datetime(1,1,1)
+                else: # wikipedia page
+                    year, month, day = language2info[language]['year_month_day']
+                    dct = datetime(year, month, day)
+
+                print(ref_text_obj.name, ref_text_obj.uri, ref_text_obj.found_by, dct)
 
                 nlp = models[language]
-    
-                
 
                 pilot_utils.text_to_naf(wiki_title,
                                         languages,
