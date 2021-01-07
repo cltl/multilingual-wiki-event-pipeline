@@ -146,7 +146,7 @@ def load_annotations(annotations, prefix):
 
 
 def time_in_correct_format(datetime_obj):
-    "Function that returns the current time (UTC)"
+    "Function that returns the current time"
     return datetime_obj.strftime("%Y-%m-%dT%H:%M:%SUTC")
 
 def add_hyperlinks(naf, annotations, prefix, language, dct, wiki_langlinks={}, verbose=0):
@@ -246,17 +246,21 @@ def text_to_naf(wiki_title,
     if language in {'en', 'nl'}:
         add_mw = True
 
-    naf = spacy_to_naf.text_to_NAF(text=text,
-                                   nlp=nlp,
-                                   dct=dct,
-                                   layers={'raw', 'text', 'terms', 'deps'},
-                                   naf_version='v3.1',
-                                   title=wiki_title,
-                                   uri=wiki_uri,
-                                   language=language,
-                                   add_mws=add_mw)
+    try:
+        naf = spacy_to_naf.text_to_NAF(text=text,
+                                       nlp=nlp,
+                                       dct=dct,
+                                       layers={'raw', 'text', 'terms', 'deps'},
+                                       naf_version='v3.1',
+                                       title=wiki_title,
+                                       uri=wiki_uri,
+                                       language=language,
+                                       add_mws=add_mw)
 
-    assert naf.find('raw').text == text, f'mismatch between raw text JSON and NAF file'
+        assert naf.find('raw').text == text, f'mismatch between raw text JSON and NAF file'
+    except:
+        return
+
 
     # add hyperlinks as entity elements
     add_hyperlinks(naf,
