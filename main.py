@@ -183,6 +183,7 @@ if __name__ == '__main__':
     event_types = {line.strip()
                    for line in open(arguments['--path_event_types'])}
     crawl_wikipedia_sources = arguments['--wikipedia_sources'] == "True"
+    max_pilot_incidents = mwep_settings['max_pilot_incidents']
     verbose = int(arguments['--verbose'])
 
     # settings for crawling Wikipedia sources
@@ -300,6 +301,10 @@ if __name__ == '__main__':
                                                mwep_settings['processing']["must_have_all_languages"],
                                                mwep_settings['processing']["must_have_english"],
                                                mwep_settings['processing']["one_page_per_language"])
+
+        if len(pilots) > max_pilot_incidents:
+            pilots = list(pilots)[:max_pilot_incidents]
+            print(f'selected first {max_pilot_incidents} pilot incidents')
 
         after_pilot_selection = time.time()
 
