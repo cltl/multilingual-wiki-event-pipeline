@@ -30,6 +30,12 @@ This installation takes some minutes. Grab a coffee (or two).
 
 ### Configuration
 
+Please run 
+```python
+python main.py -h 
+```
+To get information about how to use MWEP.
+
 We make use of docopt to provide arguments to the Python module **main.py**.
 The first argument is **--config_path**, for which a path to a JSON file should be provided (see config/mwep_settings.json for an example).
 * **processing**:
@@ -63,18 +69,11 @@ All extraction code can be found in the file `main.py`:
 6. Process each document with SpaCy
 7. Enrich with entity links, based on Wikipedia hyperlinks
 8. Store to NAF
-9. Serialize to RDF
 
 The final result is a processed incident collection for a set of languages and an incident type, stored in multiple ways:
 * a pickle file in the `bin/` folder, containing the incident collection as a python class
 * a number of NAF files in the `wiki_output` folder, containing both raw text and NLP layers
-* an RDF Turtle (.ttl) representation of the extracted incidents and documents, in `bin/rdf`
 
-### Modeling
-
-The modeling in the .ttl file is based on the SEM model. Here is an excerpt of the resulting graph:
-
-![Alt text](img/model.png?raw=true "Model")
 
 ### Helpful links
 
