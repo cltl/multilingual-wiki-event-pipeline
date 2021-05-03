@@ -10,6 +10,7 @@ import classes
 
 from newsplease import NewsPlease
 import langdetect
+import lxml
 
 for_encoding = 'é'
 WAYBACK_CDX_SERVER = 'http://web.archive.org/cdx/search/cdx?'
@@ -139,6 +140,10 @@ def run_newsplease(url,
                 ValueError,
                 http.client.RemoteDisconnected,
                 socket.timeout,
+                http.client.IncompleteRead,
+                http.client.RemoteDisconnected,
+                ConnectionResetError,
+                lxml.etree.ParserError,
                 langdetect.lang_detect_exception.LangDetectException
                 ) as e:
             article = None
