@@ -38,7 +38,10 @@ def generate_wayback_uri(url,
               'limit' : last_n}
 
     encoded_uri = WAYBACK_CDX_SERVER + urlencode(params)
-    r = http.request('GET', encoded_uri)
+    try:
+        r = http.request('GET', encoded_uri)
+    except urllib3.exceptions.MaxRetryError:
+        return 'http request failed', url
 
     if r.status != 200:
         status = 'status code not 200'
