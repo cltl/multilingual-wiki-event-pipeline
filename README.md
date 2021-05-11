@@ -4,10 +4,6 @@ This project aims to extract information about incidents of a particular event t
 This information consists of structured data on the incidents from Wikidata, as well as unstructured description and supporting sources from Wikipedia. 
 We obtain information from Wikipedia in multiple languages (currently tested with Dutch, Italian, English, and Japanese).
 
-## Authors
-* **Filip Ilievski** (f.ilievski@vu.nl)
-* **Marten Postma** (m.c.postma@vu.nl)
-
 ## License
 This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details
 
