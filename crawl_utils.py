@@ -38,6 +38,8 @@ def generate_wayback_uri(url,
               'limit' : last_n}
 
     encoded_uri = WAYBACK_CDX_SERVER + urlencode(params)
+    print(encoded_uri)
+
     try:
         r = http.request('GET', encoded_uri)
     except urllib3.exceptions.MaxRetryError:
@@ -49,6 +51,7 @@ def generate_wayback_uri(url,
             print(f'status code: {r.status}')
 
     data_as_string = r.data.decode('utf-8')
+
     try:
         snapshots = ast.literal_eval(data_as_string[:-1])
     except:
@@ -120,10 +123,11 @@ def run_newsplease(url,
     for excluded_domain in excluded_domains:
         if excluded_domain in url:
             status = 'excluded domain'
-
     if status == 'succes':
         if 'web.archive.org/web/' not in url:
+            print('generating wayback uri')
             status, wb_url = generate_wayback_uri(url, verbose=verbose)
+            print(status, wb_url)
         else:
             status = 'succes'
             wb_url = url
@@ -201,11 +205,24 @@ def run_newsplease(url,
 
 status, article = run_newsplease(url='https://www.aasdfjsoidfj.nl',
                                  timeout=10)
+print('test 1 - should fail with wayback machine url not found')
+print(status)
 assert status == 'Wayback Machine URL not found'
 
-status, article = run_newsplease(url='https://www.rt.com/news/203203-ukraine-russia-troops-border/',
+# Pia: link seems to have disappeared - creating new test
+# status, article = run_newsplease(url='https://www.rt.com/news/203203-ukraine-russia-troops-border/',
+#                                  timeout=10)
+#https://nos.nl/artikel/2312406-rechtbank-verplicht-verdachte-van-tramaanslag-om-naar-zitting-te-komen.html'
+#https://www.reuters.com/world/europe/uk-says-russian-forces-opened-new-route-advance-towards-kyiv-2022-02-25/'
+status, article = run_newsplease(url='https://nos.nl/artikel/2312406-rechtbank-verplicht-verdachte-van-tramaanslag-om-naar-zitting-te-komen.html',
                                  timeout=10)
+
+
+print('test 2 - should be successful')
+print(status)
 assert status == 'succes'
+
+
 
 def get_ref_text_obj_of_primary_reference_texts(urls,
                                                 timeout,
@@ -265,12 +282,17 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
         }
 
         if status == 'succes':
+            # Pia: stick title to text
+            text = result['text']
+            title = result['title']
+            text_title = f'{title}\n{text}'
             info['web_archive_uri']  = result['url']
             info['name'] = result['title']
             info['creation_date'] = result['date_publish']
             info['language'] = result['language']
             info['found_by'] = 'Wikipedia source'
-            info['content'] = result['text']
+            #info['content'] = result['text']
+            info['content'] = text_title
         url_to_info[url] = info
 
 
@@ -302,6 +324,7 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
 
 if __name__ == '__main__':
     import native_api_utils
+
 
     #links = native_api_utils.obtain_primary_rt_links('Aanslag_in_Utrecht_op_18_maart_2019', 'nl')
     links = ['https://nos.nl/artikel/2312406-rechtbank-verplicht-verdachte-van-tramaanslag-om-naar-zitting-te-komen.html']

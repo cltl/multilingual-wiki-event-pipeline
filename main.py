@@ -218,6 +218,7 @@ if __name__ == '__main__':
 
     # load index and language info
     path_uri2path_info = os.path.join(wiki_folder, 'page2path.p')
+    print(path_uri2path_info)
     with open(path_uri2path_info, 'rb') as infile:
         wiki_uri2path_info = pickle.load(infile)  # make take some time
 
