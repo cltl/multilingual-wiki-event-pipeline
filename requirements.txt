@@ -11,7 +11,7 @@ wikitextparser==0.26.1
 wikipedia==1.4.0
 graphviz==0.11
 # Pia: problem with lxml
-lxml==4.3.0.0
+lxml==4.9.1
 xlrd==1.2.0
 # Pia: installation problem with pandas
 #pandas==0.24.2
