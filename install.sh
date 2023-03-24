@@ -10,10 +10,9 @@ cd resources
 
 wget http://kyoto.let.vu.nl/~postma/dfn/mwep/merged_indices.p
 
-git clone https://github.com/cltl/SpaCy-to-NAF
-cp SpaCy-to-NAF/spacy_to_naf.py ../
+# Pia: needs update - added pip install to requirements
+# git clone https://github.com/cltl/SpaCy-to-NAF
+# cp SpaCy-to-NAF/spacy_to_naf.py ../
 
 wget http://kyoto.let.vu.nl/~postma/dfn/mwep/Wikipedia_Reader.zip
 unzip Wikipedia_Reader.zip
-
-
