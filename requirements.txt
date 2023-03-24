@@ -1,15 +1,26 @@
 rdflib==4.2.2
 requests==2.21.0
-spacy==2.1.4
+#Pia: installation problem with spacy
+#spacy==2.1.4
+spacy==3.5.1
 docopt==0.6.2
-scipy==1.1.0
+# Pia: problem with scipy
+#scipy==1.1.0
+scipy==1.10.1
 wikitextparser==0.26.1
 wikipedia==1.4.0
 graphviz==0.11
+# Pia: problem with lxml
 lxml==4.3.0.0
 xlrd==1.2.0
-pandas==0.24.2
+# Pia: installation problem with pandas
+#pandas==0.24.2
+pandas==1.5.3
 openpyxl==2.6.1
-news-please==1.4.24
+# Pia problem with news-please
+#news-please==1.4.24
+newsplease==1.5.22
 attrs==19.3.0
 networkx==2.6.2
+#Pia added spacy to naf pip install
+spacy-to-naf==0.2.0

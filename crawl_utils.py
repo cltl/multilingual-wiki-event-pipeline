@@ -67,7 +67,7 @@ def generate_wayback_uri(url,
          length) in snapshots[1:]:
 
         if statuscode == '-':
-            continue 
+            continue
 
         if int(statuscode) == 200:
             wb_url = f'http://web.archive.org/web/{timestamp}/{original}'
@@ -135,12 +135,18 @@ def run_newsplease(url,
     # TODO: what if url is not the same as the one crawler (via redirects?)
 
     if status == 'succes':
+        print('trying to crawl')
         try:
+            print(wb_url)
             article = NewsPlease.from_url(wb_url, timeout=timeout)
+            #article.download()
+            print(article.title)
+            # article = NewsPlease.from_url('https://www.nytimes.com/2017/02/23/us/politics/cpac-stephen-bannon-reince-priebus.html?hp')
+            # print(article.title)
 
             if article is None:
                 status = 'crawl error'
-            elif article.text is None:
+            elif article.title is None:
                 status = 'crawl error'
 
         except (urllib.error.URLError,
@@ -160,17 +166,19 @@ def run_newsplease(url,
 
         # validate attributes based on settings
         news_please_info = article.get_dict()
+        print('article dict')
+        print(news_please_info)
 
         if accepted_languages:
             if news_please_info['language'] not in accepted_languages:
                 status = 'not in accepted languages'
 
         for illegal_substring in illegal_substrings:
-            if illegal_substring in news_please_info['text']:
+            if illegal_substring in news_please_info['maintext']:
                 status = 'illegal substring'
 
         if num_chars_range:
-            num_chars = len(news_please_info['text'])
+            num_chars = len(news_please_info['maintext'])
             if num_chars not in num_chars_range:
                 status = 'outside of accepted number of characters range'
 
@@ -317,7 +325,7 @@ def get_ref_text_obj_of_primary_reference_texts(urls,
         print(f'processed {len(urls)} urls')
         print(f'represented {len(url_to_ref_text_obj)} as ReferenceText object')
         print(stati)
-        
+
 
     return url_to_ref_text_obj
 
