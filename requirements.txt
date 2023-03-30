@@ -1,3 +1,9 @@
+# Added to check if news-please issue can be fixed
+# docutils==0.19
+# Pia problem with news-please
+#news-please==1.4.24
+news-please==1.5.22
+cython==0.29.33
 rdflib==4.2.2
 requests==2.21.0
 #Pia: installation problem with spacy
@@ -11,15 +17,13 @@ wikitextparser==0.26.1
 wikipedia==1.4.0
 graphviz==0.11
 # Pia: problem with lxml
-lxml==4.3.0.0
+#lxml==4.3.0.0
+lxml==4.9.2
 xlrd==1.2.0
 # Pia: installation problem with pandas
 #pandas==0.24.2
 pandas==1.5.3
 openpyxl==2.6.1
-# Pia problem with news-please
-#news-please==1.4.24
-newsplease==1.5.22
 attrs==19.3.0
 networkx==2.6.2
 #Pia added spacy to naf pip install

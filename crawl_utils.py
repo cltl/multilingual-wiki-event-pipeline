@@ -140,7 +140,7 @@ def run_newsplease(url,
             print(wb_url)
             article = NewsPlease.from_url(wb_url, timeout=timeout)
             #article.download()
-            print(article.title)
+            #print(article.title)
             # article = NewsPlease.from_url('https://www.nytimes.com/2017/02/23/us/politics/cpac-stephen-bannon-reince-priebus.html?hp')
             # print(article.title)
 
@@ -166,8 +166,6 @@ def run_newsplease(url,
 
         # validate attributes based on settings
         news_please_info = article.get_dict()
-        print('article dict')
-        print(news_please_info)
 
         if accepted_languages:
             if news_please_info['language'] not in accepted_languages:

@@ -224,13 +224,14 @@ def get_label2freq(naf_paths, xpath_query, attributes, verbose=0):
                       for attribute in attributes]
             value_string = '---'.join(values)
             label2freq[value_string] += 1
-            
+
     if verbose >= 1:
         print()
         print(f'ran function with {xpath_query} {attributes}')
         print(f'found {sum(label2freq.values())} occurrences of {len(label2freq)} unique labels')
-    
+
     return label2freq
+
 
 
 def load_start_and_end_offset_to_tid(naf):
@@ -325,6 +326,7 @@ def get_naf_paths(inc_coll_obj,
     :param verbose:
     :return:
     """
+    print(main_naf_folder)
     naf_paths = set()
     naf_to_inc_id = {}
     for inc_obj in inc_coll_obj.incidents:
@@ -332,9 +334,12 @@ def get_naf_paths(inc_coll_obj,
             naf_path = os.path.join(main_naf_folder,
                                     ref_text_obj.language,
                                     f'{ref_text_obj.name}.naf')
+            print('path to store nafs', naf_path)
             if os.path.exists(naf_path):
+                print("path exists")
                 naf_paths.add(naf_path)
                 naf_to_inc_id[naf_path] = f'{WIKIDATA_PREFIX}{inc_obj.wdt_id}'
+                #print(f'{WIKIDATA_PREFIX}{inc_obj.wdt_id}')
 
     if verbose >= 2:
         print()

@@ -1,8 +1,9 @@
 # multilingual-wiki-event-pipeline
 
-This project aims to extract information about incidents of a particular event type. 
-This information consists of structured data on the incidents from Wikidata, as well as unstructured description and supporting sources from Wikipedia. 
+This project aims to extract information about incidents of a particular event type.
+This information consists of structured data on the incidents from Wikidata, as well as unstructured description and supporting sources from Wikipedia.
 We obtain information from Wikipedia in multiple languages (currently tested with Dutch, Italian, English, and Japanese).
+
 
 ## License
 This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details
@@ -10,6 +11,9 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENS
 ## Setup
 
 ### Python modules (Python 3.6 is used)
+
+Update: The current version has been updated to run with python 3.10, the new spacy_to_naf module and the current version of newsplease (1.5.22).
+
 A number of external modules need to be installed, which are listed in **requirements.txt**.
 Depending on how you installed Python, you can probably install the requirements using one of following commands:
 ```bash
@@ -26,9 +30,9 @@ This installation takes some minutes. Grab a coffee (or two).
 
 ### Configuration
 
-Please run 
+Please run
 ```python
-python main.py -h 
+python main.py -h
 ```
 To get information about how to use MWEP.
 
@@ -37,7 +41,7 @@ The first argument is **--config_path**, for which a path to a JSON file should 
 * **processing**:
     * **must_have_all_languages**: if set to True, an Incident is only included if a Wikipedia text is found for all specified languages.
     * **must_have_english**: if set to True, an Incident is only added if the text of the English Wikipedia page was available.
-    * **one_page_per_language**: if set to True, we only include Incidents for which we have available one page per language (due to the API calling, it can occur than we find two Wikipedia pages for the same language) 
+    * **one_page_per_language**: if set to True, we only include Incidents for which we have available one page per language (due to the API calling, it can occur than we find two Wikipedia pages for the same language)
 * **newsplease**: this is the library we use to crawl Wikipedia sources (is very slow, will only work with a small number of Incidents)
     * **excluded_domains**: exclude Wikipedia sources from these domains
     * **title_required**: if set to True, newsplease needs to detect a title for the Wikipedia source

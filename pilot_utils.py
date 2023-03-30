@@ -4,8 +4,12 @@ import re
 import time
 import urllib.parse
 from datetime import datetime
+#Pia: adding named tuple for entity elements
+from collections import namedtuple
 
-import spacy_to_naf
+#import spacy_to_naf
+from spacy_to_naf.converter import Converter
+
 from lxml import etree
 
 import native_api_utils as api
@@ -17,6 +21,58 @@ for_encoding = 'é'
 
 
 # , 'tennis tournament': 'tennis tournament'}
+
+# Pia: added entity tuple  object here
+EntityElement = namedtuple('EntityElement', ['eid',
+                                     'entity_type',
+                                     'targets',
+                                     'text',
+                                     'ext_refs' # list of dictionaries, e.g., [{'reference' : 'Naples',
+                                                                              # 'resource' : 'Wikipedia'}]
+                                     ])
+
+def add_entity_element(entities_layer,
+                       naf_version,
+                       entity_data,
+                       add_comments=False):
+    """
+    Function that adds an entity element to the entity layer.
+    """
+    entity_el = etree.SubElement(entities_layer, "entity")
+    entity_el.set("id", entity_data.eid)
+    entity_el.set("type", entity_data.entity_type)
+
+    if naf_version == 'v3':
+        references_el = etree.SubElement(entity_el, "references")
+        span = etree.SubElement(references_el, "span")
+    elif naf_version == 'v3.1':
+        span = etree.SubElement(entity_el, "span")
+
+    if add_comments:
+        text = ' '.join(entity_data.text)
+        text = prepare_comment_text(text)
+        span.append(etree.Comment(text))
+    for target in entity_data.targets:
+        target_el = etree.SubElement(span, "target")
+        target_el.set("id", target)
+
+    assert type(entity_data.ext_refs) == list, f'ext_refs should be a list of dictionaries (can be empty)'
+    ext_refs_el = etree.SubElement(entity_el, 'externalReferences')
+    for ext_ref_info in entity_data.ext_refs:
+        one_ext_ref_el = etree.SubElement(ext_refs_el, 'externalRef')
+        one_ext_ref_el.set('reference', ext_ref_info['reference'])
+
+        for optional_attr in ['resource', 'source', 'timestamp']:
+            if optional_attr in ext_ref_info:
+                one_ext_ref_el.set(optional_attr, ext_ref_info[optional_attr])
+
+
+def prepare_comment_text(text):
+    "Function to prepare text to be put inside a comment."
+    text = text.replace('--','DOUBLEDASH')
+    if text.endswith('-'):
+        text = text[:-1] + 'SINGLEDASH'
+    return text
 
 def remove_incidents_with_missing_FEs(incidents, event_type):
     new_incidents = []
@@ -149,6 +205,8 @@ def time_in_correct_format(datetime_obj):
     "Function that returns the current time"
     return datetime_obj.strftime("%Y-%m-%dT%H:%M:%SUTC")
 
+
+
 def add_hyperlinks(naf, annotations, prefix, language, dct, wiki_langlinks={}, verbose=0):
     """
     :param lxml.etree._Element naf: the root element of the XML file    :param wiki_page:
@@ -174,7 +232,7 @@ def add_hyperlinks(naf, annotations, prefix, language, dct, wiki_langlinks={}, v
     ling_proc = etree.SubElement(naf_header, "linguisticProcessors")
     ling_proc.set("layer", 'entities')
     lp = etree.SubElement(ling_proc, "lp")
-    the_time = spacy_to_naf.time_in_correct_format(dct)
+    the_time = time_in_correct_format(dct)
     lp.set("beginTimestamp", the_time)
     lp.set('endTimestamp', the_time)
     lp.set('name', 'Wikipedia hyperlinks')
@@ -213,17 +271,20 @@ def add_hyperlinks(naf, annotations, prefix, language, dct, wiki_langlinks={}, v
                                  'source' : 'https://www.wikipedia.org/',
                                  'timestamp' : date_as_string})
 
-        entity_data = spacy_to_naf.EntityElement(
+        entity_data = EntityElement(
             eid='e%d' % next_id,
             entity_type='UNK',
             text=sf,
             targets=t_ids,
             ext_refs=ext_refs)
+
+
+
         next_id += 1
 
-        spacy_to_naf.add_entity_element(entities_layer,     
+        add_entity_element(entities_layer,
                                         'v3.1',
-                                        entity_data, 
+                                        entity_data,
                                         add_comments=True)
 
 
@@ -241,25 +302,51 @@ def text_to_naf(wiki_title,
                 verbose=0):
     assert language in target_languages, f'{language} not part of supported languages: {" ".join(target_languages)}'
 
+    # prepare output path
+    if output_folder is not None:
+        print("Creating naf folder")
+        if not os.path.exists(output_folder):
+            os.mkdir(output_folder)
+        lang_dir = os.path.join(output_folder, language)
+        if not os.path.exists(lang_dir):
+            os.mkdir(lang_dir)
+        output_path = os.path.join(lang_dir, f'{wiki_title}.naf')
+    else:
+        output_path = 'dummpy.naf'
+
+
     # parse with spaCy
     add_mw = False
     if language in {'en', 'nl'}:
         add_mw = True
+    if language == 'en':
+        converter = Converter('en_core_web_sm', add_terms=True, add_deps=True, add_entities=False, add_chunks=False)
+    elif language == 'nl':
+        converter = Converter('nl_core_news_sm', add_terms=True, add_deps=True, add_entities=False, add_chunks=False)
 
     try:
-        naf = spacy_to_naf.text_to_NAF(text=text,
-                                       nlp=nlp,
-                                       dct=dct,
-                                       layers={'raw', 'text', 'terms', 'deps'},
-                                       naf_version='v3.1',
-                                       title=wiki_title,
-                                       uri=wiki_uri,
-                                       language=language,
-                                       add_mws=add_mw)
-
+        # naf = spacy_to_naf.text_to_NAF(text=text,
+        #                                nlp=nlp,
+        #                                dct=dct,
+        #                                layers={'raw', 'text', 'terms', 'deps'},
+        #                                naf_version='v3.1',
+        #                                title=wiki_title,
+        #                                uri=wiki_uri,
+        #                                language=language,
+        #                                add_mws=add_mw)
+        naf = converter.process_text(text, output_path)
+        #naf = naf.root
+        naf = naf.tree
+        # print('naf after tree')
+        # print(type(naf))
+        # print(help(naf.write))
         assert naf.find('raw').text == text, f'mismatch between raw text JSON and NAF file'
+
     except:
+        print("Did not write to files- problem:")
         return
+        # naf = converter.process_text(text, output_path)
+
 
 
     # add hyperlinks as entity elements
@@ -272,13 +359,21 @@ def text_to_naf(wiki_title,
 
     # if wanted, write output to disk
     if output_folder is not None:
-        if not os.path.exists(output_folder):
-            os.mkdir(output_folder)
-        lang_dir = os.path.join(output_folder, language)
-        if not os.path.exists(lang_dir):
-            os.mkdir(lang_dir)
-        output_path = os.path.join(lang_dir, f'{wiki_title}.naf')
-        spacy_to_naf.NAF_to_file(naf, output_path)
+        # print("Creating naf folder")
+        # if not os.path.exists(output_folder):
+        #     os.mkdir(output_folder)
+        # lang_dir = os.path.join(output_folder, language)
+        # if not os.path.exists(lang_dir):
+        #     os.mkdir(lang_dir)
+        # output_path = os.path.join(lang_dir, f'{wiki_title}.naf')
+        print("Storing naf file:", output_path)
+
+        #spacy_to_naf.NAF_to_file(naf, output_path)
+        # naf.write(output_path)
+        # print(type(naf))
+        # print(dir(naf))
+        # tree = etree.ElementTree(naf)
+        naf.write(output_path, pretty_print=True)
 
     if verbose >= 3:
         print(f'saved to {output_path}')
