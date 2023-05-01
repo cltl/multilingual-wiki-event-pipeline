@@ -15,7 +15,7 @@
     "illegal_chars_in_title" : ["/"]
     },
   "event_type_matching" : "subsumed_by",
-  "max_pilot_incidents" : 500,
+  "max_pilot_incidents" : 3,
   "wiki_langlinks_path" : "resources/merged_indices.p",
   "wiki_folder" : "resources/Wikipedia_Reader/wiki",
   "naf_output_folder" : "wiki_output",

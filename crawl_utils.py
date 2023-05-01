@@ -11,6 +11,7 @@ import classes
 from newsplease import NewsPlease
 import langdetect
 import lxml
+from newspaper import article as AT
 
 for_encoding = 'é'
 WAYBACK_CDX_SERVER = 'http://web.archive.org/cdx/search/cdx?'
@@ -139,6 +140,11 @@ def run_newsplease(url,
         try:
             print(wb_url)
             article = NewsPlease.from_url(wb_url, timeout=timeout)
+            print('article info')
+            print(article.title)
+            news_please_info = article.get_dict()
+            print(news_please_info.keys())
+            print(article.maintext)
             #article.download()
             #print(article.title)
             # article = NewsPlease.from_url('https://www.nytimes.com/2017/02/23/us/politics/cpac-stephen-bannon-reince-priebus.html?hp')
@@ -146,8 +152,11 @@ def run_newsplease(url,
 
             if article is None:
                 status = 'crawl error'
-            elif article.title is None:
-                status = 'crawl error'
+            else:
+                if article.title is None:
+                    status = 'crawl error'
+                if article.maintext is None:
+                    status = 'crawl error'
 
         except (urllib.error.URLError,
                 ValueError,
@@ -157,7 +166,10 @@ def run_newsplease(url,
                 http.client.RemoteDisconnected,
                 ConnectionResetError,
                 lxml.etree.ParserError,
-                langdetect.lang_detect_exception.LangDetectException
+                langdetect.lang_detect_exception.LangDetectException,
+                #NewsPlease.ArticleException
+                AT.ArticleException
+                #newspaper.article.ArticleException
                 ) as e:
             article = None
             status = 'URL error'
@@ -166,6 +178,9 @@ def run_newsplease(url,
 
         # validate attributes based on settings
         news_please_info = article.get_dict()
+        print("\n main text in news please output \n")
+        print(news_please_info)
+        print(news_please_info['maintext'])
 
         if accepted_languages:
             if news_please_info['language'] not in accepted_languages:

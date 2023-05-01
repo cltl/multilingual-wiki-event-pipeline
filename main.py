@@ -120,6 +120,13 @@ def retrieve_incidents_per_type(type_qid,
         incidents.append(incident)
 
     print("Wikidata querying and storing finished. Number of incidents:", len(incidents))
+    ## debugging: store original incidents':
+    all_incidents = dict()
+    # print(type(incidents), type(type_qid))
+    # print(type(incidentcs[5]))
+    all_incidents[type_qid] = [inc.wdt_id for inc in incidents]
+    with open('json/all_incidents.json', 'w') as outfile:
+        json.dump(all_incidents, outfile)
     print('\n### 2. ### Enriching the reference texts through the Wikipedia-Wikidata API...')
     incidents = add_wikipedia_pages_from_api(incidents, wdt_ids)
     print('API querying done. Number of incidents:', len(incidents))
@@ -335,6 +342,7 @@ if __name__ == '__main__':
                 primary_text_urls = {primary_text_url
                                      for ref_text_obj in incident_obj.reference_texts
                                      for primary_text_url in ref_text_obj.primary_ref_texts}
+                print("number of urls to reference texts:", len(primary_text_urls))
                 primary_url_to_ref_text_obj = crawl_utils.get_ref_text_obj_of_primary_reference_texts(primary_text_urls,
                                                                                                       timeout,
                                                                                                       startswith=startswith,
