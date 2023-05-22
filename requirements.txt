@@ -5,7 +5,7 @@
 news-please==1.5.22
 cython==0.29.33
 rdflib==4.2.2
-requests==2.21.0
+requests==2.31.0
 #Pia: installation problem with spacy
 #spacy==2.1.4
 spacy==3.5.1
