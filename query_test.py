@@ -85,7 +85,8 @@ def retrieve_incidents_per_participant(type_qid,
 
     incidents = []
     print("\n### 1. ### Retrieving and storing wikidata information from SPARQL...")
-    results_by_id = utils.construct_and_run_query(type_qid,
+    participant_type = 'Q5'  #### Person
+    results_by_id = utils.construct_and_run_participant_query(participant_type, type_qid,
                                                   event_type_matching,
                                                   languages,
                                                   wdt_fn_mappings_COL,
@@ -302,8 +303,9 @@ if __name__ == '__main__':
     spacy_models = mwep_settings['spacy_models']
     models = {}
     for model_info in spacy_models.split(';'):
-        language, model_name = model_info.split('-')
-        models[language] = spacy.load(model_name)
+         language, model_name = model_info.split('-')
+         print("Spacy modal_name", model_name)
+         models[language] = spacy.load(model_name)
 
     print("Spacy models have been loaded.")
 
@@ -331,7 +333,7 @@ if __name__ == '__main__':
         start = time.time()
 
         # Query SPARQL and the API to get incidents, their properties, and labels.
-        incidents = retrieve_incidents_per_type(incident_type_uri,
+        incidents = retrieve_incidents_per_participant(incident_type_uri,
                                                 event_type_matching,
                                                 json_wd_to_sem,
                                                 99999)

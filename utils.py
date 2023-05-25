@@ -190,7 +190,7 @@ def construct_and_run_query(type_qid,
 #     }
 #   }
 # }
-def construct_and_run_participant_query(type_qid,
+def construct_and_run_participant_query(participant_id, type_qid,
                             event_type_matching,
                             languages,
                             more_props,
@@ -207,7 +207,8 @@ def construct_and_run_participant_query(type_qid,
 
     optional_clauses_str=""
     for l, var in lang2var.items():
-        clause=f"""OPTIONAL {{ \n\t?incident rdfs:label {var}.\n\tFILTER ( LANGMATCHES ( LANG ( {var} ), \"{l}\" )) }}\n\t"""
+        clause=f"""OPTIONAL {{ \n\t?event rdfs:label {var}.\n\tFILTER ( LANGMATCHES ( LANG ( {var} ), \"{l}\" )) }}\n\t"""
+        clause+=f"""OPTIONAL {{ \n\t?participant rdfs:label {var}.\n\tFILTER ( LANGMATCHES ( LANG ( {var} ), \"{l}\" )) }}\n\t"""
         optional_clauses_str+=clause
 
     opt_vars=[]
@@ -218,23 +219,23 @@ def construct_and_run_participant_query(type_qid,
             var='?' + a_path.replace('wdt:', '').replace('/', '_')       # fn_role.split('@')[-1]
             if var not in opt_vars:
                 label_var=f"{var}Label"
-                clause=f"""OPTIONAL {{ \n\t?incident {a_path} {var} }}\n\t"""
+                clause=f"""OPTIONAL {{ \n\t?event {a_path} {var} }}\n\t"""
                 optional_more_info+=clause
                 opt_vars.append(var)
                 if type_qid not in {"Q40231"}:
                     opt_var_labels.append(var + 'Label')
 
     #### Only works for persons
-    main_part = f'?person ?prop ?disease .\n?person wdt:P31 wd:Q5 .\n ?disease wdt:P31 type_qid'
     if event_type_matching == 'direct_match':
-        main_part = f'?incident wdt:P31 wd:{type_qid} .\nBIND(wd:{type_qid} as ?direct_type) .'
+        main_part = f'?participant ?prop ?event . \n ?event wdt:P31 wd:{type_qid} ; \nBIND(wd:{type_qid} as ?direct_type) . \n?participant wdt:P31 wd:{participant_id} .'
+        #main_part = f'?incident wdt:P31 wd:{type_qid} .\nBIND(wd:{type_qid} as ?direct_type) .'
     elif event_type_matching == 'subsumed_by':
-        main_part = f'?incident wdt:P31*/wdt:P279* wd:{type_qid} ;\nwdt:P31 ?direct_type .'
+        main_part = f'?participant ?prop ?event .\n?participant wdt:P31 wd:{participant_id} .\n ?event wdt:P31*/wdt:P279* wd:{type_qid} ;\nwdt:P31 ?direct_type .'
+        #main_part = f'?incident wdt:P31*/wdt:P279* wd:{type_qid} ;\nwdt:P31 ?direct_type .'
 
     query = """
-    SELECT DISTINCT ?direct_type ?incident ?incidentLabel %s %s %s WHERE {
+    SELECT DISTINCT ?direct_type ?event ?participant ?participantLabel ?eventLabel %s %s %s WHERE {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
-      %s
       %s
       %s
     } limit %d
@@ -243,7 +244,7 @@ def construct_and_run_participant_query(type_qid,
            ' '.join(opt_var_labels),
            main_part,
            optional_clauses_str,
-           optional_more_info,
+           #optional_more_info,
            limit)
 
     print('QUERY:\n', query)
@@ -252,8 +253,8 @@ def construct_and_run_participant_query(type_qid,
 
     results=response['results']['bindings']
 
-    results_by_id=index_results_by_id(results, lang2var, more_props)
-
+    results_by_id=index_results_by_participant_id(results, lang2var, more_props)
+    print("HERE ARE THE RESULTS BY ID", results_by_id)
     return results_by_id
 
 
@@ -297,14 +298,14 @@ def index_results_by_id(raw_results, lang2var, extra_info):
         indexed_results[wdt_id]=current_result
     return indexed_results
 
-#@TODO: adapt this funciton to handle the results for the participant query
+#@TODO: adapt this function to handle the results for the participant query
 #   "results" : {
 #     "bindings" : [ {
-#       "disease" : {
+#       "event" : {
 #         "type" : "uri",
 #         "value" : "http://www.wikidata.org/entity/Q2840"
 #       },
-#       "person" : {
+#       "participant" : {
 #         "type" : "uri",
 #         "value" : "http://www.wikidata.org/entity/Q720370"
 #       },
@@ -313,11 +314,11 @@ def index_results_by_id(raw_results, lang2var, extra_info):
 #         "value" : "http://www.wikidata.org/prop/direct/P509"
 #       }
 #     }, {
-#       "disease" : {
+#       "event" : {
 #         "type" : "uri",
 #         "value" : "http://www.wikidata.org/entity/Q2840"
 #       },
-#       "person" : {
+#       "participant" : {
 #         "type" : "uri",
 #         "value" : "http://www.wikidata.org/entity/Q724677"
 #       },
@@ -333,19 +334,19 @@ def index_results_by_participant_id(raw_results, lang2var, extra_info):
     """
     indexed_results=defaultdict(dict)
     for entry in raw_results:
-        wdt_id=entry['incident']['value']
+        wdt_id=entry['participant']['value']
         current_result=indexed_results[wdt_id]
         if not len(current_result.keys()):
             current_result=defaultdict(dict)
 
         if 'references' not in current_result:
             current_result['references']=defaultdict(str)
-        name=entry['incidentLabel']['value']
+        name=entry['eventLabel']['value']
         #current_result['type_id']=entry['type_id']['value']
 
         if 'direct_types' not in current_result.keys():
             current_result['direct_types']=set()
-        current_result['direct_types'].add(entry['direct_type']['value'])
+        current_result['direct_types'].add(entry['event']['value'])
 
         for l, var in lang2var.items():
             label_in_lang=var.strip('?')

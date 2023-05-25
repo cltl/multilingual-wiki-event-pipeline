@@ -7,7 +7,7 @@ from datetime import datetime
 #Pia: adding named tuple for entity elements
 from collections import namedtuple
 
-#import spacy_to_naf
+import spacy_to_naf
 from spacy_to_naf.converter import Converter
 
 from lxml import etree
