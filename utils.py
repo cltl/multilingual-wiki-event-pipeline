@@ -334,7 +334,9 @@ def index_results_by_participant_id(raw_results, lang2var, extra_info):
     """
     indexed_results=defaultdict(dict)
     for entry in raw_results:
-        wdt_id=entry['participant']['value']
+        participant_id=entry['participant']['value']
+        event_id = entry['event']['value']
+        wdt_id=event_id+"_"+participant_id
         current_result=indexed_results[wdt_id]
         if not len(current_result.keys()):
             current_result=defaultdict(dict)

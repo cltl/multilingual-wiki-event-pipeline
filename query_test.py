@@ -27,7 +27,19 @@ Example:
     --languages="nl-en"\
     --wikipedia_sources="False"\
     --verbose=1
+
+Example:
+     python query_test.py --config_path="config_test/mwep_settings.json"\
+    --project="pilot2"\
+    --path_event_types="config_test/event_types.txt"\
+    --path_mapping_wd_to_sem="wdt_fn_mappings/any.json"\
+    --languages="nl-en"\
+    --wikipedia_sources="False"\
+    --verbose=1 \
+    --method="by_participant" \
+    --participant_type="Q5"
 """
+
 import json
 import os
 import pickle
@@ -73,7 +85,31 @@ def add_wikipedia_pages_from_api(incidents, wdt_ids):
                         incident.reference_texts.append(ref_text)
     return incidents
 
-def retrieve_incidents_per_participant(type_qid,
+def add_participant_wikipedia_pages_from_api(incidents, wdt_ids):
+    assert (len(wdt_ids) > 0)
+    id_batches = utils.split_in_batches(wdt_ids, 50)
+
+    for index, batch in enumerate(id_batches):
+        wiki_pages = native_api_utils.obtain_wiki_page_titles(batch, languages)
+        for incident in incidents:
+            if incident.participant_id in wiki_pages.keys():
+                incident_wikipedia = wiki_pages[incident.participant_id]
+                for language, name in incident_wikipedia.items():
+                    found = False
+                    for rt in incident.reference_texts:
+                        if rt.name == name and rt.language == language:
+                            rt.found_by.append('API')
+                            found = True
+                    if not found:
+                        ref_text = classes.ReferenceText(
+                            name=name,
+                            language=language,
+                            found_by=['API']
+                        )
+                        incident.reference_texts.append(ref_text)
+    return incidents
+
+def retrieve_incidents_per_participant(participant_type_qid, type_qid,
                                 event_type_matching,
                                 json_wd_to_sem,
                                 limit=10):
@@ -85,21 +121,29 @@ def retrieve_incidents_per_participant(type_qid,
 
     incidents = []
     print("\n### 1. ### Retrieving and storing wikidata information from SPARQL...")
-    participant_type = 'Q5'  #### Person
-    results_by_id = utils.construct_and_run_participant_query(participant_type, type_qid,
+    results_by_id = utils.construct_and_run_participant_query(participant_type_qid, type_qid,
                                                   event_type_matching,
                                                   languages,
                                                   wdt_fn_mappings_COL,
                                                   limit)
-    wdt_ids = []
+    wdt_ids = []  ### these will become fake IDs created from the combination of the participant and event id
+    participant_ids =[]
     if not len(results_by_id.items()):
         return [], ''
     for full_wdt_id, inc_data in results_by_id.items():
+        print(full_wdt_id) ## This is now a participant
+        print(inc_data)
         extra_info = inc_data['extra_info']
         direct_types = {direct_type.replace('http://www.wikidata.org/entity/', 'wd:')
                         for direct_type in inc_data['direct_types']}
-        wdt_id = full_wdt_id.split('/')[-1]
+        participant_id = full_wdt_id.split('/')[-1]
+        participant_ids.append(participant_id)
+
+        wdt_id = participant_id
+        for direct_type in direct_types:
+            wdt_id += "_"+direct_type[3:]  ### skip the "wd:"
         wdt_ids.append(wdt_id)
+
 
         ref_texts = []
         for language, name in inc_data['references'].items():
@@ -113,6 +157,7 @@ def retrieve_incidents_per_participant(type_qid,
         incident = classes.Incident(
             incident_type=type_qid,
             wdt_id=wdt_id,
+            participant_id=participant_id,
             direct_types=direct_types,
             extra_info=extra_info,
             reference_texts=ref_texts
@@ -128,7 +173,7 @@ def retrieve_incidents_per_participant(type_qid,
     with open('json/all_incidents.json', 'w') as outfile:
         json.dump(all_incidents, outfile)
     print('\n### 2. ### Enriching the reference texts through the Wikipedia-Wikidata API...')
-    incidents = add_wikipedia_pages_from_api(incidents, wdt_ids)
+    incidents = add_participant_wikipedia_pages_from_api(incidents, participant_ids)
     print('API querying done. Number of incidents:', len(incidents))
     return incidents
 
@@ -170,6 +215,7 @@ def retrieve_incidents_per_type(type_qid,
 
         incident = classes.Incident(
             incident_type=type_qid,
+            participant_id="",
             wdt_id=wdt_id,
             direct_types=direct_types,
             extra_info=extra_info,
@@ -250,6 +296,13 @@ if __name__ == '__main__':
     crawl_wikipedia_sources = arguments['--wikipedia_sources'] == "True"
     max_pilot_incidents = mwep_settings['max_pilot_incidents']
     verbose = int(arguments['--verbose'])
+
+    method = "by_incident"
+    method = "by_participant"
+    participant_type_uri = "Q5"
+    # method = arguments['--method'] ### "by_incident" is the classical direct query for incidents, "by_participant" looks for events for instances of participants. Default is "by_incident".
+    # if method=='by_participant':
+    #     participant_type_uri = arguments['--participant_type']
 
     # settings for crawling Wikipedia sources
     excluded_domains = set(mwep_settings['newsplease']['excluded_domains'])
@@ -333,10 +386,21 @@ if __name__ == '__main__':
         start = time.time()
 
         # Query SPARQL and the API to get incidents, their properties, and labels.
-        incidents = retrieve_incidents_per_participant(incident_type_uri,
+        if method == "by_incident":
+            print("Extracting data by:", method, " for incident type:", incident_type_uri)
+            incidents = retrieve_incidents_per_type(incident_type_uri,
                                                 event_type_matching,
                                                 json_wd_to_sem,
                                                 99999)
+        elif method == "by_participant":
+
+            print("Extracting data by:", method, " for incident type:", incident_type_uri, " and participant type:", participant_type_uri)
+            incidents = retrieve_incidents_per_participant(participant_type_uri, incident_type_uri,
+                                                event_type_matching,
+                                                json_wd_to_sem,
+                                                99999)
+        else:
+            print("Error. Method is unknown:", method)
 
         if not len(incidents):
             print('NO INCIDENTS FOUND FOR %s. Continuing to next type...')

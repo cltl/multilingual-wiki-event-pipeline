@@ -169,6 +169,7 @@ def retrieve_incidents_per_type(type_qid,
 
         incident = classes.Incident(
             incident_type=type_qid,
+            participant_id="",
             wdt_id=wdt_id,
             direct_types=direct_types,
             extra_info=extra_info,

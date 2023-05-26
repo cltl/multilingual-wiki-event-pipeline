@@ -269,6 +269,7 @@ class Incident:
     def __init__(self,
                 incident_type,
                 wdt_id,
+                participant_id="",
                 reference_texts=[],
                 extra_info={},
                 direct_types=set()):
@@ -277,6 +278,7 @@ class Incident:
         self.reference_texts=reference_texts
         self.extra_info=extra_info
         self.direct_types=direct_types
+        self.participant_id=participant_id
 
 class ReferenceText:
 
