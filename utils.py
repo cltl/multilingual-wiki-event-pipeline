@@ -238,13 +238,14 @@ def construct_and_run_participant_query(participant_id, type_qid,
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
       %s
       %s
+      %s
     } limit %d
     """ % (return_langs,
            ' '.join(opt_vars),
            ' '.join(opt_var_labels),
            main_part,
            optional_clauses_str,
-           #optional_more_info,
+           optional_more_info,
            limit)
 
     print('QUERY:\n', query)
@@ -343,7 +344,7 @@ def index_results_by_participant_id(raw_results, lang2var, extra_info):
 
         if 'references' not in current_result:
             current_result['references']=defaultdict(str)
-        name=entry['eventLabel']['value']
+        name=entry['participantLabel']['value']
         #current_result['type_id']=entry['type_id']['value']
 
         if 'direct_types' not in current_result.keys():
@@ -353,7 +354,9 @@ def index_results_by_participant_id(raw_results, lang2var, extra_info):
         for l, var in lang2var.items():
             label_in_lang=var.strip('?')
             if label_in_lang in entry.keys():
-                name_in_lang=entry[label_in_lang]['value']
+                #name_in_lang=entry[label_in_lang]['value']
+                name_in_lang=name #### We want the participant name here, this works for people and companies but probably not for places as their names can be different for each language.
+
                 current_result['references'][l]=name_in_lang
 
         if 'extra_info' not in current_result.keys():

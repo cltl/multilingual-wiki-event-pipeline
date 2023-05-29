@@ -79,6 +79,7 @@ def obtain_wiki_page_titles(wdt_ids, languages, verbose=0):
         print(j)
 
     results_batch={}
+    #print('Wikipedia results:', j)
     if 'entities' in j.keys():
         for id, id_data in j['entities'].items():
             results_one={}

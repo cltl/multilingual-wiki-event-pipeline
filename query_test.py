@@ -90,6 +90,7 @@ def add_participant_wikipedia_pages_from_api(incidents, wdt_ids):
     id_batches = utils.split_in_batches(wdt_ids, 50)
 
     for index, batch in enumerate(id_batches):
+        print('batch for getting wikipedia pages', batch)
         wiki_pages = native_api_utils.obtain_wiki_page_titles(batch, languages)
         for incident in incidents:
             if incident.participant_id in wiki_pages.keys():
@@ -398,7 +399,7 @@ if __name__ == '__main__':
             incidents = retrieve_incidents_per_participant(participant_type_uri, incident_type_uri,
                                                 event_type_matching,
                                                 json_wd_to_sem,
-                                                99999)
+                                                99)
         else:
             print("Error. Method is unknown:", method)
 
@@ -479,6 +480,8 @@ if __name__ == '__main__':
 
                 for url, primary_ref_text_obj in primary_url_to_ref_text_obj.items():
                     incident_obj.reference_texts.append(primary_ref_text_obj)
+            else:
+                print("Skipping crawling Wikipedia sources. Crawl Wikipedia sources is", crawl_wikipedia_sources)
 
             # process with spaCy
             for ref_text_obj in incident_obj.reference_texts:
