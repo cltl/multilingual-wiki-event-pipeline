@@ -140,6 +140,7 @@ def retrieve_incidents_per_participant(participant_type_qid, type_qid,
         participant_id = full_wdt_id.split('/')[-1]
         participant_ids.append(participant_id)
 
+        ### We create a new fake Q number by combining the participant_id with the event_id
         wdt_id = participant_id
         for direct_type in direct_types:
             wdt_id += "_"+direct_type[3:]  ### skip the "wd:"
@@ -262,8 +263,7 @@ def obtain_reference_texts(incidents, wiki_folder, wiki_uri2path_info, language2
                 new_reference_texts.append(ref_text)
         new_reference_texts = utils.deduplicate_ref_texts(new_reference_texts)
 
-        if len(
-                new_reference_texts):  # if there are reference texts with text, try to get more data by using the Wiki langlinks info we have stored.
+        if len(new_reference_texts):  # if there are reference texts with text, try to get more data by using the Wiki langlinks info we have stored.
             incident.reference_texts = new_reference_texts
             new_incidents.append(incident)
     print('Retrieval of reference texts done. Number of incidents:', len(new_incidents))
@@ -424,16 +424,25 @@ if __name__ == '__main__':
         inc_stats.append(len(collection.incidents))
 
         ttl_filename = '%s/%s_%s.ttl' % (rdf_folder, incident_type_uri, '_'.join(languages))
-        collection.serialize(ttl_filename)
+        if method=="by_incident":
+            collection.serialize(ttl_filename)
+        elif method== "by_participant":
+            collection.serialize_as_participant_event(ttl_filename)
 
         after_extraction = time.time()
 
-        pilots = pilot_utils.create_pilot_data(collection,
-                                               languages,
-                                               mwep_settings['processing']["must_have_all_languages"],
-                                               mwep_settings['processing']["must_have_english"],
-                                               mwep_settings['processing']["one_page_per_language"])
-
+        if method=="by_incident":
+            pilots = pilot_utils.create_pilot_data(collection,
+                                                   languages,
+                                                   mwep_settings['processing']["must_have_all_languages"],
+                                                   mwep_settings['processing']["must_have_english"],
+                                                   mwep_settings['processing']["one_page_per_language"])
+        elif method=="by_participant":
+            pilots = pilot_utils.create_participant_data(collection,
+                                                   languages,
+                                                   mwep_settings['processing']["must_have_all_languages"],
+                                                   mwep_settings['processing']["must_have_english"],
+                                                   mwep_settings['processing']["one_page_per_language"])
         if len(pilots) > max_pilot_incidents:
             pilots = list(pilots)[:max_pilot_incidents]
             print(f'selected first {max_pilot_incidents} pilot incidents')
@@ -452,7 +461,11 @@ if __name__ == '__main__':
         pilot_collections.append(pilot_collection)
 
         ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type_uri, '_'.join(pilot_and_languages))
-        pilot_collection.serialize(ttl_filename)
+
+        if method=="by_incident":
+            pilot_collection.serialize(ttl_filename)
+        elif method== "by_participant":
+            pilot_collection.serialize_as_participant_event(ttl_filename)
 
         if len(pilot_collection.incidents) == 0:
             print('No pilot incidents for type %s' % incident_type_uri)

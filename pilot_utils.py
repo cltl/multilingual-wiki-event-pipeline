@@ -177,6 +177,58 @@ def create_pilot_data(data,
     print('Num of pilot incidents', len(pilot_incidents))
     return pilot_incidents
 
+def create_participant_data(data,
+                      target_languages,
+                      must_have_all_languages,
+                      must_have_english,
+                      one_page_per_language):
+    pilot_incidents = set()
+
+    cached = {}
+
+    for incident in data.incidents:
+        langs = set()
+        incident.reference_texts = utils.deduplicate_ref_texts(incident.reference_texts)
+        new_ref_texts = []
+        for ref_text in incident.reference_texts:
+            ref_text.content = ref_text.content.split('==')[0].strip()  # first section
+            if check_ref_text(ref_text, max_chars=50000):
+                langs.add(ref_text.language)
+                new_ref_texts.append(ref_text)
+        incident.reference_texts = new_ref_texts
+
+        if skip_this_incident(new_ref_texts,
+                              target_languages,
+                              langs,
+                              must_have_all_languages,
+                              must_have_english,
+                              one_page_per_language):
+            continue
+
+        for ref_text in incident.reference_texts:
+            if not ref_text.uri:
+                ref_text.uri = api.get_uri_from_title(ref_text.name, ref_text.language)
+        pilot_incidents.add(incident)
+        for p, v_set in incident.extra_info.items():
+            new_v_set = set()
+            for v in v_set:
+                if '|' not in v:
+                    label = ''
+                    q_id = v.split('/')[-1]
+                    if q_id in cached.keys():
+                        label = cached[q_id]
+                    elif v.startswith('http'):
+                        label = utils.obtain_label(q_id)
+                        time.sleep(1)
+                        cached[q_id] = label
+                    v += ' | ' + label
+                    new_v_set.add(v)
+                else:
+                    new_v_set.add(v)
+            incident.extra_info[p] = new_v_set
+    print('Num of pilot incidents', len(pilot_incidents))
+    return pilot_incidents
+
 
 def load_annotations(annotations, prefix):
     """

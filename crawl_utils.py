@@ -216,8 +216,8 @@ def run_newsplease(url,
 
             for attr in attrs:
                 print(f'ATTR {attr}: {getattr(article, attr)}')
-
-            print('num chars', len(news_please_info['text']))
+# news_please no longer has the field 'text' so this breaks the code
+#            print('num chars', len(news_please_info['text']))
         else:
             print()
             print(status, wb_url, url)
