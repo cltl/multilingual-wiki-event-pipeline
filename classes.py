@@ -204,13 +204,14 @@ class IncidentCollection:
 
         for incident in self.incidents:
             event_id = URIRef( incident.wdt_id, WDT_ENT)
+
+            #### add the participant as sem:hasActor
             participant_id_uri = URIRef(incident.participant_id, WDT_ENT)
-           # print('participant_id_uri', participant_id_uri)
             g.add(( event_id, SEM.hasActor,participant_id_uri ))
 
+            #### we get the direct event types
             for direct_type in incident.direct_types:
                 direct_type_uri = URIRef(direct_type[3:], WDT_ONT)
-              #  print('direct_type_uri', direct_type_uri)
                 g.add((event_id, RDF.type, direct_type_uri))
 
             for ref_text in incident.reference_texts:
@@ -253,8 +254,6 @@ class IncidentCollection:
                             else:
                                 an_obj=Literal(v,datatype=XSD.date)
                         g.add(( event_id, RES[pid], an_obj))
-
-       # g.add((inc_type_uri, RDFS.label, inc_type_literal))
 
         # Done. Store the resulting .ttl file now...
         if filename: # if a filename was supplied, store it there
