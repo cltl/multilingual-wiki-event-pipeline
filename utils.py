@@ -346,10 +346,11 @@ def index_results_by_participant_id(raw_results, lang2var, extra_info):
             current_result['references']=defaultdict(str)
         name=entry['participantLabel']['value']
         #current_result['type_id']=entry['type_id']['value']
-
+        participant_eventName = name+" "+entry['eventLabel']['value']
         if 'direct_types' not in current_result.keys():
             current_result['direct_types']=set()
         current_result['direct_types'].add(entry['event']['value'])
+        current_result['participant_event_label']=participant_eventName
 
         for l, var in lang2var.items():
             label_in_lang=var.strip('?')

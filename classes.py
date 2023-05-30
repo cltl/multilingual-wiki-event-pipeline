@@ -227,9 +227,8 @@ class IncidentCollection:
             # event type information
             g.add((event_id, RDF.type, SEM.Event))
             g.add((event_id, SEM.eventType, inc_type_uri))
+            g.add((event_id, RDFS.label, Literal(incident.participant_event_label)))
 
-           # for key in incident.extra_info.keys():
-           #     print('incident.extra_info.key', key)
             # Linking to FN1.7 @ Premon
             # PIEK taking this out, was hardcoded. Why?
             # g.add(( event_id, RDF.type, FN.change_of_leadership ))
@@ -369,6 +368,7 @@ class Incident:
                 incident_type,
                 wdt_id,
                 participant_id="",
+                participant_event_label="",
                 reference_texts=[],
                 extra_info={},
                 direct_types=set()):
@@ -378,6 +378,7 @@ class Incident:
         self.extra_info=extra_info
         self.direct_types=direct_types
         self.participant_id=participant_id
+        self.participant_event_label=participant_event_label
 
 class ReferenceText:
 

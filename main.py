@@ -112,6 +112,8 @@ def retrieve_incidents_per_participant(type_qid,
         incident = classes.Incident(
             incident_type=type_qid,
             wdt_id=wdt_id,
+            participant_id="",
+            participant_event_label=inc_data['participant_event_data'],
             direct_types=direct_types,
             extra_info=extra_info,
             reference_texts=ref_texts
@@ -170,6 +172,7 @@ def retrieve_incidents_per_type(type_qid,
         incident = classes.Incident(
             incident_type=type_qid,
             participant_id="",
+            participant_event_label="",
             wdt_id=wdt_id,
             direct_types=direct_types,
             extra_info=extra_info,
