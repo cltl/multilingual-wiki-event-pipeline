@@ -20,13 +20,15 @@ Options:
     --verbose=<verbose> 0 --> no stdout 1 --> general stdout 2 --> detailed stdout
 
 Example:
-    python main.py --config_path="config/mwep_settings.json"\
+    python main.py --config_path="config_test/mwep_settings.json"\
     --project="pilot"\
     --path_event_types="config/event_types.txt"\
     --path_mapping_wd_to_sem="wdt_fn_mappings/any.json"\
     --languages="nl-en"\
     --wikipedia_sources="False"\
     --verbose=1
+
+    python main.py --config_path="config_test/mwep_settings.json" --project="pilot" --path_event_types="config/event_types.txt" --path_mapping_wd_to_sem="wdt_fn_mappings/any.json" --languages="nl-en" --wikipedia_sources="True" --verbose=1
 """
 import json
 import os
@@ -386,10 +388,13 @@ if __name__ == '__main__':
                                                       incident_type=incident_type,
                                                       languages=languages)
 
-        pilot_collections.append(pilot_collection)
-
-        ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type_uri, '_'.join(pilot_and_languages))
-        pilot_collection.serialize(ttl_filename)
+        # Piek: I commented this out here because "pilot_collection" is modified during reference text collection.
+        # This means it needs to be added after modificaiton and serialised after modifiaction
+        # pilot_collections.append(pilot_collection)
+        #
+        # ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type_uri, '_'.join(pilot_and_languages))
+        # pilot_collection.serialize(ttl_filename)
+        # Piek
 
         if len(pilot_collection.incidents) == 0:
             print('No pilot incidents for type %s' % incident_type_uri)
@@ -466,6 +471,16 @@ if __name__ == '__main__':
                                                  verbose=2)
 
         inc_stats.append(len(pilot_collection.incidents))
+
+        #Piek: this should be done here instead of before getting the reference text. Reason: the reference text function modify "pilot_collection".
+        # This means adding the "pilot_collection" to "pilot_collections" before it is modified can create a difference.
+
+        pilot_collections.append(pilot_collection)
+
+        ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type_uri, '_'.join(pilot_and_languages))
+        pilot_collection.serialize(ttl_filename)
+        #Piek
+
 
         end = time.time()
 

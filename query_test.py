@@ -34,7 +34,7 @@ Example:
     --path_event_types="config_test/event_types.txt"\
     --path_mapping_wd_to_sem="wdt_fn_mappings/any.json"\
     --languages="nl-en"\
-    --wikipedia_sources="False"\
+    --wikipedia_sources="True"\
     --verbose=1 \
     --method="by_participant" \
     --participant_type="Q5"
@@ -460,9 +460,14 @@ if __name__ == '__main__':
                                                       incident_type=incident_type,
                                                       languages=languages)
 
-        pilot_collections.append(pilot_collection)
 
-        ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type_uri, '_'.join(pilot_and_languages))
+        # Piek: I commented this out here because "pilot_collection" is modified during reference text collection.
+        # This means it needs to be added after modificaiton and serialised after modifiaction
+        # pilot_collections.append(pilot_collection)
+        #
+        # ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type_uri, '_'.join(pilot_and_languages))
+        # pilot_collection.serialize(ttl_filename)
+        # Piek
 
         if method=="by_incident":
             pilot_collection.serialize(ttl_filename)
@@ -546,6 +551,15 @@ if __name__ == '__main__':
                                                  verbose=2)
 
         inc_stats.append(len(pilot_collection.incidents))
+
+        #Piek: this should be done here instead of before getting the reference text. Reason: the reference text function modify "pilot_collection".
+        # This means adding the "pilot_collection" to "pilot_collections" before it is modified can create a difference.
+
+        pilot_collections.append(pilot_collection)
+
+        ttl_filename = '%s/%s_%s_pilot.ttl' % (rdf_folder, incident_type_uri, '_'.join(pilot_and_languages))
+        pilot_collection.serialize(ttl_filename)
+        #Piek
 
         end = time.time()
 
