@@ -38,6 +38,9 @@ Example:
     --verbose=1 \
     --method="by_participant" \
     --participant_type="Q5"
+
+python query_test.py --config_path="config_test/mwep_settings.json" --project="pilot" --path_event_types="config_test/event_types.txt" --path_mapping_wd_to_sem="wdt_fn_mappings/any.json" --languages="nl-en" --wikipedia_sources="True" --verbose=1
+
 """
 
 import json
@@ -247,6 +250,7 @@ def obtain_reference_texts(incidents, wiki_folder, wiki_uri2path_info, language2
     new_incidents = []
     for incident in tqdm(incidents):
         new_reference_texts = []
+        print(type(incident))
         for ref_text in incident.reference_texts:
             language = ref_text.language
             wiki_title = ref_text.name

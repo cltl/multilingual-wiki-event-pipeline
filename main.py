@@ -28,7 +28,8 @@ Example:
     --wikipedia_sources="False"\
     --verbose=1
 
-    python main.py --config_path="config_test/mwep_settings.json" --project="pilot" --path_event_types="config/event_types.txt" --path_mapping_wd_to_sem="wdt_fn_mappings/any.json" --languages="nl-en" --wikipedia_sources="True" --verbose=1
+python query_test.py --config_path="config/mwep_settings.json" --project="pilot" --path_event_types="config/event_types.txt" --path_mapping_wd_to_sem="wdt_fn_mappings/any.json" --languages="nl-en" --wikipedia_sources="True" --verbose=1
+
 """
 import json
 import os
